@@ -1,0 +1,18 @@
+{
+  "name": "shitstain.io",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "dependencies": {
+    "pixi.js": "^7.1.2"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "devDependencies": {
+    "prettier": "^2.8.4",
+    "vite": "^4.1.1",
+    "typescript": "^4.9.5"
+  }
+}
