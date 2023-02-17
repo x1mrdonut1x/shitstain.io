@@ -1,18 +1,19 @@
 import * as PIXI from 'pixi.js';
 import { Container } from 'pixi.js';
+import { Player } from './Player';
 
 export class PlayerBulletController {
   private readonly stage: Container;
-  private readonly player: PIXI.Sprite;
-  private readonly bullets: Set<PIXI.Sprite> = new Set();
-  private shootingSpeed: number = 200; //ms
+  private readonly player: Player;
+  private readonly bullets: { sprite: PIXI.Sprite; velocity: { x: number; y: number } }[] = [];
+  private shootingSpeed: number = 100; //ms
   private timeDelta: number = 0; //ms
-  private bulletSpeed: number = 5;
+  private bulletSpeed: number = 7;
   private isShooting: boolean = false;
 
   private lastMousePosition: { x: number; y: number } = { x: 0, y: 0 };
 
-  constructor(stage: Container, player: PIXI.Sprite) {
+  constructor(stage: Container, player: Player) {
     this.stage = stage;
     this.player = player;
 
@@ -46,7 +47,7 @@ export class PlayerBulletController {
 
     bullet.rotation = temp;
     this.stage?.addChild(bullet);
-    this.bullets.add(bullet);
+    this.bullets.push({ sprite: bullet, velocity: { ...this.player.velocity } });
   }
 
   public update(_delta: number, elapsed: number) {
@@ -57,20 +58,25 @@ export class PlayerBulletController {
       this.shoot(this.lastMousePosition);
     }
 
+    // update bullet position
     for (const bullet of this.bullets) {
-      bullet.position.x += Math.cos(bullet.rotation) * this.bulletSpeed;
-      bullet.position.y += Math.sin(bullet.rotation) * this.bulletSpeed;
+      const { position, rotation } = bullet.sprite;
+
+      position.x += Math.cos(rotation) * this.bulletSpeed + bullet.velocity.x / this.bulletSpeed;
+      position.y += Math.sin(rotation) * this.bulletSpeed + bullet.velocity.y / this.bulletSpeed;
     }
 
-    for (const bullet of this.bullets) {
+    // delete bullets
+    for (let i = this.bullets.length - 1; i >= 0; i--) {
+      const { position } = this.bullets[i].sprite;
       if (
-        bullet.position.x > document.body.clientWidth ||
-        bullet.position.x < 0 ||
-        bullet.position.y > document.body.clientHeight ||
-        bullet.position.y < 0
+        position.x > document.body.clientWidth ||
+        position.x < 0 ||
+        position.y > document.body.clientHeight ||
+        position.y < 0
       ) {
-        bullet.destroy();
-        this.bullets.delete(bullet);
+        this.bullets[i].sprite.destroy();
+        this.bullets.splice(i, 1);
       }
     }
   }

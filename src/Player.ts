@@ -14,7 +14,7 @@ export class Player {
   constructor(stage: Container) {
     this.stage = stage;
     this.movementController = new PlayerMovementController(this.player);
-    this.bulletController = new PlayerBulletController(this.stage, this.player);
+    this.bulletController = new PlayerBulletController(this.stage, this);
 
     this.createPlayer();
     this.playerContainer.addChild(this.player);
@@ -22,6 +22,14 @@ export class Player {
 
   get getPlayerContainer() {
     return this.playerContainer;
+  }
+
+  get position() {
+    return this.player.position;
+  }
+
+  get velocity() {
+    return this.movementController.getVelocity();
   }
 
   private createPlayer() {
