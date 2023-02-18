@@ -28,6 +28,9 @@ export class Player extends Physics.Arcade.Sprite {
   private readonly keys: Keys = {};
   private bullets;
 
+  private isShooting = false;
+  private lastMousePosition: { x: number; y: number } = { x: 0, y: 0 };
+
   constructor(scene: Scene, x: number, y: number, public id: string) {
     super(scene, x, y, 'fireWizard');
 
@@ -38,16 +41,38 @@ export class Player extends Physics.Arcade.Sprite {
     scene.sys.updateList.add(this);
 
     this.scene.input.on('pointerdown', (pointer: PointerEvent) => {
-      const rotation = Math.atan2(pointer.y - this.y, pointer.x - this.x);
-      const bullet = this.bullets.get();
+      this.lastMousePosition = { x: pointer.x, y: pointer.y };
+      this.isShooting = true;
+    });
 
-      if (bullet) {
-        bullet.fire(this.x, this.y, rotation);
-      }
+    this.scene.input.on('pointermove', (pointer: PointerEvent) => {
+      this.lastMousePosition = { x: pointer.x, y: pointer.y };
+    });
+
+    this.scene.input.on('pointerup', (pointer: PointerEvent) => {
+      this.isShooting = false;
     });
 
     if (this.id === gameServer.clientId) {
       this.initKeyboard();
+    }
+  }
+
+  shoot() {
+    const rotation = Math.atan2(
+      this.lastMousePosition.y - this.y,
+      this.lastMousePosition.x - this.x
+    );
+    const bullet = this.bullets.get();
+
+    if (bullet) {
+      bullet.fire(this.x, this.y, rotation);
+    }
+  }
+
+  updateBullets(): void {
+    if (this.isShooting) {
+      this.shoot();
     }
   }
 
