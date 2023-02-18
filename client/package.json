@@ -1,0 +1,16 @@
+{
+  "name": "shitstain-client",
+  "version": "1.0.0",
+  "main": "src/main.ts",
+  "license": "MIT",
+  "dependencies": {
+    "phaser": "^3.55.2",
+    "socket.io-client": "^4.6.0"
+  },
+  "devDependencies": {
+    "vite": "^4.1.2"
+  },
+  "scripts": {
+    "dev": "yarn vite"
+  }
+}
