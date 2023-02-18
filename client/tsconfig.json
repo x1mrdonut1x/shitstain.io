@@ -5,7 +5,7 @@
     "module": "esnext",
     "lib": ["esnext", "DOM"],
     "useDefineForClassFields": true,
-    "outDir": "./dist"
+    "noEmit": true
   },
   "include": ["src/**/*.ts"]
 }

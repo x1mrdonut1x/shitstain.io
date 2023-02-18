@@ -15,6 +15,7 @@
     "ts-node": "^10.9.1"
   },
   "scripts": {
-    "dev": "nodemon ./src/main.ts"
+    "dev": "nodemon ./src/main.ts",
+    "build": "tsc"
   }
 }
