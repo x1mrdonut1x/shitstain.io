@@ -22,8 +22,8 @@ const defaultMovement: ServerMovement = {
 };
 
 export class Player extends Physics.Arcade.Sprite {
-  private localMovement = defaultMovement;
-  private serverMovement = defaultMovement;
+  private localMovement = { ...defaultMovement };
+  private serverMovement = { ...defaultMovement };
   private readonly speed = 200;
   private readonly keys: Keys = {};
   private bullets;
@@ -46,7 +46,9 @@ export class Player extends Physics.Arcade.Sprite {
       }
     });
 
-    this.initKeyboard();
+    if (this.id === gameServer.clientId) {
+      this.initKeyboard();
+    }
   }
 
   private initKeyboard() {
@@ -102,27 +104,27 @@ export class Player extends Physics.Arcade.Sprite {
   private onMoveRight() {
     this.localMovement.left = false;
     this.localMovement.right = true;
-    this.localMovement.dx = 160;
+    this.localMovement.dx = this.speed;
     this.flipX = false;
   }
 
   private onMoveLeft() {
     this.localMovement.left = true;
     this.localMovement.right = false;
-    this.localMovement.dx = -160;
+    this.localMovement.dx = -this.speed;
     this.flipX = true;
   }
 
   private onMoveUp() {
     this.localMovement.up = true;
     this.localMovement.down = false;
-    this.localMovement.dy = -160;
+    this.localMovement.dy = -this.speed;
   }
 
   private onMoveDown() {
     this.localMovement.up = false;
     this.localMovement.down = true;
-    this.localMovement.dy = 160;
+    this.localMovement.dy = this.speed;
   }
 
   public setMovement(movement?: ServerMovement) {
@@ -148,8 +150,8 @@ export class Player extends Physics.Arcade.Sprite {
       this.anims.play('fire-wizard-idle', true);
     }
 
-    this.setVelocityX(this.localMovement.dx || 0);
-    this.setVelocityY(this.localMovement.dy || 0);
+    this.setVelocityX(this.serverMovement.dx || 0);
+    this.setVelocityY(this.serverMovement.dy || 0);
 
     if (this.id === gameServer.clientId) {
       if (!isEqual(this.localMovement, this.serverMovement))
