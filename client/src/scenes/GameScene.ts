@@ -39,10 +39,9 @@ export class GameScene extends Scene {
     });
   }
 
-  update() {
+  update(time: number, delta: number) {
     this.players?.forEach(player => {
-      player.move();
-      player.updateBullets();
+      player.update(delta);
     });
   }
 
