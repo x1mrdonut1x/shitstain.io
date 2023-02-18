@@ -14,6 +14,7 @@
   },
   "scripts": {
     "dev": "yarn vite",
-    "build": "yarn vite build"
+    "build": "yarn vite build",
+    "preview": "yarn vite preview"
   }
 }

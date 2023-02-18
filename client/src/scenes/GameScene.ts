@@ -2,6 +2,9 @@ import { Scene } from 'phaser';
 import { Player } from '../components/Player';
 import { gameServer } from '../networking/GameServer';
 
+import fireWizardWalkUrl from '../assets/wizards/fire-wizard/walk.png';
+import fireWizardIdleUrl from '../assets/wizards/fire-wizard/idle.png';
+
 export class GameScene extends Scene {
   private players?: Player[];
 
@@ -40,15 +43,15 @@ export class GameScene extends Scene {
   }
 
   private loadSprite(key: string, path: string) {
-    this.load.spritesheet(key, new URL(path, import.meta.url).href, {
+    this.load.spritesheet(key, path, {
       frameWidth: 128,
       frameHeight: 128,
     });
   }
 
   private loadSprites() {
-    this.loadSprite('fire-wizard-walk', `../assets/wizards/fire-wizard/walk.png`);
-    this.loadSprite('fire-wizard-idle', `../assets/wizards/fire-wizard/idle.png`);
+    this.loadSprite('fire-wizard-walk', fireWizardWalkUrl);
+    this.loadSprite('fire-wizard-idle', fireWizardIdleUrl);
   }
 
   private createAnimations() {
