@@ -1,5 +1,8 @@
 import { Physics, Scene, Types } from 'phaser';
+import { ServerMovement } from '../../../types';
+import { gameServer } from '../networking/GameServer';
 import { Bullet } from './Bullet';
+import { isEqual } from 'lodash';
 
 interface Keys {
   [keyCode: string]: {
@@ -9,12 +12,23 @@ interface Keys {
   };
 }
 
+const defaultMovement: ServerMovement = {
+  left: false,
+  right: false,
+  up: false,
+  down: false,
+  dx: 0,
+  dy: 0,
+};
+
 export class Player extends Physics.Arcade.Sprite {
+  private localMovement = defaultMovement;
+  private serverMovement = defaultMovement;
   private readonly speed = 200;
   private readonly keys: Keys = {};
   private bullets;
 
-  constructor(scene: Scene, x: number, y: number) {
+  constructor(scene: Scene, x: number, y: number, public id: string) {
     super(scene, x, y, 'fireWizard');
 
     this.bullets = scene.add.group({ classType: Bullet, runChildUpdate: true });
@@ -86,21 +100,35 @@ export class Player extends Physics.Arcade.Sprite {
   }
 
   private onMoveRight() {
-    this.setVelocityX(this.speed);
+    this.localMovement.left = false;
+    this.localMovement.right = true;
+    this.localMovement.dx = 160;
     this.flipX = false;
   }
 
   private onMoveLeft() {
-    this.setVelocityX(-this.speed);
+    this.localMovement.left = true;
+    this.localMovement.right = false;
+    this.localMovement.dx = -160;
     this.flipX = true;
   }
 
   private onMoveUp() {
-    this.setVelocityY(-this.speed);
+    this.localMovement.up = true;
+    this.localMovement.down = false;
+    this.localMovement.dy = -160;
   }
 
   private onMoveDown() {
-    this.setVelocityY(this.speed);
+    this.localMovement.up = false;
+    this.localMovement.down = true;
+    this.localMovement.dy = 160;
+  }
+
+  public setMovement(movement?: ServerMovement) {
+    if (movement) {
+      this.serverMovement = movement;
+    }
   }
 
   public move() {
@@ -118,6 +146,14 @@ export class Player extends Physics.Arcade.Sprite {
       this.anims.play('fire-wizard-walk', true);
     } else {
       this.anims.play('fire-wizard-idle', true);
+    }
+
+    this.setVelocityX(this.localMovement.dx || 0);
+    this.setVelocityY(this.localMovement.dy || 0);
+
+    if (this.id === gameServer.clientId) {
+      if (!isEqual(this.localMovement, this.serverMovement))
+        gameServer.movePlayer(this.localMovement);
     }
   }
 }
