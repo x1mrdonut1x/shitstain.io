@@ -57,7 +57,7 @@ export class Player extends Physics.Arcade.Sprite {
         if (this.keys['S'].key.isDown) {
           this.onMoveDown();
         } else {
-          this.setVelocityY(0);
+          this.localMovement.dy = 0;
         }
       },
     };
@@ -69,7 +69,7 @@ export class Player extends Physics.Arcade.Sprite {
         if (this.keys['W'].key.isDown) {
           this.onMoveUp();
         } else {
-          this.setVelocityY(0);
+          this.localMovement.dy = 0;
         }
       },
     };
@@ -81,7 +81,7 @@ export class Player extends Physics.Arcade.Sprite {
         if (this.keys['D'].key.isDown) {
           this.onMoveRight();
         } else {
-          this.setVelocityX(0);
+          this.localMovement.dx = 0;
         }
       },
     };
@@ -93,7 +93,7 @@ export class Player extends Physics.Arcade.Sprite {
         if (this.keys['A'].key.isDown) {
           this.onMoveLeft();
         } else {
-          this.setVelocityX(0);
+          this.localMovement.dx = 0;
         }
       },
     };
