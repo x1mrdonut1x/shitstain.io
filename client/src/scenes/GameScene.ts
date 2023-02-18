@@ -2,7 +2,7 @@ import { Scene } from 'phaser';
 import { Player } from '../components/Player';
 
 export class GameScene extends Scene {
-  private player;
+  private player?: Player;
 
   constructor() {
     super('gameScene');
@@ -19,7 +19,7 @@ export class GameScene extends Scene {
   }
 
   update() {
-    this.player.move();
+    this.player?.move();
   }
 
   private loadSprite(key: string, path: string) {

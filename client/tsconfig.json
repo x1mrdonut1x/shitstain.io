@@ -18,5 +18,5 @@
       "*": ["./node_modules/*"]
     }
   },
-  "include": ["./client", "./server"] // TODO fix this shit. for some reason ./server has no typechecking
+  "include": ["src/**/*.ts"]
 }
