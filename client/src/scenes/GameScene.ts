@@ -39,7 +39,10 @@ export class GameScene extends Scene {
   }
 
   update() {
-    this.players?.forEach(player => player.move());
+    this.players?.forEach(player => {
+      player.move();
+      player.updateBullets();
+    });
   }
 
   private loadSprite(key: string, path: string) {
