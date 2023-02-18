@@ -3,6 +3,10 @@ import { Physics, Scene, Types } from 'phaser';
 export class Player extends Physics.Arcade.Sprite {
   constructor(scene: Scene, x: number, y: number) {
     super(scene, x, y, 'fireWizard');
+
+    scene.physics.add.existing(this);
+    scene.sys.displayList.add(this);
+    scene.sys.updateList.add(this);
   }
 
   public move() {

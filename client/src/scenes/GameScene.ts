@@ -8,21 +8,16 @@ export class GameScene extends Scene {
     super('gameScene');
   }
 
-  //load assets
   preload() {
     this.loadSprites();
   }
 
-  //init variables, define animations & sounds, and display assets
   create() {
     this.createAnimations();
 
     this.player = new Player(this, 100, 450);
-    this.physics.add.existing(this.player);
-    // this.player = this.physics.add.sprite(100, 450, 'fire-wizard-idle');
   }
 
-  //update the attributes of various game objects per game logic
   update() {
     this.player.move();
   }
