@@ -9,6 +9,13 @@ export type ServerMovement = {
   dy?: number;
 };
 
+export type ServerShootDirection = {
+  playerId: string;
+  x: number;
+  y: number;
+  rotation: number;
+};
+
 export type ServerWorldObject = {
   id: string;
   x: number;

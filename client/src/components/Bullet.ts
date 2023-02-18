@@ -13,11 +13,10 @@ export class Bullet extends Physics.Arcade.Sprite {
     this.anims.play('fire-ball', true);
   }
 
-  update(time: number, delta: number): void {
+  update(): void {
     this.x += Math.cos(this.rotation) * this.speed;
     this.y += Math.sin(this.rotation) * this.speed;
 
-    // this.born += delta;
     if (
       this.x > this.scene.game.config.width ||
       this.x < 0 ||

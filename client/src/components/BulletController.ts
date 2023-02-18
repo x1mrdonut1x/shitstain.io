@@ -1,3 +1,4 @@
+import { gameServer } from '@/networking/GameServer';
 import { Scene } from 'phaser';
 import { Bullet } from './Bullet';
 import { Player } from './Player';
@@ -13,17 +14,27 @@ export class BulletController {
   constructor(private scene: Scene, private player: Player) {
     this.bullets = scene.add.group({ classType: Bullet, runChildUpdate: true });
 
-    this.scene.input.on('pointerdown', (pointer: PointerEvent) => {
-      this.lastMousePosition = { x: pointer.x, y: pointer.y };
-      this.isShooting = true;
-    });
+    if (this.player.id === gameServer.clientId) {
+      this.scene.input.on('pointerdown', (pointer: PointerEvent) => {
+        this.lastMousePosition = { x: pointer.x, y: pointer.y };
+        this.isShooting = true;
+      });
 
-    this.scene.input.on('pointermove', (pointer: PointerEvent) => {
-      this.lastMousePosition = { x: pointer.x, y: pointer.y };
-    });
+      this.scene.input.on('pointermove', (pointer: PointerEvent) => {
+        this.lastMousePosition = { x: pointer.x, y: pointer.y };
+      });
 
-    this.scene.input.on('pointerup', (pointer: PointerEvent) => {
-      this.isShooting = false;
+      this.scene.input.on('pointerup', (pointer: PointerEvent) => {
+        this.isShooting = false;
+      });
+    }
+
+    gameServer.shoot.on(data => {
+      if (data.playerId === this.player.id) {
+        const bullet = this.bullets.get();
+
+        bullet?.fire(data.x, data.y, data.rotation);
+      }
     });
   }
 
@@ -32,11 +43,13 @@ export class BulletController {
       this.lastMousePosition.y - this.player.y,
       this.lastMousePosition.x - this.player.x
     );
-    const bullet = this.bullets.get();
 
-    if (bullet) {
-      bullet.fire(this.player.x, this.player.y, rotation);
-    }
+    gameServer.shoot.emit({
+      playerId: this.player.id,
+      x: Math.round(this.player.x),
+      y: Math.round(this.player.y),
+      rotation: rotation,
+    });
   }
 
   updateBullets(delta: number): void {
