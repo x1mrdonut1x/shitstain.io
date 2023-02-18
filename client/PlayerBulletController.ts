@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { Container } from 'pixi.js';
 import { Player } from './Player';
+import { eventEmitter } from './EventEmitter';
 
 export class PlayerBulletController {
   private readonly stage: Container;
@@ -29,6 +30,7 @@ export class PlayerBulletController {
     this.stage.addEventListener('mousemove', e => {
       this.lastMousePosition = { x: e.global.x, y: e.global.y };
     });
+    eventEmitter.shoot.on(this.shoot.bind(this));
   }
 
   private setIsShooting(isShooting: boolean) {
@@ -47,7 +49,10 @@ export class PlayerBulletController {
 
     bullet.rotation = temp;
     this.stage?.addChild(bullet);
-    this.bullets.push({ sprite: bullet, velocity: { ...this.player.velocity } });
+    this.bullets.push({
+      sprite: bullet,
+      velocity: { ...(this.player.velocity ?? { x: 0, y: 0 }) },
+    });
   }
 
   public update(_delta: number, elapsed: number) {
@@ -55,7 +60,9 @@ export class PlayerBulletController {
 
     if (this.timeDelta > this.shootingSpeed && this.isShooting) {
       this.timeDelta = 0;
-      this.shoot(this.lastMousePosition);
+
+      eventEmitter.shoot.emit(this.lastMousePosition);
+      // this.shoot(this.lastMousePosition);
     }
 
     // update bullet position

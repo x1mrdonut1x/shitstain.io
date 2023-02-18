@@ -1,4 +1,6 @@
 import * as PIXI from 'pixi.js';
+import { eventEmitter } from './EventEmitter';
+import { Player } from './Player';
 
 interface Keys {
   [x: string]: {
@@ -9,13 +11,13 @@ interface Keys {
 }
 
 export class PlayerMovementController {
-  private readonly player: PIXI.Sprite;
+  private readonly player: Player;
   private readonly keys: Keys = {};
   private speed = 5;
   private velocityX = 0;
   private velocityY = 0;
 
-  constructor(player: PIXI.Sprite) {
+  constructor(player: Player) {
     this.player = player;
     this.setUpKeyboard();
 
@@ -44,27 +46,34 @@ export class PlayerMovementController {
     return { x: this.velocityX, y: this.velocityY };
   }
 
-  public update(_delta: number) {
+  private getNewPosition() {
     const velocity = this.getVelocity();
+    const sprite = this.player.sprite;
 
-    let newPlayerX: number = this.player.x + velocity.x;
-    let newPlayerY: number = this.player.y + velocity.y;
+    let newPlayerX: number = sprite.x + velocity.x;
+    let newPlayerY: number = sprite.y + velocity.y;
 
-    if (newPlayerX - this.player.width / 2 < 0) {
-      newPlayerX = this.player.width / 2;
+    if (newPlayerX - sprite.width / 2 < 0) {
+      newPlayerX = sprite.width / 2;
     }
-    if (newPlayerX + this.player.width / 2 > document.body.clientWidth) {
-      newPlayerX = document.body.clientWidth - this.player.width / 2;
+    if (newPlayerX + sprite.width / 2 > document.body.clientWidth) {
+      newPlayerX = document.body.clientWidth - sprite.width / 2;
     }
-    if (newPlayerY - this.player.height / 2 < 0) {
-      newPlayerY = this.player.height / 2;
+    if (newPlayerY - sprite.height / 2 < 0) {
+      newPlayerY = sprite.height / 2;
     }
-    if (newPlayerY + this.player.height / 2 > document.body.clientHeight) {
-      newPlayerY = document.body.clientHeight - +this.player.height / 2;
+    if (newPlayerY + sprite.height / 2 > document.body.clientHeight) {
+      newPlayerY = document.body.clientHeight - +sprite.height / 2;
     }
 
-    this.player.position.x = newPlayerX;
-    this.player.position.y = newPlayerY;
+    return { x: newPlayerX, y: newPlayerY };
+  }
+
+  public update(_delta: number) {
+    const { x, y } = this.getNewPosition();
+
+    this.player.sprite.position.x = x;
+    this.player.sprite.position.y = y;
   }
 
   private setUpKeyboard() {
@@ -124,6 +133,8 @@ export class PlayerMovementController {
         this.keys[key].onUp();
       }
     });
+    const { x, y } = this.getNewPosition();
+    eventEmitter.move.emit({ id: this.player.id, x, y });
   }
 
   public onKeyDown(e: KeyboardEvent) {
@@ -133,5 +144,7 @@ export class PlayerMovementController {
         this.keys[key].onDown();
       }
     });
+    const { x, y } = this.getNewPosition();
+    eventEmitter.move.emit({ id: this.player.id, x, y });
   }
 }

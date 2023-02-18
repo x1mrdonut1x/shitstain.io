@@ -1,15 +1,29 @@
 import * as PIXI from 'pixi.js';
 import { Player } from './Player';
+import { eventEmitter } from './EventEmitter'; // initalize connection
+import { PlayerMovementController } from './PlayerMovementController';
 
 const app = new PIXI.Application({ width: 640, height: 360 });
 app.stage.interactive = true;
 const players: Player[] = [];
 
-function addPlayer() {
-  const player = new Player(app.stage);
+function addPlayer(id?: number, x?: number, y?: number) {
+  const player = new Player(app.stage, id, x, y);
   players.push(player);
 
-  app.stage.addChild(player.getPlayerContainer);
+  app.stage.addChild(player.playerContainer);
+  return player;
+}
+
+function updatePlayer(id: number, x: number, y: number) {
+  const foundPlayer = players.find(p => p.id === id);
+
+  if (!foundPlayer) {
+    addPlayer(id, x, y);
+    return;
+  }
+
+  foundPlayer.setPosition(x, y);
 }
 
 function init() {
@@ -17,13 +31,22 @@ function init() {
   document.body.appendChild(app.view as any);
 
   addPointer();
-  addPlayer();
+  const player = addPlayer();
+  player.movementController = new PlayerMovementController(player);
+  eventEmitter.newPlayer.emit({ id: player.id, x: player.position.x, y: player.position.y });
+
+  eventEmitter.allPlayers.on(data => {
+    data.forEach(p => {
+      if (player.id !== p.id) updatePlayer(p.id, p.x, p.y);
+    });
+  });
 
   animate();
 }
 
 const oldTime = Date.now();
 let timeElapsedOrigin = Date.now();
+
 function animate() {
   const newTime = Date.now();
   const deltaTime = newTime - oldTime;
