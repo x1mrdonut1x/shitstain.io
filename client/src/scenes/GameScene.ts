@@ -4,6 +4,7 @@ import { gameServer } from '@/networking/GameServer';
 
 import fireWizardWalkUrl from '@/assets/wizards/fire-wizard/Walk.png';
 import fireWizardIdleUrl from '@/assets/wizards/fire-wizard/Idle.png';
+import fireWizardFireballUrl from '@/assets/wizards/fire-wizard/Charge.png';
 
 export class GameScene extends Scene {
   private players?: Player[];
@@ -45,16 +46,17 @@ export class GameScene extends Scene {
     });
   }
 
-  private loadSprite(key: string, path: string) {
+  private loadSprite(key: string, path: string, size = 128) {
     this.load.spritesheet(key, path, {
-      frameWidth: 128,
-      frameHeight: 128,
+      frameWidth: size,
+      frameHeight: size,
     });
   }
 
   private loadSprites() {
     this.loadSprite('fire-wizard-walk', fireWizardWalkUrl);
     this.loadSprite('fire-wizard-idle', fireWizardIdleUrl);
+    this.loadSprite('fire-ball', fireWizardFireballUrl, 64);
   }
 
   private createAnimations() {
@@ -70,6 +72,13 @@ export class GameScene extends Scene {
       frames: this.anims.generateFrameNumbers('fire-wizard-walk', {}),
       frameRate: 20,
       repeat: -1,
+    });
+
+    this.anims.create({
+      key: 'fire-ball',
+      frames: this.anims.generateFrameNumbers('fire-ball', {}),
+      frameRate: 20,
+      repeat: 0,
     });
   }
 }
