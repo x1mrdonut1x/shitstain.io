@@ -1,8 +1,9 @@
 import { Scene } from 'phaser';
 import { Player } from '../components/Player';
+import { gameServer } from '../networking/GameServer';
 
 export class GameScene extends Scene {
-  private player?: Player;
+  private players?: Player[];
 
   constructor() {
     super('gameScene');
@@ -15,11 +16,27 @@ export class GameScene extends Scene {
   create() {
     this.createAnimations();
 
-    this.player = new Player(this, 100, 450);
+    gameServer.onPlayersChange(data => {
+      this.players = data.map(({ id, x, y }) => {
+        return new Player(this, x, y, id);
+      });
+    });
+
+    gameServer.onWorldChange(objects => {
+      objects.forEach(object => {
+        const foundPlayer = this.players?.find(player => player.id === object.id);
+
+        foundPlayer?.setMovement(object.move);
+      });
+    });
+
+    gameServer.onConnect(() => {
+      gameServer.createPlayer();
+    });
   }
 
   update() {
-    this.player?.move();
+    this.players?.forEach(player => player.move());
   }
 
   private loadSprite(key: string, path: string) {

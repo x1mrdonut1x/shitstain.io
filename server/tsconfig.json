@@ -2,10 +2,9 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
-    "lib": ["esnext", "DOM"],
-    "useDefineForClassFields": true,
-    "noEmit": true
+    "module": "commonjs",
+    "lib": ["esnext"],
+    "outDir": "./dist"
   },
   "include": ["src/**/*.ts"]
 }
