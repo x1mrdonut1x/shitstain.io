@@ -1,9 +1,9 @@
 import { Scene } from 'phaser';
-import { Player } from '../components/Player';
-import { gameServer } from '../networking/GameServer';
+import { Player } from '@/components/Player';
+import { gameServer } from '@/networking/GameServer';
 
-import fireWizardWalkUrl from '../assets/wizards/fire-wizard/walk.png';
-import fireWizardIdleUrl from '../assets/wizards/fire-wizard/idle.png';
+import fireWizardWalkUrl from '@/assets/wizards/fire-wizard/Walk.png';
+import fireWizardIdleUrl from '@/assets/wizards/fire-wizard/Idle.png';
 
 export class GameScene extends Scene {
   private players?: Player[];
