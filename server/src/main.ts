@@ -1,7 +1,7 @@
 import express, { static as staticMiddleware } from 'express';
 import httpServer from 'http';
 import { Server } from 'socket.io';
-import { ServerMovement, ServerPlayer } from '../../types';
+import { ServerMovement, ServerPlayer, ServerShootDirection as ServerShootData } from '../../types';
 
 const app = express();
 const server = new httpServer.Server(app);
@@ -46,9 +46,8 @@ io.on('connection', socket => {
     io.emit('objects:change', players);
   });
 
-  socket.on('shoot', data => {
-    console.log('shoot', data);
-    socket.broadcast.emit('shoot', data);
+  socket.on('players:shoot', (data: ServerShootData ) => {
+    io.emit('players:shoot', data);
   });
 });
 

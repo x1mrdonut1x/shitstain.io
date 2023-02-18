@@ -1,5 +1,10 @@
 import { io as client } from 'socket.io-client';
-import { ServerMovement, ServerPlayer, ServerWorldObject } from '../../../types';
+import {
+  ServerMovement,
+  ServerPlayer,
+  ServerShootDirection,
+  ServerWorldObject,
+} from '../../../types';
 
 const io = client(import.meta.env.VITE_SOCKET_SERVER);
 
@@ -28,6 +33,15 @@ class GameServer {
 
   onWorldChange(callback: (data: ServerWorldObject[]) => void) {
     io.on('objects:change', callback);
+  }
+
+  get shoot() {
+    return {
+      emit: (data: ServerShootDirection) => io.emit('players:shoot', data),
+      on: (callback: (data: ServerShootDirection) => void) => {
+        io.on('players:shoot', callback);
+      },
+    };
   }
 }
 

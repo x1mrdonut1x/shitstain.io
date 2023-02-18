@@ -2,7 +2,7 @@ import { GameScene } from './scenes/GameScene';
 
 const config = {
   type: Phaser.AUTO,
-  width: 1400,
+  width: 1200,
   height: 750,
   backgroundColor: '#FFFFF',
   parent: 'game-container',

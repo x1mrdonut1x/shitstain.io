@@ -1,3 +1,4 @@
+import { gameServer } from '@/networking/GameServer';
 import { Physics, Scene } from 'phaser';
 import { ServerMovement } from '../../../types';
 import { BulletController } from './BulletController';
@@ -11,7 +12,10 @@ export class Player extends Physics.Arcade.Sprite {
     super(scene, x, y, 'fireWizard');
 
     this.bulletController = new BulletController(scene, this);
-    this.movementController = new MovementController(scene, this);
+
+    if (this.id === gameServer.clientId) {
+      this.movementController = new MovementController(scene, this);
+    }
 
     scene.physics.add.existing(this);
     scene.sys.displayList.add(this);
