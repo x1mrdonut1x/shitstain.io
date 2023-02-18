@@ -2,7 +2,11 @@
   "name": "shitstain.io",
   "version": "1.0.0",
   "description": "",
-  "main": "index.html",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "dependencies": {
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
