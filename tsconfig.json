@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "useDefineForClassFields": true,
-    "module": "commonjs",
-    "lib": ["ESNext", "DOM"],
-    "moduleResolution": "Node",
+    "moduleResolution": "node",
     "strict": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -12,11 +8,6 @@
     "noEmit": true,
     "noImplicitReturns": true,
     "noImplicitAny": true,
-    "skipLibCheck": true,
-    "outDir": "./dist",
-    "paths": {
-      "*": ["./node_modules/*"]
-    }
-  },
-  "include": ["./client", "./server"] // TODO fix this shit. for some reason ./server has no typechecking
+    "skipLibCheck": true
+  }
 }

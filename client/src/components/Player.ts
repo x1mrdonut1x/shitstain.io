@@ -1,7 +1,19 @@
-import { Physics, Scene, Types } from 'phaser';
+import { Physics, Scene } from 'phaser';
+import { ServerMovement } from '../../../types';
+import { gameServer } from '../networking/GameServer';
+import { isEqual } from 'lodash';
 
 export class Player extends Physics.Arcade.Sprite {
-  constructor(scene: Scene, x: number, y: number) {
+  private movement: ServerMovement = {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+    dx: 0,
+    dy: 0,
+  };
+
+  constructor(scene: Scene, x: number, y: number, public id: string) {
     super(scene, x, y, 'fireWizard');
 
     scene.physics.add.existing(this);
@@ -9,30 +21,62 @@ export class Player extends Physics.Arcade.Sprite {
     scene.sys.updateList.add(this);
   }
 
+  public setMovement(movement?: ServerMovement) {
+    if (movement) {
+      this.movement = movement;
+    }
+  }
+
   public move() {
-    const cursors = this.scene.input.keyboard.createCursorKeys();
-
-    if (cursors.left.isDown) {
-      this.setVelocityX(-160);
-
+    if (this.movement.left) {
       this.anims.play('fire-wizard-walk', true);
       this.flipX = true;
-    } else if (cursors.right.isDown) {
-      this.setVelocityX(160);
-
+    } else if (this.movement.right) {
       this.anims.play('fire-wizard-walk', true);
       this.flipX = false;
     } else {
-      this.setVelocityX(0);
       this.anims.play('fire-wizard-idle');
     }
 
-    if (cursors.up.isDown) {
-      this.setVelocityY(-160);
-    } else if (cursors.down.isDown) {
-      this.setVelocityY(160);
-    } else {
-      this.setVelocityY(0);
+    this.setVelocityX(this.movement.dx || 0);
+    this.setVelocityY(this.movement.dy || 0);
+
+    if (this.id === gameServer.clientId) {
+      const cursors = this.scene.input.keyboard.createCursorKeys();
+      const movement: ServerMovement = {};
+
+      if (cursors.left.isDown) {
+        movement.left = true;
+        movement.right = false;
+        movement.dx = -160;
+      } else if (cursors.right.isDown) {
+        movement.left = false;
+        movement.right = true;
+        movement.dx = 160;
+      } else {
+        movement.left = false;
+        movement.right = false;
+        movement.dx = 0;
+      }
+
+      if (cursors.up.isDown) {
+        movement.up = true;
+        movement.down = false;
+        movement.dy = -160;
+      } else if (cursors.down.isDown) {
+        movement.up = false;
+        movement.down = true;
+        movement.dy = 160;
+      } else {
+        movement.up = false;
+        movement.down = false;
+        movement.dy = 0;
+      }
+
+      if (!isEqual(movement, this.movement)) {
+        // console.log(movement);
+        gameServer.movePlayer(movement);
+      }
     }
   }
 }
