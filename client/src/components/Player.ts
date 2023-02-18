@@ -1,4 +1,5 @@
 import { Physics, Scene, Types } from 'phaser';
+import { Bullet } from './Bullet';
 
 interface Keys {
   [keyCode: string]: {
@@ -11,13 +12,25 @@ interface Keys {
 export class Player extends Physics.Arcade.Sprite {
   private readonly speed = 200;
   private readonly keys: Keys = {};
+  private bullets;
 
   constructor(scene: Scene, x: number, y: number) {
     super(scene, x, y, 'fireWizard');
 
+    this.bullets = scene.add.group({ classType: Bullet, runChildUpdate: true });
+
     scene.physics.add.existing(this);
     scene.sys.displayList.add(this);
     scene.sys.updateList.add(this);
+
+    this.scene.input.on('pointerdown', (pointer: PointerEvent) => {
+      const rotation = Math.atan2(pointer.y - this.y, pointer.x - this.x);
+      const bullet = this.bullets.get();
+
+      if (bullet) {
+        bullet.fire(this.x, this.y, rotation);
+      }
+    });
 
     this.initKeyboard();
   }
