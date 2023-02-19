@@ -13,7 +13,7 @@ export default defineConfig({
     checker({
       typescript: true,
       eslint: {
-        lintCommand: 'eslint "./src/**/*.ts"', // for example, lint .ts & .tsx
+        lintCommand: 'eslint -c ../.eslintrc.cjs "./src/**/*.ts"', // for example, lint .ts & .tsx
       },
     }),
   ],
