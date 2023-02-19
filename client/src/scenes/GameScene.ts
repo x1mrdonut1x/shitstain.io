@@ -49,7 +49,9 @@ export class GameScene extends Scene {
       data.forEach(object => {
         const foundPlayer = this.players.find(player => player.id === object.clientId);
 
-        foundPlayer?.setMovement(object.move);
+        if (foundPlayer && object.move) {
+          foundPlayer?.setMovement(object.move);
+        }
       });
     });
   }

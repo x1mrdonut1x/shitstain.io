@@ -28,7 +28,9 @@ export class MovementController {
   private readonly keys: Keys = {};
 
   constructor(private scene: Scene, private player: Player) {
-    this.initKeyboard();
+    if (this.player.id === gameServer.clientId) {
+      this.initKeyboard();
+    }
   }
 
   private initKeyboard() {
@@ -107,10 +109,8 @@ export class MovementController {
     this.localMovement.dy = this.speed;
   }
 
-  public setMovement(movement?: ServerMovement) {
-    if (movement) {
-      this.serverMovement = movement;
-    }
+  public setMovement(movement: ServerMovement) {
+    this.serverMovement = movement;
   }
 
   public update() {
