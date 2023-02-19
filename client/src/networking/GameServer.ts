@@ -9,15 +9,17 @@ import {
 } from '../../../types/events';
 
 class GameServer {
-  public clientId: string | undefined;
-  private io: Socket | undefined;
+  public clientId!: string; // initialized in main.ts
+  private io!: Socket; // initialized in main.ts
 
   constructor() {
     this.io = client(import.meta.env.VITE_SOCKET_SERVER);
+  }
 
+  async init() {
     this.io.on('message', (id: string) => {
       this.clientId = id;
-      console.log('clientId', this.clientId);
+
       this.createPlayer.emit();
     });
   }
@@ -27,7 +29,7 @@ class GameServer {
   }
 
   get getPlayers() {
-    return this.createSocket<GetPlayersEvent>(SocketEvent.PLAYERS);
+    return this.createSocket.bind(this)<GetPlayersEvent>(SocketEvent.PLAYERS);
   }
 
   get movePlayer() {
@@ -46,30 +48,30 @@ class GameServer {
     event: SocketEvent
   ): DataSocket<TEmit, TOn, TOff> {
     return {
-      emit: this.emitCallback(event),
-      on: this.onCallback(event),
-      off: this.offCallback(event),
+      emit: this.emitCallback.bind(this)(event),
+      on: this.onCallback.bind(this)(event),
+      off: this.offCallback.bind(this)(event),
     };
   }
 
   private emitCallback<T>(event: string) {
     return (data: T): void => {
       console.log('emitCallback', event, this.clientId);
-      this.io?.emit(event, { clientId: this.clientId, ...data });
+      this.io.emit(event, { clientId: this.clientId, ...data });
     };
   }
 
   private onCallback<T>(event: string) {
     return (callback: ListenerCallback<T>): void => {
       console.log('onCallback', event);
-      this.io?.on(event, callback);
+      this.io.on(event, callback);
     };
   }
 
   private offCallback<T>(event: string) {
     return (callback?: ListenerCallback<T>): void => {
       console.log('offCallback', event);
-      this.io?.off(event, callback);
+      this.io.off(event, callback);
     };
   }
 }
@@ -84,4 +86,11 @@ interface ListenerCallback<T> {
   (data: T): void;
 }
 
-export const gameServer = new GameServer();
+export let gameServer: GameServer;
+
+export async function createGameServer() {
+  gameServer = new GameServer();
+  await gameServer.init();
+
+  return gameServer;
+}

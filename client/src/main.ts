@@ -1,3 +1,4 @@
+import { createGameServer } from './networking/GameServer';
 import { GameScene } from './scenes/GameScene';
 
 const config = {
@@ -12,4 +13,10 @@ const config = {
   },
 };
 
-export default new Phaser.Game(config);
+async function initialize() {
+  await createGameServer();
+
+  new Phaser.Game(config);
+}
+
+initialize();

@@ -20,5 +20,5 @@ export type ServerWorldObject = {
   clientId: string;
   x: number;
   y: number;
-  move?: ServerMovement;
+  move: ServerMovement;
 };
