@@ -1,4 +1,3 @@
-import { gameServer } from '@/networking/GameServer';
 import { Physics, Scene } from 'phaser';
 import { ServerMovement } from '../../../types';
 import { BulletController } from './BulletController';
@@ -8,17 +7,13 @@ export class Player extends Physics.Arcade.Sprite {
   private bulletController: BulletController | undefined;
   private movementController: MovementController | undefined;
   private isMoving = false;
-  private isShooting = false;
 
   constructor(scene: Scene, x: number, y: number, public id: string) {
     super(scene, x, y, 'fireWizard');
     console.log('player', id, 'created');
 
     this.bulletController = new BulletController(scene, this);
-
-    if (this.id === gameServer.clientId) {
-      this.movementController = new MovementController(scene, this);
-    }
+    this.movementController = new MovementController(scene, this);
 
     scene.physics.add.existing(this);
     scene.sys.displayList.add(this);
@@ -38,7 +33,7 @@ export class Player extends Physics.Arcade.Sprite {
     }
   }
 
-  public setMovement(movement?: ServerMovement) {
+  public setMovement(movement: ServerMovement) {
     this.isMoving = Boolean(movement?.dx || movement?.dy);
     this.movementController?.setMovement(movement);
   }

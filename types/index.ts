@@ -1,4 +1,4 @@
-export type ServerPlayer = ServerWorldObject & {};
+export type ServerPlayer = ServerWorldObject & object;
 
 export type ServerMovement = {
   left?: boolean;
@@ -17,7 +17,7 @@ export type ServerShootData = {
 };
 
 export type ServerWorldObject = {
-  id: string;
+  clientId: string;
   x: number;
   y: number;
   move?: ServerMovement;
