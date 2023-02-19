@@ -22,5 +22,5 @@ export function createSocketServer(server: httpServer.Server) {
 }
 
 export function broadcast<T>(event: SocketEvent) {
-  return (message: T) => io?.emit(event, message);
+  return (message?: T) => io?.emit(event, message);
 }
