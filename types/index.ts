@@ -1,4 +1,4 @@
-export type ServerPlayer = ServerWorldObject & {};
+export type ServerPlayer = ServerWorldObject & object;
 
 export type ServerMovement = {
   left?: boolean;

@@ -1,6 +1,12 @@
 import { io as client, Socket } from 'socket.io-client';
-import { ServerMovement, ServerPlayer, ServerShootData } from '../../../types';
-import { SocketEvent } from '../../../types/events';
+import {
+  GetPlayersEvent,
+  GetWorldStateEvent,
+  PlayerConnectEvent,
+  PlayerMoveEvent,
+  PlayerShootEvent,
+  SocketEvent,
+} from '../../../types/events';
 
 class GameServer {
   public clientId: string | undefined;
@@ -17,23 +23,23 @@ class GameServer {
   }
 
   get createPlayer() {
-    return this.createSocket<{ id: string }>(SocketEvent.PLAYER_CONNECT);
+    return this.createSocket<PlayerConnectEvent>(SocketEvent.PLAYER_CONNECT);
   }
 
   get getPlayers() {
-    return this.createSocket<ServerPlayer[]>(SocketEvent.PLAYERS);
+    return this.createSocket<GetPlayersEvent>(SocketEvent.PLAYERS);
   }
 
   get movePlayer() {
-    return this.createSocket<{ movement: ServerMovement }>(SocketEvent.PLAYER_MOVE);
+    return this.createSocket<PlayerMoveEvent>(SocketEvent.PLAYER_MOVE);
   }
 
   get getWorldState() {
-    return this.createSocket<ServerPlayer[]>(SocketEvent.OBJECTS_CHANGE);
+    return this.createSocket<GetWorldStateEvent>(SocketEvent.OBJECTS_CHANGE);
   }
 
   get shoot() {
-    return this.createSocket<ServerShootData>(SocketEvent.PLAYER_SHOOT);
+    return this.createSocket<PlayerShootEvent>(SocketEvent.PLAYER_SHOOT);
   }
 
   private createSocket<TEmit = unknown, TOn = TEmit, TOff = TEmit>(
@@ -69,7 +75,7 @@ class GameServer {
 }
 
 export interface DataSocket<TEmit, TOn, TOff> {
-  emit: (data?: TEmit) => void;
+  emit: (data?: Omit<TEmit, 'clientId'>) => void;
   on: (callback: ListenerCallback<TOn>) => void;
   off: (callback?: ListenerCallback<TOff>) => void;
 }
