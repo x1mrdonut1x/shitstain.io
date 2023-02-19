@@ -33,29 +33,38 @@ export function createSocketServer(server: httpServer.Server) {
     });
   });
 
+  function handleCreatePlayer(data: { id: string }) {
+    console.log(`player ${data.id} connected`);
+
+    players.push({
+      id: data.id,
+      x: Math.random() * 1100 + 100,
+      y: Math.random() * 600 + 100,
+    });
+
+    broadcast<ServerWorldObject[]>(SocketEvent.PLAYER)(players);
+  }
+
+  function handleMovePlayer(data: { id: string; movement: ServerMovement }) {
+    const foundPlayer = players.find(p => p.id === data.id);
+    if (foundPlayer) {
+      foundPlayer.move = data.movement;
+    }
+
+    broadcast<ServerWorldObject[]>(SocketEvent.OBJECTS_CHANGE)(players);
+  }
+
+  function handleDisconnectPlayer() {
+    players = players.filter(player => player.id !== socketId);
+  }
+
   const registeredEvents = [
-    createSocket(SocketEvent.DISCONNECT, () => {
-      players = players.filter(player => player.id !== socketId);
-    }),
-    createSocket<{ id: string }>(SocketEvent.PLAYER_CREATE, data => {
-      console.log(`player ${data.id} connected`);
-
-      players.push({
-        id: data.id,
-        x: Math.random() * 1100 + 100,
-        y: Math.random() * 600 + 100,
-      });
-
-      broadcast<ServerWorldObject[]>(SocketEvent.PLAYER)(players);
-    }),
-    createSocket<{ id: string; movement: ServerMovement }>(SocketEvent.PLAYER_MOVE, data => {
-      const foundPlayer = players.find(p => p.id === data.id);
-      if (foundPlayer) {
-        foundPlayer.move = data.movement;
-      }
-
-      broadcast<ServerWorldObject[]>(SocketEvent.OBJECTS_CHANGE)(players);
-    }),
+    createSocket(SocketEvent.DISCONNECT, handleDisconnectPlayer),
+    createSocket<{ id: string }>(SocketEvent.PLAYER_CREATE, handleCreatePlayer),
+    createSocket<{ id: string; movement: ServerMovement }>(
+      SocketEvent.PLAYER_MOVE,
+      handleMovePlayer
+    ),
     createSocket<ServerShootData>(SocketEvent.PLAYER_SHOOT),
   ];
 }
