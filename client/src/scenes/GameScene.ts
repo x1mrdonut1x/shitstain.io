@@ -4,7 +4,9 @@ import { gameServer } from '@/networking/GameServer';
 
 import fireWizardWalkUrl from '@/assets/wizards/fire-wizard/Walk.png';
 import fireWizardIdleUrl from '@/assets/wizards/fire-wizard/Idle.png';
-import fireWizardFireballUrl from '@/assets/wizards/fire-wizard/Charge.png';
+import fireWizardFireballUrl from '@/assets/wizards/fire-wizard/Fireball.png';
+import fireballUrl from '@/assets/wizards/fire-wizard/Charge.png';
+import { log } from '@/utils/logAction';
 
 export class GameScene extends Scene {
   private players: Player[] = [];
@@ -26,8 +28,11 @@ export class GameScene extends Scene {
       const newPlayers: Player[] = [];
 
       data.forEach(serverPlayer => {
-        if (!this.players.find(localPlayer => localPlayer.id === serverPlayer.id))
+        if (!this.players.find(localPlayer => localPlayer.id === serverPlayer.id)) {
+          log(`Player ${serverPlayer.id} connected`);
+
           newPlayers.push(new Player(this, serverPlayer.x, serverPlayer.y, serverPlayer.id));
+        }
       });
 
       this.players = newPlayers;
@@ -46,6 +51,7 @@ export class GameScene extends Scene {
     });
 
     gameServer.onPlayerDisconnect(playerId => {
+      log(`Player ${playerId} disconnected`);
       this.players = this.players.filter(player => player.id === playerId);
     });
   }
@@ -66,7 +72,8 @@ export class GameScene extends Scene {
   private loadSprites() {
     this.loadSprite('fire-wizard-walk', fireWizardWalkUrl);
     this.loadSprite('fire-wizard-idle', fireWizardIdleUrl);
-    this.loadSprite('fire-ball', fireWizardFireballUrl, 64);
+    this.loadSprite('fire-wizard-fireball', fireWizardFireballUrl);
+    this.loadSprite('fire-ball', fireballUrl, 64);
   }
 
   private createAnimations() {
@@ -74,6 +81,13 @@ export class GameScene extends Scene {
       key: 'fire-wizard-idle',
       frames: this.anims.generateFrameNumbers('fire-wizard-idle', {}),
       frameRate: 8,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: 'fire-wizard-fireball',
+      frames: this.anims.generateFrameNumbers('fire-wizard-fireball', {}),
+      frameRate: 40,
       repeat: -1,
     });
 

@@ -8,6 +8,7 @@ export class Player extends Physics.Arcade.Sprite {
   private bulletController: BulletController | undefined;
   private movementController: MovementController | undefined;
   private isMoving = false;
+  private isShooting = false;
 
   constructor(scene: Scene, x: number, y: number, public id: string) {
     super(scene, x, y, 'fireWizard');
@@ -25,10 +26,12 @@ export class Player extends Physics.Arcade.Sprite {
   }
 
   update(delta: number) {
-    this.bulletController?.updateBullets(delta);
+    this.bulletController?.update(delta);
     this.movementController?.update();
 
-    if (this.isMoving) {
+    if (this.bulletController?.isShooting) {
+      this.anims.play('fire-wizard-fireball', true);
+    } else if (this.isMoving) {
       this.anims.play('fire-wizard-walk', true);
     } else {
       this.anims.play('fire-wizard-idle', true);
