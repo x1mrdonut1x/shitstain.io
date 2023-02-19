@@ -17,7 +17,7 @@ export type ServerShootData = {
 };
 
 export type ServerWorldObject = {
-  id: string;
+  clientId: string;
   x: number;
   y: number;
   move?: ServerMovement;

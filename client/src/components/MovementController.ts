@@ -128,8 +128,9 @@ export class MovementController {
     this.player.setVelocityY(this.serverMovement.dy || 0);
 
     if (this.player.id === gameServer.clientId) {
-      if (!isEqual(this.localMovement, this.serverMovement))
-        gameServer.movePlayer(this.localMovement);
+      if (!isEqual(this.localMovement, this.serverMovement)) {
+        gameServer.movePlayer.emit({ movement: this.localMovement });
+      }
     }
   }
 }

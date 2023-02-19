@@ -22,44 +22,35 @@ export class GameScene extends Scene {
   create() {
     this.createAnimations();
 
-    gameServer.onPlayersChange.bind(this)(data => {
+    gameServer.getPlayers.on(data => {
       console.log('serverPlayers', data);
       console.log('localPlayers', this.players);
       const newPlayers: Player[] = [];
 
-      // this.players.forEach(localPlayer => {
-      //   if (!data.find(serverPlayer => localPlayer.id === serverPlayer.id)) {
-      //     log(`Player ${localPlayer.id} destroyed`);
-      //     localPlayer.destroy(true);
-      //   }
-      // });
+      this.players.forEach(localPlayer => {
+        if (!data.find(serverPlayer => localPlayer.id === serverPlayer.clientId)) {
+          log(`Player ${localPlayer.id} destroyed`);
+          localPlayer.destroy(true);
+        }
+      });
 
       data.forEach(serverPlayer => {
-        if (!this.players.find(localPlayer => localPlayer.id === serverPlayer.id)) {
-          log(`Player ${serverPlayer.id} created`);
+        if (!this.players.find(localPlayer => localPlayer.id === serverPlayer.clientId)) {
+          log(`Player ${serverPlayer.clientId} connected`);
 
-          newPlayers.push(new Player(this, serverPlayer.x, serverPlayer.y, serverPlayer.id));
+          newPlayers.push(new Player(this, serverPlayer.x, serverPlayer.y, serverPlayer.clientId));
         }
       });
 
       this.players = newPlayers;
     });
 
-    gameServer.onWorldChange(data => {
+    gameServer.getWorldState.on(data => {
       data.forEach(object => {
-        const foundPlayer = this.players.find(player => player.id === object.id);
+        const foundPlayer = this.players.find(player => player.id === object.clientId);
 
         foundPlayer?.setMovement(object.move);
       });
-    });
-
-    gameServer.onConnect(() => {
-      gameServer.createPlayer();
-    });
-
-    gameServer.onPlayerDisconnect(playerId => {
-      log(`Player ${playerId} disconnected`);
-      this.players = this.players.filter(player => player.id === playerId);
     });
   }
 
