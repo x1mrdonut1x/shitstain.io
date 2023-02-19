@@ -8,7 +8,7 @@ export interface WrappedServerSocket<T> {
   callback: SocketActionFn<T>;
 }
 
-type SocketActionFn<T> = (message: T) => void;
+type SocketActionFn<T> = (socketId: string) => (message: T) => void;
 
 let io: Server;
 
@@ -21,45 +21,50 @@ export function createSocketServer(server: httpServer.Server) {
   });
 
   let players: ServerPlayer[] = [];
-  let socketId: string;
 
   io.on('connection', socket => {
-    socketId = socket.id;
+    const socketId = socket.id;
     socket.send(socketId);
 
     registeredEvents.forEach(({ event, callback }) => {
-      socket.on(event, callback);
+      socket.on(event, callback(socketId));
     });
   });
 
-  function handleCreatePlayer(data: { id: string }) {
-    console.log(`player ${data.id} connected`);
+  function handleCreatePlayer(socketId: string) {
+    return (data: { id: string }) => {
+      console.log(`player ${data.id} connected`);
 
-    players.push({
-      id: data.id,
-      x: Math.random() * 1100 + 100,
-      y: Math.random() * 600 + 100,
-    });
+      players.push({
+        id: data.id,
+        x: Math.random() * 1100 + 100,
+        y: Math.random() * 600 + 100,
+      });
 
-    broadcast<ServerWorldObject[]>(SocketEvent.PLAYER)(players);
-    console.log('Total players', players.length);
+      broadcast<ServerWorldObject[]>(SocketEvent.PLAYER)(players);
+      console.log('Total players', players.length);
+    };
   }
 
-  function handleMovePlayer(data: { id: string; movement: ServerMovement }) {
-    const foundPlayer = players.find(p => p.id === data.id);
-    if (foundPlayer) {
-      foundPlayer.move = data.movement;
-    }
+  function handleMovePlayer(socketId: string) {
+    return (data: { id: string; movement: ServerMovement }) => {
+      const foundPlayer = players.find(p => p.id === data.id);
+      if (foundPlayer) {
+        foundPlayer.move = data.movement;
+      }
 
-    broadcast<ServerWorldObject[]>(SocketEvent.OBJECTS_CHANGE)(players);
+      broadcast<ServerWorldObject[]>(SocketEvent.OBJECTS_CHANGE)(players);
+    };
   }
 
-  function handleDisconnectPlayer() {
-    console.log(`player ${socketId} disconnected`);
-    players = players.filter(player => player.id !== socketId);
+  function handleDisconnectPlayer(socketId: string) {
+    return () => {
+      console.log(`player ${socketId} disconnected`);
+      players = players.filter(player => player.id !== socketId);
 
-    broadcast<string>(SocketEvent.PLAYER_DISCONNECT)(socketId);
-    console.log('Total players', players.length);
+      broadcast<string>(SocketEvent.PLAYER_DISCONNECT)(socketId);
+      console.log('Total players', players.length);
+    };
   }
 
   const registeredEvents = [
@@ -81,6 +86,6 @@ export function createSocket<T>(
   event: SocketEvent,
   action?: SocketActionFn<T>
 ): WrappedServerSocket<T> {
-  const callback = action || broadcast(event);
+  const callback = action || (() => broadcast(event));
   return { event, callback };
 }

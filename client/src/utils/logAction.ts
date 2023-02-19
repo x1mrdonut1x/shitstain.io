@@ -1,4 +1,6 @@
 export function log(value: string) {
+  console.log(value);
+
   const entry = document.createElement('div');
   const logText = document.createElement('span');
   logText.classList.add('text');
