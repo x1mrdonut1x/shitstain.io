@@ -5,22 +5,29 @@ import { SocketEvent } from '../../../types/events';
 const io = client(import.meta.env.VITE_SOCKET_SERVER);
 
 class GameServer {
-  public clientId = 'unconnected';
+  public clientId: string | undefined;
+
+  onConnect(callback: (id: string) => void) {
+    io.on('message', (id: string) => {
+      this.clientId = id;
+      console.log('player', this.clientId, 'connected');
+      callback(id);
+    });
+  }
+
+  onPlayerDisconnect(callback: (id: string) => void) {
+    io.on(SocketEvent.PLAYER_DISCONNECT, (id: string) => {
+      console.log('player', id, 'disconnected');
+      callback(id);
+    });
+  }
 
   createPlayer() {
-    io.emit(SocketEvent.PLAYER_CREATE, { id: this.clientId });
+    io.emit(SocketEvent.PLAYER_CONNECT, { id: this.clientId });
   }
 
   movePlayer(movement: ServerMovement) {
     io.emit(SocketEvent.PLAYER_MOVE, { id: this.clientId, movement });
-  }
-
-  onConnect(callback: (id: string) => void) {
-    io.on('message', (id: string) => {
-      console.log('message', id);
-      this.clientId = id;
-      callback(id);
-    });
   }
 
   onPlayersChange(callback: (data: ServerPlayer[]) => void) {

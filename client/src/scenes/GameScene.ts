@@ -7,7 +7,7 @@ import fireWizardIdleUrl from '@/assets/wizards/fire-wizard/Idle.png';
 import fireWizardFireballUrl from '@/assets/wizards/fire-wizard/Charge.png';
 
 export class GameScene extends Scene {
-  private players?: Player[];
+  private players: Player[] = [];
 
   constructor() {
     super('gameScene');
@@ -20,22 +20,22 @@ export class GameScene extends Scene {
   create() {
     this.createAnimations();
 
-    gameServer.onPlayersChange(data => {
-      // destroy old players
-      this.players?.forEach(player => {
-        if (!data.find(d => d.id === player.id)) {
-          player.destroy();
-        }
+    gameServer.onPlayersChange.bind(this)(data => {
+      console.log('serverPlayers', data);
+      console.log('localPlayers', this.players);
+      const newPlayers: Player[] = [];
+
+      data.forEach(serverPlayer => {
+        if (!this.players.find(localPlayer => localPlayer.id === serverPlayer.id))
+          newPlayers.push(new Player(this, serverPlayer.x, serverPlayer.y, serverPlayer.id));
       });
 
-      this.players = data.map(({ id, x, y }) => {
-        return new Player(this, x, y, id);
-      });
+      this.players = newPlayers;
     });
 
-    gameServer.onWorldChange(objects => {
-      objects.forEach(object => {
-        const foundPlayer = this.players?.find(player => player.id === object.id);
+    gameServer.onWorldChange(data => {
+      data.forEach(object => {
+        const foundPlayer = this.players.find(player => player.id === object.id);
 
         foundPlayer?.setMovement(object.move);
       });
@@ -44,10 +44,14 @@ export class GameScene extends Scene {
     gameServer.onConnect(() => {
       gameServer.createPlayer();
     });
+
+    gameServer.onPlayerDisconnect(playerId => {
+      this.players = this.players.filter(player => player.id === playerId);
+    });
   }
 
   update(time: number, delta: number) {
-    this.players?.forEach(player => {
+    this.players.forEach(player => {
       player.update(delta);
     });
   }
@@ -69,14 +73,14 @@ export class GameScene extends Scene {
     this.anims.create({
       key: 'fire-wizard-idle',
       frames: this.anims.generateFrameNumbers('fire-wizard-idle', {}),
-      frameRate: 20,
+      frameRate: 8,
       repeat: -1,
     });
 
     this.anims.create({
       key: 'fire-wizard-walk',
       frames: this.anims.generateFrameNumbers('fire-wizard-walk', {}),
-      frameRate: 20,
+      frameRate: 10,
       repeat: -1,
     });
 
