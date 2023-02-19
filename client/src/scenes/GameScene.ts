@@ -27,9 +27,16 @@ export class GameScene extends Scene {
       console.log('localPlayers', this.players);
       const newPlayers: Player[] = [];
 
+      // this.players.forEach(localPlayer => {
+      //   if (!data.find(serverPlayer => localPlayer.id === serverPlayer.id)) {
+      //     log(`Player ${localPlayer.id} destroyed`);
+      //     localPlayer.destroy(true);
+      //   }
+      // });
+
       data.forEach(serverPlayer => {
         if (!this.players.find(localPlayer => localPlayer.id === serverPlayer.id)) {
-          log(`Player ${serverPlayer.id} connected`);
+          log(`Player ${serverPlayer.id} created`);
 
           newPlayers.push(new Player(this, serverPlayer.x, serverPlayer.y, serverPlayer.id));
         }

@@ -10,16 +10,12 @@ class GameServer {
   onConnect(callback: (id: string) => void) {
     io.on('message', (id: string) => {
       this.clientId = id;
-      console.log('player', this.clientId, 'connected');
       callback(id);
     });
   }
 
   onPlayerDisconnect(callback: (id: string) => void) {
-    io.on(SocketEvent.PLAYER_DISCONNECT, (id: string) => {
-      console.log('player', id, 'disconnected');
-      callback(id);
-    });
+    io.on(SocketEvent.PLAYER_DISCONNECT, callback);
   }
 
   createPlayer() {
