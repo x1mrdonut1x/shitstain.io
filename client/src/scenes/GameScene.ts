@@ -21,6 +21,13 @@ export class GameScene extends Scene {
     this.createAnimations();
 
     gameServer.onPlayersChange(data => {
+      // destroy old players
+      this.players?.forEach(player => {
+        if (!data.find(d => d.id === player.id)) {
+          player.destroy();
+        }
+      });
+
       this.players = data.map(({ id, x, y }) => {
         return new Player(this, x, y, id);
       });
