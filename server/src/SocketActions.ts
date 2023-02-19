@@ -40,33 +40,24 @@ export class SocketActions {
   private handleCreatePlayer(data: { clientId: string }) {
     console.log(`player ${data.clientId} connected`);
 
-    this.gameState.players.push({
-      clientId: data.clientId,
-      x: Math.random() * 1100 + 100,
-      y: Math.random() * 600 + 100,
-    });
+    this.gameState.addPlayer(data.clientId);
 
     broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(this.gameState.players);
-    console.log('Total players', this.gameState.players.length);
+    console.log('Total players', this.gameState.getPlayerCount());
   }
 
   private handleMovePlayer(data: PlayerMoveEvent) {
-    const foundPlayer = this.gameState.players.find(p => p.clientId === data.clientId);
+    this.gameState.movePlayer(data.clientId, data.movement);
 
-    if (foundPlayer) {
-      foundPlayer.move = data.movement;
-      broadcast<GetWorldStateEvent>(SocketEvent.OBJECTS_CHANGE)(this.gameState.players);
-    }
+    broadcast<GetWorldStateEvent>(SocketEvent.OBJECTS_CHANGE)(this.gameState.players);
   }
 
   private handleDisconnectPlayer() {
     console.log(`player ${this.socket.id} disconnected`);
-    this.gameState.players = this.gameState.players.filter(
-      player => player.clientId !== this.socket.id
-    );
+    this.gameState.removePlayer(this.socket.id);
 
     broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(this.gameState.players);
-    console.log('Total players', this.gameState.players.length);
+    console.log('Total players', this.gameState.getPlayerCount());
   }
 }
 

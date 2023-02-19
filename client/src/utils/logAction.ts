@@ -14,5 +14,13 @@ export function log(value: string) {
   entry.appendChild(time);
   entry.appendChild(logText);
 
-  document.getElementById('game-logs')?.appendChild(entry);
+  const logsContainer = document.getElementById('game-logs');
+
+  if (logsContainer && (logsContainer?.childElementCount || 0) > 10) {
+    if (logsContainer.firstChild) {
+      logsContainer?.removeChild(logsContainer.firstChild);
+    }
+  }
+
+  logsContainer?.appendChild(entry);
 }

@@ -1,18 +1,18 @@
 import { Scene } from 'phaser';
-import { Player } from '@/components/Player';
 import { gameServer } from '@/networking/GameServer';
 
 import fireWizardWalkUrl from '@/assets/wizards/fire-wizard/Walk.png';
 import fireWizardIdleUrl from '@/assets/wizards/fire-wizard/Idle.png';
 import fireWizardFireballUrl from '@/assets/wizards/fire-wizard/Fireball.png';
 import fireballUrl from '@/assets/wizards/fire-wizard/Charge.png';
-import { log } from '@/utils/logAction';
+import { GameState } from '@/components/GameState';
 
 export class GameScene extends Scene {
-  private players: Player[] = [];
+  private gameState: GameState;
 
   constructor() {
     super('gameScene');
+    this.gameState = new GameState(gameServer.clientId, this);
   }
 
   preload() {
@@ -22,44 +22,17 @@ export class GameScene extends Scene {
   create() {
     this.createAnimations();
 
-    gameServer.getPlayers.on(data => {
-      console.log('serverPlayers', data);
-      console.log('localPlayers', this.players);
-      const newPlayers: Player[] = [];
-
-      this.players.forEach(localPlayer => {
-        if (!data.find(serverPlayer => localPlayer.id === serverPlayer.clientId)) {
-          log(`Player ${localPlayer.id} destroyed`);
-          localPlayer.destroy(true);
-        }
-      });
-
-      data.forEach(serverPlayer => {
-        if (!this.players.find(localPlayer => localPlayer.id === serverPlayer.clientId)) {
-          log(`Player ${serverPlayer.clientId} connected`);
-
-          newPlayers.push(new Player(this, serverPlayer.x, serverPlayer.y, serverPlayer.clientId));
-        }
-      });
-
-      this.players = newPlayers;
+    gameServer.getPlayers.on.bind(this)(data => {
+      this.gameState.updatePlayersFromServer(data);
     });
 
     gameServer.getWorldState.on(data => {
-      data.forEach(object => {
-        const foundPlayer = this.players.find(player => player.id === object.clientId);
-
-        if (foundPlayer && object.move) {
-          foundPlayer?.setMovement(object.move);
-        }
-      });
+      this.gameState.movePlayers(data);
     });
   }
 
   update(time: number, delta: number) {
-    this.players.forEach(player => {
-      player.update(delta);
-    });
+    this.gameState.updatePlayers(delta);
   }
 
   private loadSprite(key: string, path: string, size = 128) {

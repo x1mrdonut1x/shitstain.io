@@ -18,18 +18,14 @@ export class BulletController {
       this.scene.input.on('pointerdown', (pointer: PointerEvent) => {
         this.lastMousePosition = { x: pointer.x, y: pointer.y };
         this.isShooting = true;
+
+        this.tryFlipX(pointer.x);
       });
 
       this.scene.input.on('pointermove', (pointer: PointerEvent) => {
         this.lastMousePosition = { x: pointer.x, y: pointer.y };
 
-        if (this.isShooting) {
-          if (pointer.x > this.player.x) {
-            this.player.flipX = false;
-          } else {
-            this.player.flipX = true;
-          }
-        }
+        this.tryFlipX(pointer.x);
       });
 
       this.scene.input.on('pointerup', () => {
@@ -44,6 +40,16 @@ export class BulletController {
         bullet?.fire(data.x, data.y, data.rotation);
       }
     });
+  }
+
+  private tryFlipX(x: number) {
+    if (this.isShooting) {
+      if (x > this.player.x) {
+        this.player.flipX = false;
+      } else {
+        this.player.flipX = true;
+      }
+    }
   }
 
   shoot() {
