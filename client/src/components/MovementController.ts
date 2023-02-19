@@ -124,12 +124,6 @@ export class MovementController {
       }
     });
 
-    if (Object.values(this.keys).some(value => value.key.isDown)) {
-      this.player.anims.play('fire-wizard-walk', true);
-    } else {
-      this.player.anims.play('fire-wizard-idle', true);
-    }
-
     this.player.setVelocityX(this.serverMovement.dx || 0);
     this.player.setVelocityY(this.serverMovement.dy || 0);
 

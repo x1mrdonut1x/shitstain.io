@@ -1,6 +1,7 @@
 export enum SocketEvent {
   DISCONNECT = 'disconnect',
-  PLAYER_CREATE = 'players:create',
+  PLAYER_CONNECT = 'players:connect',
+  PLAYER_DISCONNECT = 'players:disconnect',
   PLAYER = 'players',
   PLAYER_MOVE = 'players:move',
   OBJECTS_CHANGE = 'objects:change',

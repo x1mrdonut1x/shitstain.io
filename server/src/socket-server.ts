@@ -42,6 +42,7 @@ export function createSocketServer(server: httpServer.Server) {
     });
 
     broadcast<ServerWorldObject[]>(SocketEvent.PLAYER)(players);
+    console.log('Total players', players.length);
   }
 
   function handleMovePlayer(data: { id: string; movement: ServerMovement }) {
@@ -54,12 +55,16 @@ export function createSocketServer(server: httpServer.Server) {
   }
 
   function handleDisconnectPlayer() {
+    console.log(`player ${socketId} disconnected`);
     players = players.filter(player => player.id !== socketId);
+
+    broadcast<string>(SocketEvent.PLAYER_DISCONNECT)(socketId);
+    console.log('Total players', players.length);
   }
 
   const registeredEvents = [
     createSocket(SocketEvent.DISCONNECT, handleDisconnectPlayer),
-    createSocket<{ id: string }>(SocketEvent.PLAYER_CREATE, handleCreatePlayer),
+    createSocket<{ id: string }>(SocketEvent.PLAYER_CONNECT, handleCreatePlayer),
     createSocket<{ id: string; movement: ServerMovement }>(
       SocketEvent.PLAYER_MOVE,
       handleMovePlayer
