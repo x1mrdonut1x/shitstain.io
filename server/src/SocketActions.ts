@@ -22,22 +22,20 @@ export class SocketActions {
     socket.send(socket.id);
     console.log('New socket connection', socket.id);
 
-    this.registeredEvents.forEach(({ event, callback }) => {
-      socket.on(event, callback);
-    });
+    this.createSocket(SocketEvent.DISCONNECT).on(this.onPlayerDisconnect.bind(this));
+
+    this.createSocket<PlayerConnectEvent>(SocketEvent.PLAYER_CONNECT).on(
+      this.onPlayerConnected.bind(this)
+    );
+
+    this.createSocket<PlayerMoveEvent>(SocketEvent.PLAYER_MOVE).on(this.onPlayerMove.bind(this));
+
+    this.createSocket<PlayerShootEvent>(SocketEvent.PLAYER_SHOOT).on(
+      broadcast(SocketEvent.PLAYER_SHOOT)
+    );
   }
 
-  private registeredEvents = [
-    createSocket(SocketEvent.DISCONNECT, this.handleDisconnectPlayer.bind(this)),
-    createSocket<PlayerConnectEvent>(
-      SocketEvent.PLAYER_CONNECT,
-      this.handleCreatePlayer.bind(this)
-    ),
-    createSocket<PlayerMoveEvent>(SocketEvent.PLAYER_MOVE, this.handleMovePlayer.bind(this)),
-    createSocket<PlayerShootEvent>(SocketEvent.PLAYER_SHOOT),
-  ];
-
-  private handleCreatePlayer(data: { clientId: string }) {
+  private onPlayerConnected(data: { clientId: string }) {
     console.log(`player ${data.clientId} connected`);
 
     this.gameState.addPlayer(data.clientId);
@@ -46,26 +44,25 @@ export class SocketActions {
     console.log('Total players', this.gameState.getPlayerCount());
   }
 
-  private handleMovePlayer(data: PlayerMoveEvent) {
-    this.gameState.movePlayer(data.clientId, data.movement);
-
-    broadcast<GetWorldStateEvent>(SocketEvent.OBJECTS_CHANGE)(this.gameState.players);
-  }
-
-  private handleDisconnectPlayer() {
+  private onPlayerDisconnect() {
     console.log(`player ${this.socket.id} disconnected`);
     this.gameState.removePlayer(this.socket.id);
 
     broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(this.gameState.players);
     console.log('Total players', this.gameState.getPlayerCount());
   }
-}
 
-export function createSocket<T>(
-  event: SocketEvent,
-  action?: SocketActionFn<T>
-): WrappedServerSocket<T> {
-  const callback = action || broadcast(event);
+  private onPlayerMove(data: PlayerMoveEvent) {
+    this.gameState.movePlayer(data.clientId, data.movement);
 
-  return { event, callback };
+    broadcast<GetWorldStateEvent>(SocketEvent.OBJECTS_CHANGE)(this.gameState.players);
+  }
+
+  private createSocket<T>(event: SocketEvent) {
+    return {
+      on: (callback: (data: T) => void) => {
+        this.socket.on(event, callback);
+      },
+    };
+  }
 }

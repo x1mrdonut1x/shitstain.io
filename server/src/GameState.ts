@@ -22,7 +22,7 @@ export class GameState {
   }
 
   public removePlayer(id: string) {
-    this._players = this._players.filter(p => p.clientId === id);
+    this._players = this._players.filter(p => p.clientId !== id);
   }
 
   public movePlayer(id: string, data: ServerMovement) {
