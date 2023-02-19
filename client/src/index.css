@@ -11,3 +11,19 @@ body {
   min-height: 100%;
   overflow: hidden;
 }
+
+#game-logs {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: .9rem;
+}
+
+#game-logs .text {
+  color: white;
+}
+
+#game-logs .time {
+  color: cyan;
+  margin-right: 8px;
+}

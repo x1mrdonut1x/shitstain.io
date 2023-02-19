@@ -8,7 +8,7 @@ export class BulletController {
   private timeDelta = 0; //ms
   private shootingSpeed = 100; //ms
 
-  private isShooting = false;
+  public isShooting = false;
   private lastMousePosition: { x: number; y: number } = { x: 0, y: 0 };
 
   constructor(private scene: Scene, private player: Player) {
@@ -22,6 +22,14 @@ export class BulletController {
 
       this.scene.input.on('pointermove', (pointer: PointerEvent) => {
         this.lastMousePosition = { x: pointer.x, y: pointer.y };
+
+        if (this.isShooting) {
+          if (pointer.x > this.player.x) {
+            this.player.flipX = false;
+          } else {
+            this.player.flipX = true;
+          }
+        }
       });
 
       this.scene.input.on('pointerup', () => {
@@ -52,7 +60,7 @@ export class BulletController {
     });
   }
 
-  updateBullets(delta: number): void {
+  update(delta: number): void {
     this.timeDelta += delta;
     if (this.timeDelta > this.shootingSpeed && this.isShooting) {
       this.timeDelta = 0;

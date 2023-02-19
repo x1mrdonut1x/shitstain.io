@@ -11,6 +11,10 @@ export class Bullet extends Physics.Arcade.Sprite {
     this.setPosition(x, y);
     this.setRotation(rotation);
     this.anims.play('fire-ball', true);
+
+    this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+      this.destroy(true);
+    });
   }
 
   update(): void {
@@ -23,7 +27,7 @@ export class Bullet extends Physics.Arcade.Sprite {
       this.y > this.scene.game.config.height ||
       this.y < 0
     ) {
-      this.destroy();
+      this.destroy(true);
     }
   }
 }
