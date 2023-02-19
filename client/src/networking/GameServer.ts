@@ -1,22 +1,18 @@
 import { io as client } from 'socket.io-client';
-import {
-  ServerMovement,
-  ServerPlayer,
-  ServerShootDirection,
-  ServerWorldObject,
-} from '../../../types';
+import { ServerMovement, ServerPlayer, ServerShootData, ServerWorldObject } from '../../../types';
+import { SocketEvent } from '../../../types/events';
 
 const io = client(import.meta.env.VITE_SOCKET_SERVER);
 
 class GameServer {
-  public clientId: string = 'unconnected';
+  public clientId = 'unconnected';
 
   createPlayer() {
-    io.emit('players:create', { id: this.clientId });
+    io.emit(SocketEvent.PLAYER_CREATE, { id: this.clientId });
   }
 
   movePlayer(movement: ServerMovement) {
-    io.emit('players:move', { id: this.clientId, movement });
+    io.emit(SocketEvent.PLAYER_MOVE, { id: this.clientId, movement });
   }
 
   onConnect(callback: (id: string) => void) {
@@ -28,18 +24,18 @@ class GameServer {
   }
 
   onPlayersChange(callback: (data: ServerPlayer[]) => void) {
-    io.on('players', callback);
+    io.on(SocketEvent.PLAYER, callback);
   }
 
   onWorldChange(callback: (data: ServerWorldObject[]) => void) {
-    io.on('objects:change', callback);
+    io.on(SocketEvent.OBJECTS_CHANGE, callback);
   }
 
   get shoot() {
     return {
-      emit: (data: ServerShootDirection) => io.emit('players:shoot', data),
-      on: (callback: (data: ServerShootDirection) => void) => {
-        io.on('players:shoot', callback);
+      emit: (data: ServerShootData) => io.emit(SocketEvent.PLAYER_SHOOT, data),
+      on: (callback: (data: ServerShootData) => void) => {
+        io.on(SocketEvent.PLAYER_SHOOT, callback);
       },
     };
   }

@@ -5,8 +5,8 @@ import { Player } from './Player';
 
 export class BulletController {
   private bullets;
-  private timeDelta: number = 0; //ms
-  private shootingSpeed: number = 100; //ms
+  private timeDelta = 0; //ms
+  private shootingSpeed = 100; //ms
 
   private isShooting = false;
   private lastMousePosition: { x: number; y: number } = { x: 0, y: 0 };
@@ -24,7 +24,7 @@ export class BulletController {
         this.lastMousePosition = { x: pointer.x, y: pointer.y };
       });
 
-      this.scene.input.on('pointerup', (pointer: PointerEvent) => {
+      this.scene.input.on('pointerup', () => {
         this.isShooting = false;
       });
     }

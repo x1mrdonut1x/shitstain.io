@@ -7,9 +7,10 @@
     },
     "target": "esnext",
     "module": "esnext",
-    "lib": ["esnext", "DOM"],
+    "lib": ["esnext", "DOM", "scripthost"],
     "useDefineForClassFields": true,
     "noEmit": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
 }

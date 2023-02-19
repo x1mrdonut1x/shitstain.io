@@ -9,7 +9,7 @@ export type ServerMovement = {
   dy?: number;
 };
 
-export type ServerShootDirection = {
+export type ServerShootData = {
   playerId: string;
   x: number;
   y: number;
