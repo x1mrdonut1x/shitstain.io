@@ -13,7 +13,7 @@ export class GameState {
   }
 
   public addPlayer(id: string, x: number, y: number) {
-    log(`Player ${id} added`);
+    log(`Player ${id} connected`);
     this.players.push(new Player(this.scene, x, y, id));
   }
 
@@ -21,7 +21,7 @@ export class GameState {
     const foundPlayer = this.players.find(player => player.id === id);
 
     if (foundPlayer) {
-      log(`Player ${id} removed`);
+      log(`Player ${id} disconnected`);
       foundPlayer.destroy(true);
       this.players = this.players.filter(p => p.id !== id);
     }
