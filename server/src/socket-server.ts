@@ -26,7 +26,6 @@ export function createSocketServer(server: httpServer.Server) {
   io.on('connection', socket => {
     socketId = socket.id;
     socket.send(socketId);
-    console.log(`user ${socketId} connected`);
 
     registeredEvents.forEach(({ event, callback }) => {
       socket.on(event, callback);
@@ -70,7 +69,6 @@ export function createSocketServer(server: httpServer.Server) {
 }
 
 export function broadcast<T>(event: SocketEvent) {
-  console.log('emmiting', event);
   return (message: T) => io?.emit(event, message);
 }
 
