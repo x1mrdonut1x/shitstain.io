@@ -22,3 +22,5 @@ export type ServerWorldObject = {
   y: number;
   move: ServerMovement;
 };
+
+export type XYPosition = { x: number; y: number };

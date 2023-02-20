@@ -58,7 +58,7 @@ class GameServer {
 
   private emitCallback<T>(event: string) {
     return (data: T): void => {
-      console.log('emitCallback', event, this.clientId);
+      // console.log('emitCallback', event, this.clientId);
       this.io.emit(event, { clientId: this.clientId, ...data });
     };
   }

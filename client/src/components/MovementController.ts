@@ -24,7 +24,7 @@ const defaultMovement: ServerMovement = {
 export class MovementController {
   private localMovement = { ...defaultMovement };
   private serverMovement = { ...defaultMovement };
-  private readonly speed = 200;
+  private readonly speed = 400;
   private readonly keys: Keys = {};
 
   constructor(private scene: Scene, private player: Player) {
