@@ -9,23 +9,13 @@ export class BulletController {
   private shootingSpeed = 100; //ms
 
   public isShooting = false;
-  private lastMousePosition: { x: number; y: number } = { x: 0, y: 0 };
 
   constructor(private scene: Scene, private player: Player) {
     this.bullets = scene.add.group({ classType: Bullet, runChildUpdate: true });
 
     if (this.player.id === gameServer.clientId) {
-      this.scene.input.on('pointerdown', (pointer: PointerEvent) => {
-        this.lastMousePosition = { x: pointer.x, y: pointer.y };
+      this.scene.input.on('pointerdown', () => {
         this.isShooting = true;
-
-        this.tryFlipX(pointer.x);
-      });
-
-      this.scene.input.on('pointermove', (pointer: PointerEvent) => {
-        this.lastMousePosition = { x: pointer.x, y: pointer.y };
-
-        this.tryFlipX(pointer.x);
       });
 
       this.scene.input.on('pointerup', () => {
@@ -35,7 +25,7 @@ export class BulletController {
 
     gameServer.shoot.on(data => {
       if (data.playerId === this.player.id) {
-        const bullet = this.bullets.get();
+        const bullet = this.bullets.get() as Bullet;
 
         bullet?.fire(data.x, data.y, data.rotation);
       }
@@ -54,9 +44,11 @@ export class BulletController {
 
   shoot() {
     const rotation = Math.atan2(
-      this.lastMousePosition.y - this.player.y,
-      this.lastMousePosition.x - this.player.x
+      this.scene.input.mousePointer.worldY - this.player.y,
+      this.scene.input.mousePointer.worldX - this.player.x
     );
+
+    this.tryFlipX(this.scene.input.mousePointer.worldX);
 
     gameServer.shoot.emit({
       playerId: this.player.id,

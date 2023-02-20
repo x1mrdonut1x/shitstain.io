@@ -18,6 +18,12 @@ export class Player extends Physics.Arcade.Sprite {
     scene.physics.add.existing(this);
     scene.sys.displayList.add(this);
     scene.sys.updateList.add(this);
+
+    // if (this.id === gameServer.clientId) {
+    //   console.log('loadCamera');
+    //   this.scene.cameras.main.startFollow(this);
+    //   this.setCollideWorldBounds(true);
+    // }
   }
 
   update(delta: number) {

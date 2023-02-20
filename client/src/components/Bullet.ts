@@ -17,6 +17,7 @@ export class Bullet extends Physics.Arcade.Sprite {
     });
   }
 
+  // TODO this is currently fucked up because it takes the game delta, not tick rate. Will shoot faster/slower depending on FPS
   update(): void {
     this.x += Math.cos(this.rotation) * this.speed;
     this.y += Math.sin(this.rotation) * this.speed;
