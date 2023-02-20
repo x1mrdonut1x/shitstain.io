@@ -13,7 +13,7 @@ export type ServerShootData = {
   playerId: string;
   x: number;
   y: number;
-  rotation: number;
+  velocity: XYPosition;
 };
 
 export type ServerWorldObject = {

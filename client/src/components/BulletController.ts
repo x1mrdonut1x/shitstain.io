@@ -27,7 +27,7 @@ export class BulletController {
       if (data.playerId === this.player.id) {
         const bullet = this.bullets.get() as Bullet;
 
-        bullet?.fire(data.x, data.y, data.rotation);
+        bullet?.fire(data.x, data.y, data.velocity);
       }
     });
   }
@@ -43,18 +43,16 @@ export class BulletController {
   }
 
   shoot() {
-    const rotation = Math.atan2(
-      this.scene.input.mousePointer.worldY - this.player.y,
-      this.scene.input.mousePointer.worldX - this.player.x
-    );
-
     this.tryFlipX(this.scene.input.mousePointer.worldX);
 
     gameServer.shoot.emit({
       playerId: this.player.id,
       x: Math.round(this.player.x),
       y: Math.round(this.player.y),
-      rotation: rotation,
+      velocity: {
+        x: Math.round(this.scene.input.mousePointer.worldX - this.player.x),
+        y: Math.round(this.scene.input.mousePointer.worldY - this.player.y),
+      },
     });
   }
 
