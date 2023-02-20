@@ -1,5 +1,5 @@
 import { Scene } from 'phaser';
-import { gameServer } from '@/networking/GameServer';
+import { createGameServer } from '@/networking/GameServer';
 
 import fireWizardWalkUrl from '@/assets/wizards/fire-wizard/Walk.png';
 import fireWizardIdleUrl from '@/assets/wizards/fire-wizard/Idle.png';
@@ -15,7 +15,7 @@ export class GameScene extends Scene {
 
   constructor() {
     super('gameScene');
-    this.gameState = new GameState(gameServer.clientId, this);
+    this.gameState = new GameState(this);
   }
 
   preload() {
@@ -23,19 +23,14 @@ export class GameScene extends Scene {
   }
 
   create() {
+    createGameServer().then(() => {
+      this.gameState.initialize();
+    });
+
     // this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT, true);
     // this.cameras.main.zoomTo(0.2);
     this.createAnimations();
     this.addBackground();
-
-    gameServer.getPlayers.on(data => {
-      console.log(data);
-      this.gameState.updatePlayersFromServer(data);
-    });
-
-    gameServer.getWorldState.on(data => {
-      this.gameState.movePlayers(data);
-    });
   }
 
   update(time: number, delta: number) {
