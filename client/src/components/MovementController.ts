@@ -111,6 +111,10 @@ export class MovementController {
 
   public setMovement(movement: ServerMovement) {
     this.serverMovement = movement;
+
+    if (!isEqual(this.localMovement, this.serverMovement)) {
+      this.player.flipX = (movement.dx || 0) < 0;
+    }
   }
 
   public update() {
