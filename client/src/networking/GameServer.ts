@@ -20,6 +20,8 @@ class GameServer {
     this.io.on('message', (id: string) => {
       this.clientId = id;
 
+      document.getElementById('loading')?.remove();
+
       this.createPlayer.emit();
     });
   }
