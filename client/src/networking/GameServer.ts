@@ -17,12 +17,12 @@ class GameServer {
   }
 
   async init() {
-    this.io.on('message', (id: string) => {
-      this.clientId = id;
+    return new Promise(resolve => {
+      this.io.on('message', (id: string) => {
+        this.clientId = id;
 
-      document.getElementById('loading')?.remove();
-
-      this.createPlayer.emit();
+        return resolve(this.clientId);
+      });
     });
   }
 
@@ -31,7 +31,7 @@ class GameServer {
   }
 
   get getPlayers() {
-    return this.createSocket.bind(this)<GetPlayersEvent>(SocketEvent.PLAYERS);
+    return this.createSocket<GetPlayersEvent>(SocketEvent.PLAYERS);
   }
 
   get movePlayer() {
@@ -65,14 +65,12 @@ class GameServer {
 
   private onCallback<T>(event: string) {
     return (callback: ListenerCallback<T>): void => {
-      console.log('onCallback', event);
       this.io.on(event, callback);
     };
   }
 
   private offCallback<T>(event: string) {
     return (callback?: ListenerCallback<T>): void => {
-      console.log('offCallback', event);
       this.io.off(event, callback);
     };
   }

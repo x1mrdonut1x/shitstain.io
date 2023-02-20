@@ -20,7 +20,6 @@ type SocketActionFn<T> = (message: T) => void;
 export class SocketActions {
   constructor(private socket: Socket, private gameState: GameState) {
     socket.send(socket.id);
-    console.log('New socket connection', socket.id);
 
     this.createSocket(SocketEvent.DISCONNECT).on(this.onPlayerDisconnect.bind(this));
 

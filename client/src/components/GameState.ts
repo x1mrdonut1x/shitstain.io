@@ -1,3 +1,4 @@
+import { gameServer } from '@/networking/GameServer';
 import { log } from '@/utils/logAction';
 import { Scene } from 'phaser';
 import { GetPlayersEvent, GetWorldStateEvent } from '../../../types/events';
@@ -6,7 +7,21 @@ import { Player } from './Player';
 export class GameState {
   public players: Player[] = [];
 
-  constructor(private clientId: string, private scene: Scene) {}
+  constructor(private scene: Scene) {}
+
+  public initialize() {
+    gameServer.getPlayers.on(data => {
+      console.log(data);
+      this.updatePlayersFromServer(data);
+    });
+
+    gameServer.getWorldState.on(data => {
+      this.movePlayers(data);
+    });
+
+    gameServer.createPlayer.emit();
+    document.getElementById('loading')?.remove();
+  }
 
   public getPlayerCount() {
     return this.players.length;

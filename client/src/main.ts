@@ -1,5 +1,4 @@
 import { MAP_HEIGHT, MAP_WIDTH, TILE_WIDTH } from './constants';
-import { createGameServer } from './networking/GameServer';
 import { GameScene } from './scenes/GameScene';
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -15,8 +14,6 @@ const config: Phaser.Types.Core.GameConfig = {
 };
 
 async function initialize() {
-  await createGameServer();
-
   new Phaser.Game(config);
 }
 
