@@ -29,7 +29,7 @@ export function broadcast<T>(event: SocketEvent) {
   return (message?: T) => io?.emit(event, message);
 }
 
-const tickLengthMs = 1000 / 60;
+const tickLengthMs = 1000 / 20;
 
 /* gameLoop related variables */
 // timestamp of each loop
