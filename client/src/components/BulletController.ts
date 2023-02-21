@@ -10,11 +10,7 @@ export class BulletController {
 
   public isShooting = false;
 
-  constructor(
-    private scene: Scene,
-    world: Phaser.Physics.Matter.World,
-    private player: Player
-  ) {
+  constructor(private scene: Scene, world: Phaser.Physics.Matter.World, private player: Player) {
     if (this.player.id === gameServer.clientId) {
       this.scene.input.on('pointerdown', () => {
         this.isShooting = true;
@@ -27,7 +23,7 @@ export class BulletController {
 
     gameServer.shoot.on(data => {
       if (data.playerId === player.id) {
-        const bullet = new Bullet(world, player.x, player.y, data.velocity);
+        const bullet = new Bullet(world, data.x, data.y, data.velocity);
         this.bullets.push(bullet);
 
         this.scene.add.existing(bullet);
