@@ -22,6 +22,7 @@ export class Bullet extends Physics.Matter.Sprite {
     this.setCollisionGroup(-1);
 
     this.setOnCollide(() => {
+      this.setStatic(true);
       this.anims.play('fire-ball-explode', true);
       this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
         this.destroy(true);
