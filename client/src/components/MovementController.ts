@@ -1,5 +1,5 @@
 import { Scene } from 'phaser';
-import { ServerMovement } from '../../../types';
+import { ServerMovement } from '../../../shared/types';
 import { gameServer } from '../networking/GameServer';
 import { isEqual } from 'lodash';
 import { Player } from './Player';

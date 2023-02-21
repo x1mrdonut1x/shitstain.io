@@ -1,6 +1,6 @@
 import { gameServer } from '@/networking/GameServer';
 import { Physics, Scene } from 'phaser';
-import { ServerMovement } from '../../../types';
+import { ServerMovement } from '../../../shared/types';
 import { BulletController } from './BulletController';
 import { MovementController } from './MovementController';
 

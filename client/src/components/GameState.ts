@@ -1,7 +1,7 @@
 import { gameServer } from '@/networking/GameServer';
 import { log } from '@/utils/logAction';
 import { Scene } from 'phaser';
-import { GetPlayersEvent, GetWorldStateEvent } from '../../../types/events';
+import { GetPlayersEvent, GetWorldStateEvent } from '../../../shared/types/events';
 import { Player } from './Player';
 
 export class GameState {

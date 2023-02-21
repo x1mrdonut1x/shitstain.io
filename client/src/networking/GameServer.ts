@@ -6,7 +6,7 @@ import {
   PlayerMoveEvent,
   PlayerShootEvent,
   SocketEvent,
-} from '../../../types/events';
+} from '../../../shared/types/events';
 
 class GameServer {
   public clientId!: string; // initialized in main.ts

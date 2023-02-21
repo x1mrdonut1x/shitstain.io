@@ -6,7 +6,7 @@ import {
   PlayerMoveEvent,
   PlayerShootEvent,
   SocketEvent,
-} from '../../types/events';
+} from '../../shared/types/events';
 import { broadcast } from './socket-server';
 import { GameState } from './GameState';
 

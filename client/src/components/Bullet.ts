@@ -1,5 +1,5 @@
 import { Physics, Scene } from 'phaser';
-import { XYPosition } from '../../../types';
+import { XYPosition } from '../../../shared/types';
 
 export class Bullet extends Physics.Arcade.Sprite {
   private speed = 400;

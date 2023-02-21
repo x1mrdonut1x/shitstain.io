@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import { ServerMovement, ServerPlayer } from '../../types';
+import { ServerMovement, ServerPlayer } from '../../shared/types';
 
 export class GameState {
   private _players: ServerPlayer[] = [];

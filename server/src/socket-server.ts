@@ -1,8 +1,9 @@
 import { Server } from 'socket.io';
 import httpServer from 'http';
 import { SocketActions } from './SocketActions';
-import { SocketEvent } from '../../types/events';
+import { SocketEvent } from '../../shared/types/events';
 import { GameState } from './GameState';
+import GameEngine from './GameEngine';
 
 let io: Server;
 
@@ -15,6 +16,7 @@ export function createSocketServer(server: httpServer.Server) {
   });
 
   const gameState = new GameState();
+  const gameEngine = new GameEngine(gameState);
 
   io.on('connection', socket => {
     new SocketActions(socket, gameState);
