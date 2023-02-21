@@ -1,33 +1,31 @@
-import { gameServer } from '@/networking/GameServer';
 import { Physics, Scene } from 'phaser';
-import { ServerMovement } from '../../../types';
+import { ServerPlayer } from '../../../types';
 import { BulletController } from './BulletController';
 import { MovementController } from './MovementController';
 
-export class Player extends Physics.Arcade.Sprite {
+export class Player extends Physics.Matter.Sprite {
   private bulletController: BulletController | undefined;
   private movementController: MovementController | undefined;
-  private isMoving = false;
+  public isMoving = false;
 
-  constructor(scene: Scene, x: number, y: number, public id: string) {
-    super(scene, x, y, 'fireWizard');
+  constructor(
+    scene: Scene,
+    world: Phaser.Physics.Matter.World,
+    x: number,
+    y: number,
+    public id: string
+  ) {
+    super(world, x, y, 'fireWizard');
+    this.setPosition(x, y);
     console.log('player', id, 'created');
 
-    this.bulletController = new BulletController(scene, this);
+    this.bulletController = new BulletController(scene, world, this);
     this.movementController = new MovementController(scene, this);
 
-    scene.physics.add.existing(this);
+    world.add(this);
     scene.sys.displayList.add(this);
     scene.sys.updateList.add(this);
-
-    if (gameServer.clientId === id) {
-      this.setCollideWorldBounds(true);
-    }
-
-    // if (this.id === gameServer.clientId) {
-    //   console.log('loadCamera');
-    //   this.scene.cameras.main.startFollow(this);
-    // }
+    this.setCollisionGroup(-1);
   }
 
   update(delta: number) {
@@ -43,8 +41,7 @@ export class Player extends Physics.Arcade.Sprite {
     }
   }
 
-  public setMovement(movement: ServerMovement) {
-    this.isMoving = Boolean(movement?.dx || movement?.dy);
-    this.movementController?.setMovement(movement);
+  public setMovement(movement: ServerPlayer) {
+    this.movementController?.updatePositionFromServer(movement);
   }
 }

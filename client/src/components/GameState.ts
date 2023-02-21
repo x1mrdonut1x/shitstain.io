@@ -7,7 +7,7 @@ import { Player } from './Player';
 export class GameState {
   public players: Player[] = [];
 
-  constructor(private scene: Scene) {}
+  constructor(private scene: Scene, private world: Phaser.Physics.Matter.World) {}
 
   public initialize() {
     gameServer.getPlayers.on(data => {
@@ -29,7 +29,7 @@ export class GameState {
 
   public addPlayer(id: string, x: number, y: number) {
     log(`Player ${id} connected`);
-    this.players.push(new Player(this.scene, x, y, id));
+    this.players.push(new Player(this.scene, this.world, x, y, id));
   }
 
   public removePlayer(id: string) {
@@ -63,7 +63,7 @@ export class GameState {
       if (!foundPlayer) {
         this.addPlayer(serverPlayer.clientId, serverPlayer.x, serverPlayer.y);
       } else {
-        foundPlayer.setMovement(serverPlayer.move);
+        foundPlayer.setMovement(serverPlayer);
       }
     });
 
@@ -75,9 +75,7 @@ export class GameState {
     data.forEach(object => {
       const foundPlayer = this.players.find(player => player.id === object.clientId);
 
-      if (foundPlayer && object.move) {
-        foundPlayer?.setMovement(object.move);
-      }
+      foundPlayer?.setMovement(object);
     });
   }
 }

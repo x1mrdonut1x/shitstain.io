@@ -4,15 +4,13 @@ import { Bullet } from './Bullet';
 import { Player } from './Player';
 
 export class BulletController {
-  private bullets;
+  private bullets: Bullet[] = [];
   private timeDelta = 0; //ms
   private shootingSpeed = 100; //ms
 
   public isShooting = false;
 
-  constructor(private scene: Scene, private player: Player) {
-    this.bullets = scene.add.group({ classType: Bullet, runChildUpdate: true });
-
+  constructor(private scene: Scene, world: Phaser.Physics.Matter.World, private player: Player) {
     if (this.player.id === gameServer.clientId) {
       this.scene.input.on('pointerdown', () => {
         this.isShooting = true;
@@ -24,10 +22,11 @@ export class BulletController {
     }
 
     gameServer.shoot.on(data => {
-      if (data.playerId === this.player.id) {
-        const bullet = this.bullets.get() as Bullet;
+      if (data.playerId === player.id) {
+        const bullet = new Bullet(world, data.x, data.y, data.velocity);
+        this.bullets.push(bullet);
 
-        bullet?.fire(data.x, data.y, data.velocity);
+        this.scene.add.existing(bullet);
       }
     });
   }
@@ -62,5 +61,10 @@ export class BulletController {
       this.timeDelta = 0;
       this.shoot();
     }
+
+    this.bullets.forEach(bullet => {
+      if (!bullet.active) return;
+      bullet.update();
+    });
   }
 }

@@ -9,7 +9,8 @@ const config: Phaser.Types.Core.GameConfig = {
   parent: 'game-container',
   scene: [GameScene],
   physics: {
-    default: 'arcade',
+    default: 'matter',
+    matter: { gravity: false },
   },
 };
 
@@ -17,4 +18,6 @@ async function initialize() {
   new Phaser.Game(config);
 }
 
-initialize();
+window.onload = () => {
+  initialize();
+};
