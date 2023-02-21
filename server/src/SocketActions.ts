@@ -1,7 +1,6 @@
 import { Socket } from 'socket.io';
 import {
   GetPlayersEvent,
-  GetWorldStateEvent,
   PlayerConnectEvent,
   PlayerMoveEvent,
   PlayerShootEvent,
@@ -53,8 +52,6 @@ export class SocketActions {
 
   private onPlayerMove(data: PlayerMoveEvent) {
     this.gameState.movePlayer(data.clientId, data.movement);
-
-    broadcast<GetWorldStateEvent>(SocketEvent.OBJECTS_CHANGE)(this.gameState.players);
   }
 
   private createSocket<T>(event: SocketEvent) {

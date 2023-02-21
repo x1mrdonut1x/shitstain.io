@@ -1,7 +1,7 @@
 import { Scene } from 'phaser';
-import { ServerMovement } from '../../../types';
+import { ServerPlayer } from '../../../types';
 import { gameServer } from '../networking/GameServer';
-import { isEqual } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { Player } from './Player';
 
 interface Keys {
@@ -12,18 +12,21 @@ interface Keys {
   };
 }
 
-const defaultMovement: ServerMovement = {
-  left: false,
-  right: false,
-  up: false,
-  down: false,
-  dx: 0,
-  dy: 0,
+const defaultMovement: Omit<ServerPlayer, 'clientId'> = {
+  x: 0,
+  y: 0,
+  speed: 4,
+  move: {
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+  },
 };
 
 export class MovementController {
-  private localMovement = { ...defaultMovement };
-  private serverMovement = { ...defaultMovement };
+  private localPosition = cloneDeep(defaultMovement);
+  private serverPosition = cloneDeep(defaultMovement);
   private readonly speed = 4;
   private readonly keys: Keys = {};
 
@@ -41,7 +44,7 @@ export class MovementController {
         if (this.keys['S'].key.isDown) {
           this.onMoveDown();
         } else {
-          this.localMovement.dy = 0;
+          this.localPosition.move.up = false;
         }
       },
     };
@@ -53,7 +56,7 @@ export class MovementController {
         if (this.keys['W'].key.isDown) {
           this.onMoveUp();
         } else {
-          this.localMovement.dy = 0;
+          this.localPosition.move.down = false;
         }
       },
     };
@@ -65,7 +68,7 @@ export class MovementController {
         if (this.keys['D'].key.isDown) {
           this.onMoveRight();
         } else {
-          this.localMovement.dx = 0;
+          this.localPosition.move.left = false;
         }
       },
     };
@@ -77,44 +80,36 @@ export class MovementController {
         if (this.keys['A'].key.isDown) {
           this.onMoveLeft();
         } else {
-          this.localMovement.dx = 0;
+          this.localPosition.move.right = false;
         }
       },
     };
   }
 
   private onMoveRight() {
-    this.localMovement.left = false;
-    this.localMovement.right = true;
-    this.localMovement.dx = this.speed;
+    this.localPosition.move.left = false;
+    this.localPosition.move.right = true;
     this.player.flipX = false;
   }
 
   private onMoveLeft() {
-    this.localMovement.left = true;
-    this.localMovement.right = false;
-    this.localMovement.dx = -this.speed;
+    this.localPosition.move.left = true;
+    this.localPosition.move.right = false;
     this.player.flipX = true;
   }
 
   private onMoveUp() {
-    this.localMovement.up = true;
-    this.localMovement.down = false;
-    this.localMovement.dy = -this.speed;
+    this.localPosition.move.up = true;
+    this.localPosition.move.down = false;
   }
 
   private onMoveDown() {
-    this.localMovement.up = false;
-    this.localMovement.down = true;
-    this.localMovement.dy = this.speed;
+    this.localPosition.move.up = false;
+    this.localPosition.move.down = true;
   }
 
-  public setMovement(movement: ServerMovement) {
-    this.serverMovement = movement;
-
-    if (!isEqual(this.localMovement, this.serverMovement)) {
-      this.player.flipX = (movement.dx || 0) < 0;
-    }
+  public updatePositionFromServer(position: Omit<ServerPlayer, 'clientId'>) {
+    this.serverPosition = position;
   }
 
   public update() {
@@ -128,12 +123,26 @@ export class MovementController {
       }
     });
 
-    this.player.x += this.serverMovement.dx || 0;
-    this.player.y += this.serverMovement.dy || 0;
+    this.player.x = Phaser.Math.Linear(this.player.x, this.serverPosition.x, 0.2);
+    this.player.y = Phaser.Math.Linear(this.player.y, this.serverPosition.y, 0.2);
+
+    if (!isEqual(this.localPosition.move, this.serverPosition.move)) {
+      this.player.flipX = this.localPosition.move.left || this.serverPosition.move.left;
+    }
+
+    this.player.isMoving =
+      this.localPosition.move.up ||
+      this.localPosition.move.down ||
+      this.localPosition.move.left ||
+      this.localPosition.move.right ||
+      this.serverPosition.move.up ||
+      this.serverPosition.move.down ||
+      this.serverPosition.move.left ||
+      this.serverPosition.move.right;
 
     if (this.player.id === gameServer.clientId) {
-      if (!isEqual(this.localMovement, this.serverMovement)) {
-        gameServer.movePlayer.emit({ movement: this.localMovement });
+      if (!isEqual(this.localPosition.move, this.serverPosition.move)) {
+        gameServer.movePlayer.emit({ movement: this.localPosition.move });
       }
     }
   }

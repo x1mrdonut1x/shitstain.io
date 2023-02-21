@@ -63,7 +63,7 @@ export class GameState {
       if (!foundPlayer) {
         this.addPlayer(serverPlayer.clientId, serverPlayer.x, serverPlayer.y);
       } else {
-        foundPlayer.setMovement(serverPlayer.move);
+        foundPlayer.setMovement(serverPlayer);
       }
     });
 
@@ -75,9 +75,7 @@ export class GameState {
     data.forEach(object => {
       const foundPlayer = this.players.find(player => player.id === object.clientId);
 
-      if (foundPlayer && object.move) {
-        foundPlayer?.setMovement(object.move);
-      }
+      foundPlayer?.setMovement(object);
     });
   }
 }

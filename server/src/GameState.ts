@@ -17,7 +17,13 @@ export class GameState {
       clientId: id,
       x: Math.random() * 1100 + 100,
       y: Math.random() * 600 + 100,
-      move: {},
+      speed: 4,
+      move: {
+        up: false,
+        right: false,
+        down: false,
+        left: false,
+      },
     });
   }
 
@@ -29,7 +35,18 @@ export class GameState {
     const foundPlayer = this._players.find(p => p.clientId === id);
 
     if (foundPlayer) {
-      foundPlayer.move = data;
+      if (data.up) {
+        foundPlayer.y -= foundPlayer.speed;
+      }
+      if (data.down) {
+        foundPlayer.y += foundPlayer.speed;
+      }
+      if (data.left) {
+        foundPlayer.x -= foundPlayer.speed;
+      }
+      if (data.right) {
+        foundPlayer.x += foundPlayer.speed;
+      }
     }
   }
 }

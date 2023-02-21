@@ -49,6 +49,7 @@ export class GameScene extends Scene {
   fixedTimeStep = 1000 / this.FRAME_RATE;
   update(time: number, delta: number) {
     this.elapsedTime += delta;
+
     while (this.elapsedTime >= this.fixedTimeStep) {
       this.elapsedTime -= this.fixedTimeStep;
       this.fixedTick(time, this.fixedTimeStep);

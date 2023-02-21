@@ -1,12 +1,8 @@
-export type ServerPlayer = ServerWorldObject & object;
-
 export type ServerMovement = {
-  left?: boolean;
-  right?: boolean;
-  up?: boolean;
-  down?: boolean;
-  dx?: number;
-  dy?: number;
+  left: boolean;
+  right: boolean;
+  up: boolean;
+  down: boolean;
 };
 
 export type ServerShootData = {
@@ -16,10 +12,11 @@ export type ServerShootData = {
   velocity: XYPosition;
 };
 
-export type ServerWorldObject = {
+export type ServerPlayer = {
   clientId: string;
   x: number;
   y: number;
+  speed: number;
   move: ServerMovement;
 };
 
