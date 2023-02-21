@@ -11,11 +11,10 @@ import { GameState } from '@/components/GameState';
 import { MAP_HEIGHT, MAP_WIDTH, TILE_WIDTH } from '@/constants';
 
 export class GameScene extends Scene {
-  private gameState: GameState;
+  private gameState: GameState | undefined;
 
   constructor() {
     super('gameScene');
-    this.gameState = new GameState(this);
   }
 
   preload() {
@@ -23,8 +22,16 @@ export class GameScene extends Scene {
   }
 
   create() {
+    this.matter.world.setBounds(
+      0,
+      0,
+      this.game.config.width as number,
+      this.game.config.height as number
+    );
+    this.gameState = new GameState(this, this.matter.world);
+
     createGameServer().then(() => {
-      this.gameState.initialize();
+      this.gameState?.initialize();
     });
 
     // this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT, true);
@@ -33,8 +40,19 @@ export class GameScene extends Scene {
     this.addBackground();
   }
 
+  fixedTick(time: number, delta: number) {
+    this.gameState?.updatePlayers(delta);
+  }
+
+  FRAME_RATE = 60;
+  elapsedTime = 0;
+  fixedTimeStep = 1000 / this.FRAME_RATE;
   update(time: number, delta: number) {
-    this.gameState.updatePlayers(delta);
+    this.elapsedTime += delta;
+    while (this.elapsedTime >= this.fixedTimeStep) {
+      this.elapsedTime -= this.fixedTimeStep;
+      this.fixedTick(time, this.fixedTimeStep);
+    }
   }
 
   private loadSprite(key: string, path: string, size = 128) {
@@ -92,7 +110,7 @@ export class GameScene extends Scene {
       key: 'fire-ball',
       frames: this.anims.generateFrameNumbers('fire-ball', {}),
       frameRate: 20,
-      repeat: 0,
+      repeat: -1,
     });
   }
 }

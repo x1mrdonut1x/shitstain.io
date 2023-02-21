@@ -4,24 +4,32 @@ import { ServerMovement } from '../../../types';
 import { BulletController } from './BulletController';
 import { MovementController } from './MovementController';
 
-export class Player extends Physics.Arcade.Sprite {
+export class Player extends Physics.Matter.Sprite {
   private bulletController: BulletController | undefined;
   private movementController: MovementController | undefined;
   private isMoving = false;
 
-  constructor(scene: Scene, x: number, y: number, public id: string) {
-    super(scene, x, y, 'fireWizard');
+  constructor(
+    scene: Scene,
+    world: Phaser.Physics.Matter.World,
+    x: number,
+    y: number,
+    public id: string
+  ) {
+    super(world, x, y, 'fireWizard');
+    this.setPosition(x, y);
     console.log('player', id, 'created');
 
-    this.bulletController = new BulletController(scene, this);
+    this.bulletController = new BulletController(scene, world, this);
     this.movementController = new MovementController(scene, this);
 
-    scene.physics.add.existing(this);
+    world.add(this);
     scene.sys.displayList.add(this);
     scene.sys.updateList.add(this);
+    this.setCollisionGroup(-1);
 
     if (gameServer.clientId === id) {
-      this.setCollideWorldBounds(true);
+      // this.setCollideWorldBounds(true);
     }
 
     // if (this.id === gameServer.clientId) {

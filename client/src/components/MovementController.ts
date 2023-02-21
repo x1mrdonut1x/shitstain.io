@@ -24,7 +24,7 @@ const defaultMovement: ServerMovement = {
 export class MovementController {
   private localMovement = { ...defaultMovement };
   private serverMovement = { ...defaultMovement };
-  private readonly speed = 400;
+  private readonly speed = 4;
   private readonly keys: Keys = {};
 
   constructor(private scene: Scene, private player: Player) {
@@ -128,8 +128,8 @@ export class MovementController {
       }
     });
 
-    this.player.setVelocityX(this.serverMovement.dx || 0);
-    this.player.setVelocityY(this.serverMovement.dy || 0);
+    this.player.x += this.serverMovement.dx || 0;
+    this.player.y += this.serverMovement.dy || 0;
 
     if (this.player.id === gameServer.clientId) {
       if (!isEqual(this.localMovement, this.serverMovement)) {
