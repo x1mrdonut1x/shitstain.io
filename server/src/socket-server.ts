@@ -14,14 +14,11 @@ export function createSocketServer(server: httpServer.Server) {
     },
   });
 
-  // let gameLoop: NodeJS.Timer;
   const gameState = new GameState();
+  gameLoop(gameState);
 
   io.on('connection', socket => {
     new SocketActions(socket, gameState);
-    gameLoop(gameState);
-
-    // socket.on('disconnect', () => clearInterval(gameLoop));
   });
 }
 
@@ -29,25 +26,32 @@ export function broadcast<T>(event: SocketEvent) {
   return (message?: T) => io?.emit(event, message);
 }
 
-const tickLengthMs = 1000 / 20;
+const mainLoopMs = 1000 / 60;
+const updateClientMs = 1000 / 10;
 
-/* gameLoop related variables */
-// timestamp of each loop
-let previousTick = Date.now();
+let mainLoopTick = Date.now();
+let updateClientTick = Date.now();
 
 const gameLoop = function (gameState: GameState) {
   const now = Date.now();
 
-  if (previousTick + tickLengthMs <= now) {
-    const delta = now - previousTick;
-    previousTick = now;
+  if (mainLoopTick + mainLoopMs <= now) {
+    const delta = now - mainLoopTick;
+    mainLoopTick = now;
 
     update(gameState, delta);
-
-    // console.log('delta', `${delta}ms`, '(target: ' + tickLengthMs + 'ms)');
   }
 
-  if (Date.now() - previousTick < tickLengthMs - 16) {
+  if (updateClientTick + updateClientMs <= now) {
+    updateClientTick = now;
+
+    if (gameState.hasChanged) {
+      broadcast<GetWorldStateEvent>(SocketEvent.OBJECTS_CHANGE)(gameState.players);
+      gameState.hasChanged = false;
+    }
+  }
+
+  if (Date.now() - mainLoopTick < mainLoopMs - 16) {
     setTimeout(() => gameLoop(gameState));
   } else {
     setImmediate(() => gameLoop(gameState));
@@ -55,5 +59,5 @@ const gameLoop = function (gameState: GameState) {
 };
 
 const update = (gameState: GameState, delta: number) => {
-  broadcast<GetWorldStateEvent>(SocketEvent.OBJECTS_CHANGE)(gameState.players);
+  gameState.updateMovement();
 };

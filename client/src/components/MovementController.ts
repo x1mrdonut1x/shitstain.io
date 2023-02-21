@@ -110,6 +110,10 @@ export class MovementController {
 
   public updatePositionFromServer(position: Omit<ServerPlayer, 'clientId'>) {
     this.serverPosition = position;
+
+    // TODO this makes the player lag
+    // this.player.x = Phaser.Math.Linear(this.player.x, position.x, 0.8);
+    // this.player.y = Phaser.Math.Linear(this.player.y, position.y, 0.8);
   }
 
   public update() {
@@ -123,22 +127,18 @@ export class MovementController {
       }
     });
 
-    this.player.x = Phaser.Math.Linear(this.player.x, this.serverPosition.x, 0.2);
-    this.player.y = Phaser.Math.Linear(this.player.y, this.serverPosition.y, 0.2);
+    this.player.setVelocityX(
+      this.serverPosition.move.right ? this.speed : this.serverPosition.move.left ? -this.speed : 0
+    );
+    this.player.setVelocityY(
+      this.serverPosition.move.up ? -this.speed : this.serverPosition.move.down ? this.speed : 0
+    );
 
     if (!isEqual(this.localPosition.move, this.serverPosition.move)) {
       this.player.flipX = this.localPosition.move.left || this.serverPosition.move.left;
     }
 
-    this.player.isMoving =
-      this.localPosition.move.up ||
-      this.localPosition.move.down ||
-      this.localPosition.move.left ||
-      this.localPosition.move.right ||
-      this.serverPosition.move.up ||
-      this.serverPosition.move.down ||
-      this.serverPosition.move.left ||
-      this.serverPosition.move.right;
+    this.player.isMoving = this.player.body.velocity.y !== 0 || this.player.body.velocity.x !== 0;
 
     if (this.player.id === gameServer.clientId) {
       if (!isEqual(this.localPosition.move, this.serverPosition.move)) {
