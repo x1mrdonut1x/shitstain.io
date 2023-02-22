@@ -36,10 +36,10 @@ export class GameState {
       },
     };
 
-    const body = Bodies.rectangle(x, y, 128, 128);
+    // const body = Bodies.rectangle(x, y, 128, 128);
 
-    this._players.push({ data: player, body });
-    World.add(this.world, body);
+    this._players.push({ data: player });
+    // World.add(this.world, body);
   }
 
   public removePlayer(id: string) {

@@ -21,7 +21,6 @@ export type ServerPlayer = {
 };
 
 export type ServerWorldPlayer = {
-  body: Matter.Body;
   data: ServerPlayer;
 };
 

@@ -59,7 +59,7 @@ export class GameEngine {
         timestamp: now,
         state: {
           players: this.state.players.map(player => {
-            const { body, data } = player;
+            const { data } = player;
             // data.x = body.position.x;
             // data.y = body.position.y;
             return data;
