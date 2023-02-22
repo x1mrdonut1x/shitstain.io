@@ -3,14 +3,7 @@ import { ServerPlayer } from '../../../types';
 import { gameServer } from '../networking/GameServer';
 import { cloneDeep, isEqual } from 'lodash';
 import { Player } from './Player';
-
-interface Keys {
-  [keyCode: string]: {
-    key: Phaser.Input.Keyboard.Key;
-    onDown: () => void;
-    onUp: () => void;
-  };
-}
+import { KeyboardController } from './KeyboardController';
 
 const defaultMovement: Omit<ServerPlayer, 'clientId'> = {
   x: 0,
@@ -25,87 +18,17 @@ const defaultMovement: Omit<ServerPlayer, 'clientId'> = {
 };
 
 export class MovementController {
-  private localPosition = cloneDeep(defaultMovement);
   private serverPosition = cloneDeep(defaultMovement);
+  private keyboardController: KeyboardController | undefined;
   private readonly speed = 4;
-  private readonly keys: Keys = {};
 
   constructor(private scene: Scene, private player: Player) {
     if (this.player.id === gameServer.clientId) {
-      this.initKeyboard();
+      this.keyboardController = new KeyboardController(scene);
     }
-  }
 
-  private initKeyboard() {
-    this.keys['W'] = {
-      key: this.scene.input.keyboard.addKey('W'),
-      onDown: () => this.onMoveUp(),
-      onUp: () => {
-        if (this.keys['S'].key.isDown) {
-          this.onMoveDown();
-        } else {
-          this.localPosition.move.up = false;
-        }
-      },
-    };
-
-    this.keys['S'] = {
-      key: this.scene.input.keyboard.addKey('S'),
-      onDown: () => this.onMoveDown(),
-      onUp: () => {
-        if (this.keys['W'].key.isDown) {
-          this.onMoveUp();
-        } else {
-          this.localPosition.move.down = false;
-        }
-      },
-    };
-
-    this.keys['A'] = {
-      key: this.scene.input.keyboard.addKey('A'),
-      onDown: () => this.onMoveLeft(),
-      onUp: () => {
-        if (this.keys['D'].key.isDown) {
-          this.onMoveRight();
-        } else {
-          this.localPosition.move.left = false;
-        }
-      },
-    };
-
-    this.keys['D'] = {
-      key: this.scene.input.keyboard.addKey('D'),
-      onDown: () => this.onMoveRight(),
-      onUp: () => {
-        if (this.keys['A'].key.isDown) {
-          this.onMoveLeft();
-        } else {
-          this.localPosition.move.right = false;
-        }
-      },
-    };
-  }
-
-  private onMoveRight() {
-    this.localPosition.move.left = false;
-    this.localPosition.move.right = true;
-    this.player.flipX = false;
-  }
-
-  private onMoveLeft() {
-    this.localPosition.move.left = true;
-    this.localPosition.move.right = false;
-    this.player.flipX = true;
-  }
-
-  private onMoveUp() {
-    this.localPosition.move.up = true;
-    this.localPosition.move.down = false;
-  }
-
-  private onMoveDown() {
-    this.localPosition.move.up = false;
-    this.localPosition.move.down = true;
+    this.serverPosition.x = this.player.x;
+    this.serverPosition.y = this.player.y;
   }
 
   public updatePositionFromServer(position: Omit<ServerPlayer, 'clientId'>) {
@@ -113,36 +36,48 @@ export class MovementController {
   }
 
   public update() {
-    Object.keys(this.keys).forEach(key => {
-      const entry = this.keys[key];
+    this.keyboardController?.update();
 
-      if (Phaser.Input.Keyboard.JustDown(entry.key)) {
-        entry.onDown();
-      } else if (Phaser.Input.Keyboard.JustUp(entry.key)) {
-        entry.onUp();
+    if (this.keyboardController) {
+      const { left, right, up, down } = this.keyboardController.movement;
+      let velocityY = 0;
+      let velocityX = 0;
+
+      if (up) {
+        velocityY = -this.speed;
       }
-    });
+      if (down) {
+        velocityY = this.speed;
+      }
+      if (left) {
+        velocityX = -this.speed;
+      }
+      if (right) {
+        velocityX = this.speed;
+      }
 
-    this.player.x = Phaser.Math.Linear(this.player.x, this.serverPosition.x, 0.2);
-    this.player.y = Phaser.Math.Linear(this.player.y, this.serverPosition.y, 0.2);
+      this.player.x += velocityX;
+      this.player.y += velocityY;
+    } else {
+      // TODO this should only by run on remote players. In order to do this, we need the exact same tick rate on client and server
+      this.player.x = Phaser.Math.Linear(this.player.x, this.serverPosition.x, 0.2);
+      this.player.y = Phaser.Math.Linear(this.player.y, this.serverPosition.y, 0.2);
+    }
 
-    if (!isEqual(this.localPosition.move, this.serverPosition.move)) {
-      this.player.flipX = this.localPosition.move.left || this.serverPosition.move.left;
+    if (!isEqual(this.keyboardController?.movement, this.serverPosition.move)) {
+      this.player.flipX = this.keyboardController?.movement.left ?? this.serverPosition.move.left;
     }
 
     this.player.isMoving =
-      this.localPosition.move.up ||
-      this.localPosition.move.down ||
-      this.localPosition.move.left ||
-      this.localPosition.move.right ||
-      this.serverPosition.move.up ||
-      this.serverPosition.move.down ||
-      this.serverPosition.move.left ||
-      this.serverPosition.move.right;
+      this.keyboardController?.isMoving ??
+      (this.serverPosition.move.right ||
+        this.serverPosition.move.left ||
+        this.serverPosition.move.up ||
+        this.serverPosition.move.down);
 
-    if (this.player.id === gameServer.clientId) {
-      if (!isEqual(this.localPosition.move, this.serverPosition.move)) {
-        gameServer.movePlayer.emit({ movement: this.localPosition.move });
+    if (this.player.id === gameServer.clientId && this.keyboardController) {
+      if (!isEqual(this.keyboardController?.movement, this.serverPosition.move)) {
+        gameServer.movePlayer.emit({ movement: this.keyboardController.movement });
       }
     }
   }

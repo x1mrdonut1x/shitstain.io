@@ -2,30 +2,37 @@ import { Physics } from 'phaser';
 import { XYPosition } from '../../../types';
 
 export class Bullet extends Physics.Matter.Sprite {
-  private speed = 10;
-  private velocity: XYPosition = { x: 0, y: 0 };
-
-  constructor(world: Phaser.Physics.Matter.World, x: number, y: number, velocity: XYPosition) {
+  constructor(
+    world: Phaser.Physics.Matter.World,
+    x: number,
+    y: number,
+    private velocity: XYPosition
+  ) {
     super(world, x, y, 'fire-ball');
     const angle = Math.atan2(velocity.y, velocity.x);
 
-    const velocityX = Math.cos(angle) * this.speed;
-    const velocityY = Math.sin(angle) * this.speed;
-
-    this.velocity = { x: velocityX, y: velocityY };
+    this.setFriction(0);
+    this.setFrictionAir(0);
+    this.setBounce(0);
 
     this.setRotation(angle);
 
-    world.add(this);
     this.anims.play('fire-ball', true);
     this.setCollisionGroup(-1);
 
-    // this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-    //   this.destroy(true);
-    // });
+    this.setOnCollide(() => {
+      this.setStatic(true);
+      this.anims.play('fire-ball-explode', true);
+      this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+        this.destroy(true);
+      });
+    });
+
+    world.add(this);
   }
 
   update(): void {
+    if (this.isStatic()) return;
     this.x += this.velocity.x;
     this.y += this.velocity.y;
 

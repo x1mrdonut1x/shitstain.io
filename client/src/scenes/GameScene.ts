@@ -113,9 +113,16 @@ export class GameScene extends Scene {
 
     this.anims.create({
       key: 'fire-ball',
-      frames: this.anims.generateFrameNumbers('fire-ball', {}),
+      frames: this.anims.generateFrameNumbers('fire-ball', { frames: [0, 1, 2, 3, 4] }),
       frameRate: 20,
       repeat: -1,
+    });
+
+    this.anims.create({
+      key: 'fire-ball-explode',
+      frames: this.anims.generateFrameNumbers('fire-ball', { frames: [5, 6, 7, 8, 9, 10] }),
+      frameRate: 30,
+      repeat: 0,
     });
 
     this.anims.create({
