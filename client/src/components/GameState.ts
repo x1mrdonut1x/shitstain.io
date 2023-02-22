@@ -1,3 +1,5 @@
+import { Enemy } from '@/components/Enemy';
+import { MAP_HEIGHT, MAP_WIDTH } from '@/constants';
 import { gameServer } from '@/networking/GameServer';
 import { log } from '@/utils/logAction';
 import { Scene } from 'phaser';
@@ -6,6 +8,7 @@ import { Player } from './Player';
 
 export class GameState {
   public players: Player[] = [];
+  public enemies: Enemy[] = [];
 
   constructor(private scene: Scene, private world: Phaser.Physics.Matter.World) {}
 
@@ -20,6 +23,20 @@ export class GameState {
     });
 
     gameServer.createPlayer.emit();
+
+    [...Array(10)].forEach(() => {
+      const x =
+        Math.random() > 0.5
+          ? MAP_WIDTH * 0.2 * Math.random()
+          : MAP_WIDTH * (1 - 0.2 * Math.random());
+      const y =
+        Math.random() > 0.5
+          ? MAP_HEIGHT * 0.2 * Math.random()
+          : MAP_HEIGHT * (1 - 0.2 * Math.random());
+
+      this.enemies.push(new Enemy(this.scene, this.world, this, x, y));
+    });
+
     document.getElementById('loading')?.remove();
   }
 
@@ -45,6 +62,12 @@ export class GameState {
   public updatePlayers(delta: number) {
     this.players.forEach(player => {
       player.update(delta);
+    });
+  }
+
+  public updateEnemies() {
+    this.enemies.forEach(enemy => {
+      enemy.update();
     });
   }
 
