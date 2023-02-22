@@ -1,5 +1,5 @@
 import { Scene } from 'phaser';
-import { ServerPlayer } from '../../../types';
+import { ServerPlayer, XYPosition } from '../../../types';
 import { gameServer } from '../networking/GameServer';
 import { cloneDeep, isEqual } from 'lodash';
 import { Player } from './Player';
@@ -8,7 +8,7 @@ import { KeyboardController } from './KeyboardController';
 const defaultMovement: Omit<ServerPlayer, 'clientId'> = {
   x: 0,
   y: 0,
-  speed: 4,
+  speed: 80,
   move: {
     left: false,
     right: false,
@@ -18,9 +18,17 @@ const defaultMovement: Omit<ServerPlayer, 'clientId'> = {
 };
 
 export class MovementController {
+  private existenceTime = 0;
+
+  private baseTimestamp: number | undefined;
+  private nextTimestamp: number | undefined;
+
+  private basePosition: XYPosition | undefined;
+  private nextPosition: XYPosition | undefined;
+
   private serverPosition = cloneDeep(defaultMovement);
   private keyboardController: KeyboardController | undefined;
-  private readonly speed = 4;
+  private readonly speed = 80;
 
   constructor(private scene: Scene, private player: Player) {
     if (this.player.id === gameServer.clientId) {
@@ -31,11 +39,24 @@ export class MovementController {
     this.serverPosition.y = this.player.y;
   }
 
-  public updatePositionFromServer(position: Omit<ServerPlayer, 'clientId'>) {
+  public updatePositionFromServer(timestamp: number, position: Omit<ServerPlayer, 'clientId'>) {
     this.serverPosition = position;
+
+    if (!this.baseTimestamp) {
+      this.baseTimestamp = timestamp;
+      this.basePosition = position;
+    } else {
+      this.baseTimestamp = this.nextTimestamp;
+      this.basePosition = this.nextPosition;
+
+      this.nextTimestamp = timestamp;
+      this.nextPosition = position;
+
+      this.existenceTime = 0;
+    }
   }
 
-  public update() {
+  public update(delta: number) {
     this.keyboardController?.update();
 
     if (this.keyboardController) {
@@ -56,12 +77,32 @@ export class MovementController {
         velocityX = this.speed;
       }
 
-      this.player.x += velocityX;
-      this.player.y += velocityY;
+      this.player.x += velocityX * delta;
+      this.player.y += velocityY * delta;
+
+      if (this.nextPosition) {
+        const dx = Math.abs(this.player.x - this.nextPosition.x);
+        const dy = Math.abs(this.player.y - this.nextPosition.y);
+        const maxAllowedShift = 50;
+
+        console.log(dx, dy);
+
+        if (dx > maxAllowedShift || dy > maxAllowedShift) {
+          this.player.x = this.nextPosition.x;
+          this.player.y = this.nextPosition.y;
+        }
+      }
     } else {
       // TODO this should only by run on remote players. In order to do this, we need the exact same tick rate on client and server
-      this.player.x = Phaser.Math.Linear(this.player.x, this.serverPosition.x, 0.2);
-      this.player.y = Phaser.Math.Linear(this.player.y, this.serverPosition.y, 0.2);
+
+      if (this.basePosition && this.nextPosition && this.nextTimestamp && this.baseTimestamp) {
+        const fullTimeStep = this.nextTimestamp - this.baseTimestamp;
+        const step = Math.max(this.existenceTime, fullTimeStep) / fullTimeStep;
+        this.existenceTime += delta;
+
+        this.player.x = Phaser.Math.Linear(this.basePosition.x, this.nextPosition.x, step);
+        this.player.y = Phaser.Math.Linear(this.basePosition.y, this.nextPosition.y, step);
+      }
     }
 
     if (!isEqual(this.keyboardController?.movement, this.serverPosition.move)) {

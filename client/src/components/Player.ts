@@ -30,7 +30,7 @@ export class Player extends Physics.Matter.Sprite {
 
   update(delta: number) {
     this.bulletController?.update(delta);
-    this.movementController?.update();
+    this.movementController?.update(delta);
 
     if (this.bulletController?.isShooting) {
       this.anims.play('fire-wizard-fireball', true);
@@ -41,7 +41,7 @@ export class Player extends Physics.Matter.Sprite {
     }
   }
 
-  public setMovement(movement: ServerPlayer) {
-    this.movementController?.updatePositionFromServer(movement);
+  public setMovement(timestamp: number, movement: ServerPlayer) {
+    this.movementController?.updatePositionFromServer(timestamp, movement);
   }
 }

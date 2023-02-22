@@ -20,4 +20,16 @@ export type ServerPlayer = {
   move: ServerMovement;
 };
 
+export type ServerWorldPlayer = {
+  body: Matter.Body;
+  data: ServerPlayer;
+};
+
+export type ServerSnapshot = {
+  timestamp: number;
+  state: {
+    players: ServerPlayer[];
+  };
+};
+
 export type XYPosition = { x: number; y: number };
