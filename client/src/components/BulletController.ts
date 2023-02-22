@@ -37,7 +37,7 @@ export class BulletController {
 
     gameServer.shoot.on(data => {
       if (data.playerId === player.id) {
-        this.isShooting = data.isShooting;
+        this.isShooting = this.isShooting ?? data.isShooting;
         this.serverVelocity = data.velocity;
       }
     });
