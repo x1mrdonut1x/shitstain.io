@@ -38,7 +38,7 @@ export class SocketActions {
 
     this.gameState.addPlayer(data.clientId);
 
-    broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(this.gameState.players);
+    broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(this.gameState.players.map(p => p.data));
     console.log('Total players', this.gameState.getPlayerCount());
   }
 
@@ -46,7 +46,7 @@ export class SocketActions {
     console.log(`player ${this.socket.id} disconnected`);
     this.gameState.removePlayer(this.socket.id);
 
-    broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(this.gameState.players);
+    broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(this.gameState.players.map(p => p.data));
     console.log('Total players', this.gameState.getPlayerCount());
   }
 

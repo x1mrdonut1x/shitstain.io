@@ -1,5 +1,5 @@
 import { Scene } from 'phaser';
-import { ServerPlayer } from '../../../types';
+import { ServerPlayer, XYPosition } from '../../../types';
 import { gameServer } from '../networking/GameServer';
 import { cloneDeep, isEqual } from 'lodash';
 import { Player } from './Player';
@@ -18,6 +18,14 @@ const defaultMovement: Omit<ServerPlayer, 'clientId'> = {
 };
 
 export class MovementController {
+  private existenceTime = 0;
+
+  private baseTimestamp: number | undefined;
+  private nextTimestamp: number | undefined;
+
+  private basePosition: XYPosition | undefined;
+  private nextPosition: XYPosition | undefined;
+
   private serverPosition = cloneDeep(defaultMovement);
   private keyboardController: KeyboardController | undefined;
   private readonly speed = 4;
@@ -31,11 +39,22 @@ export class MovementController {
     this.serverPosition.y = this.player.y;
   }
 
-  public updatePositionFromServer(position: Omit<ServerPlayer, 'clientId'>) {
-    this.serverPosition = position;
+  public updatePositionFromServer(timestamp: number, position: Omit<ServerPlayer, 'clientId'>) {
+    if (!this.baseTimestamp) {
+      this.baseTimestamp = timestamp;
+      this.basePosition = position;
+    } else {
+      this.baseTimestamp = this.nextTimestamp;
+      this.basePosition = this.nextPosition;
+
+      this.nextTimestamp = timestamp;
+      this.nextPosition = position;
+
+      this.existenceTime = 0;
+    }
   }
 
-  public update() {
+  public update(delta: number) {
     this.keyboardController?.update();
 
     if (this.keyboardController) {
@@ -60,8 +79,15 @@ export class MovementController {
       this.player.y += velocityY;
     } else {
       // TODO this should only by run on remote players. In order to do this, we need the exact same tick rate on client and server
-      this.player.x = Phaser.Math.Linear(this.player.x, this.serverPosition.x, 0.2);
-      this.player.y = Phaser.Math.Linear(this.player.y, this.serverPosition.y, 0.2);
+
+      if (this.basePosition && this.nextPosition && this.nextTimestamp && this.baseTimestamp) {
+        const fullTimeStep = this.nextTimestamp - this.baseTimestamp;
+        const step = Math.max(this.existenceTime, fullTimeStep) / fullTimeStep;
+        this.existenceTime += delta;
+
+        this.player.x = Phaser.Math.Linear(this.basePosition.x, this.nextPosition.x, step);
+        this.player.y = Phaser.Math.Linear(this.basePosition.y, this.nextPosition.y, step);
+      }
     }
 
     if (!isEqual(this.keyboardController?.movement, this.serverPosition.move)) {
