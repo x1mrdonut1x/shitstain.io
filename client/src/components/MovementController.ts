@@ -58,11 +58,11 @@ export class MovementController {
 
       this.player.x += velocityX;
       this.player.y += velocityY;
+    } else {
+      // TODO this should only by run on remote players. In order to do this, we need the exact same tick rate on client and server
+      this.player.x = Phaser.Math.Linear(this.player.x, this.serverPosition.x, 0.2);
+      this.player.y = Phaser.Math.Linear(this.player.y, this.serverPosition.y, 0.2);
     }
-
-    // TODO this should only by run on remote players. In order to do this, we need the exact same tick rate on client and server
-    this.player.x = Phaser.Math.Linear(this.player.x, this.serverPosition.x, 0.2);
-    this.player.y = Phaser.Math.Linear(this.player.y, this.serverPosition.y, 0.2);
 
     if (!isEqual(this.keyboardController?.movement, this.serverPosition.move)) {
       this.player.flipX = this.keyboardController?.movement.left ?? this.serverPosition.move.left;
