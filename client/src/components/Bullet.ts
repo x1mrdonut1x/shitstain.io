@@ -32,6 +32,7 @@ export class Bullet extends Physics.Matter.Sprite {
   }
 
   update(): void {
+    if (this.isStatic()) return;
     this.x += this.velocity.x;
     this.y += this.velocity.y;
 
