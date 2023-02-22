@@ -41,21 +41,13 @@ export class GameScene extends Scene {
     this.addBackground();
   }
 
-  fixedTick(time: number, delta: number) {
-    this.gameState?.updatePlayers(delta);
+  lastTimestamp = Date.now();
+  update() {
+    const now = Date.now();
+    const d = now - this.lastTimestamp;
+    this.lastTimestamp = now;
+    this.gameState?.updatePlayers(d / 1000);
     this.gameState?.updateEnemies();
-  }
-
-  FRAME_RATE = 60;
-  elapsedTime = 0;
-  fixedTimeStep = 1000 / this.FRAME_RATE;
-  update(time: number, delta: number) {
-    this.elapsedTime += delta;
-
-    while (this.elapsedTime >= this.fixedTimeStep) {
-      this.elapsedTime -= this.fixedTimeStep;
-      this.fixedTick(time, this.fixedTimeStep);
-    }
   }
 
   private loadSprite(key: string, path: string, size = 128) {

@@ -47,7 +47,8 @@ export class GameEngine {
     this.loop = setInterval(() => {
       const now = Date.now();
       const delta = now - lastTimestamp;
-      Engine.update(this.engine, delta);
+
+      this.state.updateMovement(delta / 1000);
 
       lastTimestamp = now;
     }, TIMESTEP);
@@ -59,8 +60,8 @@ export class GameEngine {
         state: {
           players: this.state.players.map(player => {
             const { body, data } = player;
-            data.x = body.position.x;
-            data.y = body.position.y;
+            // data.x = body.position.x;
+            // data.y = body.position.y;
             return data;
           }),
         },

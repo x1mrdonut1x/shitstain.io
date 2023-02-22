@@ -1,5 +1,6 @@
 import { cloneDeep } from 'lodash';
 import { World, Bodies, Body } from 'matter-js';
+import { TIMESTEP } from '../../shared/constants';
 import { ServerMovement, ServerPlayer, ServerWorldPlayer } from '../../types';
 
 export class GameState {
@@ -26,7 +27,7 @@ export class GameState {
       clientId: id,
       x,
       y,
-      speed: 4,
+      speed: 80,
       move: {
         up: false,
         right: false,
@@ -52,19 +53,10 @@ export class GameState {
 
     if (foundPlayer) {
       foundPlayer.data.move = data;
-
-      let y = 0;
-      let x = 0;
-      if (data.down) y = foundPlayer.data.speed;
-      if (data.up) y = -foundPlayer.data.speed;
-      if (data.left) x = -foundPlayer.data.speed;
-      if (data.right) x = foundPlayer.data.speed;
-
-      Body.setVelocity(foundPlayer.body, { x, y });
     }
   }
 
-  public updateMovement() {
+  public updateMovement(delta: number) {
     let anyPlayerChanged = false;
 
     this._players.forEach(({ data: player }) => {
@@ -83,8 +75,8 @@ export class GameState {
       if (player.move.right) {
         velocityX = player.speed;
       }
-      player.x += velocityX;
-      player.y += velocityY;
+      player.x += velocityX * delta;
+      player.y += velocityY * delta;
 
       if (velocityX !== 0 || velocityY !== 0) {
         anyPlayerChanged = true;

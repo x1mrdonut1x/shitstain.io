@@ -8,7 +8,7 @@ import { KeyboardController } from './KeyboardController';
 const defaultMovement: Omit<ServerPlayer, 'clientId'> = {
   x: 0,
   y: 0,
-  speed: 4,
+  speed: 80,
   move: {
     left: false,
     right: false,
@@ -28,7 +28,7 @@ export class MovementController {
 
   private serverPosition = cloneDeep(defaultMovement);
   private keyboardController: KeyboardController | undefined;
-  private readonly speed = 4;
+  private readonly speed = 80;
 
   constructor(private scene: Scene, private player: Player) {
     if (this.player.id === gameServer.clientId) {
@@ -40,6 +40,8 @@ export class MovementController {
   }
 
   public updatePositionFromServer(timestamp: number, position: Omit<ServerPlayer, 'clientId'>) {
+    this.serverPosition = position;
+
     if (!this.baseTimestamp) {
       this.baseTimestamp = timestamp;
       this.basePosition = position;
@@ -75,8 +77,21 @@ export class MovementController {
         velocityX = this.speed;
       }
 
-      this.player.x += velocityX;
-      this.player.y += velocityY;
+      this.player.x += velocityX * delta;
+      this.player.y += velocityY * delta;
+
+      if (this.nextPosition) {
+        const dx = Math.abs(this.player.x - this.nextPosition.x);
+        const dy = Math.abs(this.player.y - this.nextPosition.y);
+        const maxAllowedShift = 50;
+
+        console.log(dx, dy);
+
+        if (dx > maxAllowedShift || dy > maxAllowedShift) {
+          this.player.x = this.nextPosition.x;
+          this.player.y = this.nextPosition.y;
+        }
+      }
     } else {
       // TODO this should only by run on remote players. In order to do this, we need the exact same tick rate on client and server
 
