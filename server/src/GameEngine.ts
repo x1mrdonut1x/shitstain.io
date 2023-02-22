@@ -2,7 +2,6 @@ import { Engine, Events } from 'matter-js';
 import { ServerSnapshot } from '../../types';
 import { GameState } from './GameState';
 import { TIMESTEP, SNAPSHOT_STEP } from '../../shared/constants';
-import { omit } from 'lodash';
 
 export class GameEngine {
   private engine: Engine;
@@ -59,7 +58,7 @@ export class GameEngine {
         timestamp: now,
         state: {
           players: this.state.players.map(player => {
-            const { body, data } = player;
+            const { data } = player;
             // data.x = body.position.x;
             // data.y = body.position.y;
             return data;
