@@ -1,7 +1,6 @@
 import { cloneDeep } from 'lodash';
-import { World, Bodies, Body } from 'matter-js';
-import { TIMESTEP } from '../../shared/constants';
-import { ServerMovement, ServerPlayer, ServerWorldPlayer } from '../../types';
+import { World } from 'matter-js';
+import { ServerMovement, ServerWorldPlayer } from '../../types';
 
 export class GameState {
   public hasChanged = false;
@@ -36,10 +35,10 @@ export class GameState {
       },
     };
 
-    const body = Bodies.rectangle(x, y, 128, 128);
+    // const body = Bodies.rectangle(x, y, 128, 128);
 
-    this._players.push({ data: player, body });
-    World.add(this.world, body);
+    this._players.push({ data: player });
+    // World.add(this.world, body);
   }
 
   public removePlayer(id: string) {
