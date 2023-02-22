@@ -7,8 +7,8 @@ export type ServerMovement = {
 
 export type ServerShootData = {
   playerId: string;
-  x: number;
-  y: number;
+  isShooting: boolean;
+  playerPos: XYPosition;
   velocity: XYPosition;
 };
 
