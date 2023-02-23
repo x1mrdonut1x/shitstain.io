@@ -40,8 +40,8 @@ export class SocketActions {
       isShooting: data.isShooting,
       mousePos: data.mousePos,
       playerPos: {
-        x: foundPlayer?.data.x,
-        y: foundPlayer.data.y,
+        x: foundPlayer?.body.position.x,
+        y: foundPlayer.body.position.y,
       },
     };
 

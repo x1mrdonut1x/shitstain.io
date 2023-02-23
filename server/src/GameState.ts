@@ -1,10 +1,17 @@
 import { cloneDeep } from 'lodash';
-import { World } from 'matter-js';
-import { ServerMovement, ServerPlayer, ServerWorldPlayer } from '../../types';
+import Matter, { Bodies, World } from 'matter-js';
+import {
+  ServerEnemy,
+  ServerMovement,
+  ServerPlayer,
+  ServerWorldEnemy,
+  ServerWorldPlayer,
+} from '../../types';
 
 export class GameState {
   public hasChanged = false;
   private _players: ServerWorldPlayer[] = [];
+  private _enemies: ServerWorldEnemy[] = [];
 
   constructor(private world: World) {}
 
@@ -17,15 +24,15 @@ export class GameState {
   }
 
   public addPlayer(id: string) {
-    this.hasChanged = true;
-
     const x = Math.random() * 1100 + 100;
     const y = Math.random() * 600 + 100;
+    const body = Bodies.rectangle(x, y, 20, 60);
+    this.hasChanged = true;
 
-    const player: ServerPlayer = {
+    const serverPlayer: ServerPlayer = {
       clientId: id,
-      x,
-      y,
+      x: body.position.x,
+      y: body.position.y,
       bulletSpeed: 10, //px per tick
       speed: 200,
       move: {
@@ -36,15 +43,40 @@ export class GameState {
       },
     };
 
-    // const body = Bodies.rectangle(x, y, 128, 128);
+    this._players.push({ data: serverPlayer, body });
+    World.add(this.world, body);
+  }
 
-    this._players.push({ data: player });
-    // World.add(this.world, body);
+  public addEnemy() {
+    const x = Math.random() * 100 + 100;
+    const y = Math.random() * 100 + 100;
+    const body = Bodies.rectangle(x, y, 20, 60);
+    this.hasChanged = true;
+
+    const serverEnemy: ServerEnemy = {
+      x: body.position.x,
+      y: body.position.y,
+      speed: 200,
+      move: {
+        up: false,
+        right: false,
+        down: false,
+        left: false,
+      },
+    };
+
+    this._enemies.push({ data: serverEnemy, body });
+    World.add(this.world, body);
   }
 
   public removePlayer(id: string) {
     this.hasChanged = true;
+
+    const foundPlayer = this._players.find(p => p.data.clientId === id);
+
     this._players = this._players.filter(p => p.data.clientId !== id);
+
+    if (foundPlayer) World.remove(this.world, foundPlayer.body);
   }
 
   public movePlayer(id: string, data: ServerMovement) {
@@ -59,24 +91,24 @@ export class GameState {
   public updateMovement(delta: number) {
     let anyPlayerChanged = false;
 
-    this._players.forEach(({ data: player }) => {
+    this._players.forEach(({ body, data }) => {
       let velocityX = 0;
       let velocityY = 0;
 
-      if (player.move.up) {
-        velocityY = -player.speed;
+      if (data.move.up) {
+        velocityY = -data.speed;
       }
-      if (player.move.down) {
-        velocityY = player.speed;
+      if (data.move.down) {
+        velocityY = data.speed;
       }
-      if (player.move.left) {
-        velocityX = -player.speed;
+      if (data.move.left) {
+        velocityX = -data.speed;
       }
-      if (player.move.right) {
-        velocityX = player.speed;
+      if (data.move.right) {
+        velocityX = data.speed;
       }
-      player.x += velocityX * delta;
-      player.y += velocityY * delta;
+      body.position.x += velocityX * delta;
+      body.position.y += velocityY * delta;
 
       if (velocityX !== 0 || velocityY !== 0) {
         anyPlayerChanged = true;

@@ -26,6 +26,7 @@ export class Player extends Physics.Matter.Sprite {
     this.bulletController = new BulletController(scene, world, this);
     this.movementController = new MovementController(scene, this);
 
+    this.setRectangle(20, 60);
     if (this.isLocalPlayer) {
       this.scene.cameras.main.startFollow(
         this,

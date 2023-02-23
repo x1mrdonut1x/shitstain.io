@@ -1,3 +1,5 @@
+import MatterJS from 'matter-js';
+
 export type ServerMovement = {
   left: boolean;
   right: boolean;
@@ -28,8 +30,21 @@ export type ServerPlayer = {
   move: ServerMovement;
 };
 
+export type ServerEnemy = {
+  x: number;
+  y: number;
+  speed: number;
+  move: ServerMovement;
+};
+
 export type ServerWorldPlayer = {
   data: ServerPlayer;
+  body: MatterJS.Body;
+};
+
+export type ServerWorldEnemy = {
+  data: ServerEnemy;
+  body: MatterJS.Body;
 };
 
 export type ServerSnapshot = {
