@@ -4,6 +4,10 @@ import checker from 'vite-plugin-checker';
 
 export default defineConfig({
   publicDir: resolve(__dirname, 'public'),
+  assetsInclude: ['**/*.png'],
+  build: {
+    assetsInlineLimit: 0,
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

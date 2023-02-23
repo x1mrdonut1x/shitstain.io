@@ -10,14 +10,15 @@ export class Bullet extends Physics.Matter.Sprite {
     player: Player,
     private velocity: XYPosition
   ) {
-    super(world, x, y, 'fire-ball', undefined);
+    super(world, x, y, 'fire-ball', undefined, { label: 'bullet' });
     const angle = Math.atan2(velocity.y, velocity.x);
 
     this.setFriction(0);
     this.setFrictionAir(0);
     this.setBounce(0);
 
-    this.setRectangle(10, 10);
+    this.setCircle(7);
+    (this.body as MatterJS.BodyType).label = 'bullet';
     this.setOrigin(0.8, 0.5);
 
     this.setRotation(angle);

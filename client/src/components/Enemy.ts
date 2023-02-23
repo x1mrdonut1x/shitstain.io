@@ -1,9 +1,10 @@
 import { EnemyController } from '@/components/EnemyController';
 import { GameState } from '@/components/GameState';
-import { Scene } from 'phaser';
 import { DamageText } from './DamageText';
 
-export class Enemy {
+import { Physics, Scene } from 'phaser';
+
+export class Enemy extends Physics.Matter.Sprite {
   private enemyController?: EnemyController;
   private health = 100;
   private damageTexts: DamageText[] = [];
@@ -15,22 +16,22 @@ export class Enemy {
     x: number,
     y: number
   ) {
-    const enemy = scene.matter.add.rectangle(x, y, 50, 50);
-    enemy.render.fillOpacity = 1;
-    enemy.render.fillColor = 0x00ff00;
-    enemy.render.opacity = 1;
-    enemy.label = 'enemy';
+    super(world, x, y, 'monster-hydra-walk', undefined, { label: 'enemy' });
+    const body = this.body as MatterJS.BodyType;
 
-    // this.enemyController = new EnemyController(this, gameState.players);
+    body.label = 'enemy';
+    this.name = 'enemy';
+
+    this.setRectangle(60, 50);
+    this.setOrigin(0.65, 0.75);
 
     world.add(this);
-    // this.setCollisionGroup(1);
 
-    enemy.onCollideCallback = (event: Phaser.Types.Physics.Matter.MatterCollisionData) => {
+    this.setOnCollide((event: Phaser.Types.Physics.Matter.MatterCollisionData) => {
       let enemy;
       let bullet;
 
-      if (event.bodyA.label !== 'enemy') {
+      if (event.bodyA.label === 'bullet') {
         bullet = event.bodyA;
         enemy = event.bodyB;
       } else {
@@ -38,11 +39,13 @@ export class Enemy {
         bullet = event.bodyB;
       }
 
-      // console.log('playerId', bullet.gameObject?.getData('playerId'));
-      // console.log('damage', bullet.gameObject?.getData('damage'));
-      // console.log('enemy', enemy);
       this.damageTexts.push(new DamageText(scene, enemy, bullet.gameObject?.getData('damage')));
-    };
+    });
+
+    scene.sys.displayList.add(this);
+    scene.sys.updateList.add(this);
+
+    this.anims.play('monster-hydra-walk', true);
   }
 
   update(delta: number) {
