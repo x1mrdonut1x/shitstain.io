@@ -9,9 +9,8 @@ import tile2 from '@/assets/background/Ground_Tile_02.png';
 import fireballUrl from '@/assets/wizards/fire-wizard/Charge.png';
 import { GameState } from '@/components/GameState';
 import { MAP_HEIGHT, MAP_WIDTH, TILE_WIDTH } from '../../../shared/constants';
-
 export class GameScene extends Scene {
-  private gameState: GameState | undefined;
+  private gameState?: GameState;
 
   constructor() {
     super({ key: 'gameScene' });
@@ -32,14 +31,13 @@ export class GameScene extends Scene {
       this.game.config.width as number,
       this.game.config.height as number
     );
+
     this.gameState = new GameState(this, this.matter.world);
 
     createGameServer().then(() => {
       this.gameState?.initialize();
     });
 
-    // this.cameras.main.setBounds(0, 0, MAP_WIDTH, MAP_HEIGHT, true);
-    // this.cameras.main.zoomTo(0.2);
     this.createAnimations();
     this.addBackground();
   }
@@ -78,11 +76,20 @@ export class GameScene extends Scene {
     this.loadSprite('fire-wizard-fireball', fireWizardFireballUrl);
     this.loadSprite('fire-ball', fireballUrl, 64);
 
+    // this.loadSprite('monster-idle', dood, 96);
+
     this.load.image('tile1', tile1);
     this.load.image('tile2', tile2);
   }
 
   private createAnimations() {
+    this.anims.create({
+      key: 'monster-idle',
+      frames: this.anims.generateFrameNumbers('monster-idle', {}),
+      frameRate: 8,
+      repeat: -1,
+    });
+
     this.anims.create({
       key: 'fire-wizard-idle',
       frames: this.anims.generateFrameNumbers('fire-wizard-idle', {}),

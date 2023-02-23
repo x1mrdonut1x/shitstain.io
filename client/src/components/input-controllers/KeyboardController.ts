@@ -1,5 +1,5 @@
 import { Scene } from 'phaser';
-import { ServerMovement } from '../../../types';
+import { ServerMovement } from '../../../../types';
 interface Keys {
   [keyCode: string]: {
     key: Phaser.Input.Keyboard.Key;

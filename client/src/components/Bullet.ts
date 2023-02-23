@@ -8,19 +8,23 @@ export class Bullet extends Physics.Matter.Sprite {
     y: number,
     private velocity: XYPosition
   ) {
-    super(world, x, y, 'fire-ball');
+    super(world, x, y, 'fire-ball', undefined);
     const angle = Math.atan2(velocity.y, velocity.x);
 
     this.setFriction(0);
     this.setFrictionAir(0);
     this.setBounce(0);
 
+    this.setRectangle(10, 10);
+    this.setOrigin(0.8, 0.5);
+
     this.setRotation(angle);
 
     this.anims.play('fire-ball', true);
     this.setCollisionGroup(-1);
 
-    this.setOnCollide(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    this.setOnCollide((e: Phaser.Types.Physics.Matter.MatterCollisionData) => {
       this.setStatic(true);
       this.anims.play('fire-ball-explode', true);
       this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {

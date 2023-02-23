@@ -3,7 +3,7 @@ import { ServerPlayer, XYPosition } from '../../../types';
 import { gameServer } from '../networking/GameServer';
 import { isEqual } from 'lodash';
 import { Player } from './Player';
-import { KeyboardController } from './KeyboardController';
+import { KeyboardController } from './input-controllers/KeyboardController';
 
 export class MovementController {
   private existenceTime = 0;

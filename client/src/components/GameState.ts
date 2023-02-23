@@ -24,19 +24,16 @@ export class GameState {
 
     gameServer.createPlayer.emit();
 
-    [...Array(10)].forEach(() => {
-      // const x =
-      //   Math.random() > 0.5
-      //     ? MAP_WIDTH * 0.2 * Math.random()
-      //     : MAP_WIDTH * (1 - 0.2 * Math.random());
-      // const y =
-      //   Math.random() > 0.5
-      //     ? MAP_HEIGHT * 0.2 * Math.random()
-      //     : MAP_HEIGHT * (1 - 0.2 * Math.random());
-      // this.enemies.push(new Enemy(this.scene, this.world, this, x, y));
+    Array.from(Array(10)).forEach((_, index) => {
+      this.addEnemy(400, 200 + index * 100);
     });
 
     document.getElementById('loading')?.remove();
+  }
+
+  public addEnemy(x: number, y: number) {
+    const newEnemy = new Enemy(this.scene, this.world, this, x, y);
+    this.enemies.push(newEnemy);
   }
 
   public getPlayerCount() {

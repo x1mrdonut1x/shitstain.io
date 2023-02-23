@@ -1,9 +1,10 @@
 import { EnemyController } from '@/components/EnemyController';
 import { GameState } from '@/components/GameState';
-import { Physics, Scene } from 'phaser';
+import { Scene } from 'phaser';
 
-export class Enemy extends Physics.Matter.Sprite {
-  private enemyController: EnemyController;
+export class Enemy {
+  private enemyController?: EnemyController;
+  private health = 100;
 
   constructor(
     scene: Scene,
@@ -12,20 +13,31 @@ export class Enemy extends Physics.Matter.Sprite {
     x: number,
     y: number
   ) {
-    super(world, x, y, 'monster-hydra-walk');
-    this.setPosition(x, y);
+    const enemy = scene.matter.add.rectangle(x, y, 50, 50);
+    enemy.render.fillOpacity = 1;
+    enemy.render.fillColor = 0x00ff00;
+    enemy.render.opacity = 1;
 
-    this.enemyController = new EnemyController(this, gameState.players);
+    // this.setPosition(x, y);
+    // this.setSize(100, 100);
+
+    // this.setRectangle(50, 50);
+    // this.setOrigin(0.75, 0.75);
+    // this.enemyController = new EnemyController(this, gameState.players);
 
     world.add(this);
-    scene.sys.displayList.add(this);
-    scene.sys.updateList.add(this);
-    this.setCollisionGroup(1);
+    // scene.sys.displayList.add(this);
+    // scene.sys.updateList.add(this);
+    // this.setCollisionGroup(1);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // this.setOnCollide((event: Phaser.Types.Physics.Matter.MatterCollisionData) => {
+    //   // console.log(event.bodyA);
+    //   // console.log(event.bodyB);
+    // });
   }
 
   update() {
-    this.enemyController.update();
-
-    this.anims.play('monster-hydra-walk', true);
+    // this.enemyController.update();
   }
 }
