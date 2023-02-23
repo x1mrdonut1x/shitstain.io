@@ -25,14 +25,17 @@ export class Player extends Physics.Matter.Sprite {
 
     this.bulletController = new BulletController(scene, world, this);
     this.movementController = new MovementController(scene, this);
-    this.scene.cameras.main.startFollow(
-      this,
-      true,
-      1,
-      1,
-      -window.innerWidth / 4,
-      -window.innerHeight - 50 //offset url and tabs bar
-    );
+
+    if (this.isLocalPlayer) {
+      this.scene.cameras.main.startFollow(
+        this,
+        true,
+        1,
+        1,
+        -window.innerWidth / 4,
+        -window.innerHeight - 50 //offset url and tabs bar
+      );
+    }
 
     world.add(this);
     scene.sys.displayList.add(this);
