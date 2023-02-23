@@ -13,10 +13,14 @@ class GameServer {
   private io!: Socket; // initialized in main.ts
 
   constructor() {
+    console.log('GameServer constructor');
     this.io = client(import.meta.env.VITE_SOCKET_SERVER);
+    console.log(this.io);
   }
 
   async init() {
+    console.log('GameServer initialized');
+
     return new Promise(resolve => {
       this.io.on('message', (id: string) => {
         this.clientId = id;
