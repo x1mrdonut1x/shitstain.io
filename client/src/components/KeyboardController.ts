@@ -10,10 +10,15 @@ interface Keys {
 
 export class KeyboardController {
   private readonly keys: Keys = {};
+  private events: (() => void)[] = [];
   private _movement: ServerMovement = { up: false, down: false, left: false, right: false };
 
   constructor(private scene: Scene) {
     this.initKeyboard();
+  }
+
+  public addEvent(callback: () => void) {
+    this.events.push(callback);
   }
 
   get movement() {
@@ -34,6 +39,12 @@ export class KeyboardController {
         entry.onDown();
       } else if (Phaser.Input.Keyboard.JustUp(entry.key)) {
         entry.onUp();
+      }
+
+      if (this.isMoving) {
+        this.events.forEach(event => {
+          event();
+        });
       }
     });
   }

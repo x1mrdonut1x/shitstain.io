@@ -1,3 +1,4 @@
+import { gameServer } from '@/networking/GameServer';
 import { Physics, Scene } from 'phaser';
 import { ServerPlayer } from '../../../types';
 import { BulletController } from './BulletController';
@@ -7,6 +8,8 @@ export class Player extends Physics.Matter.Sprite {
   private bulletController: BulletController | undefined;
   private movementController: MovementController | undefined;
   public isMoving = false;
+  public isLocalPlayer;
+  public bulletSpeed = 10;
 
   constructor(
     scene: Scene,
@@ -16,7 +19,8 @@ export class Player extends Physics.Matter.Sprite {
     public id: string
   ) {
     super(world, x, y, 'fireWizard');
-    this.setPosition(x, y);
+    this.isLocalPlayer = id === gameServer.clientId;
+
     console.log('player', id, 'created');
 
     this.bulletController = new BulletController(scene, world, this);
@@ -29,7 +33,7 @@ export class Player extends Physics.Matter.Sprite {
   }
 
   update(delta: number) {
-    this.bulletController?.update(delta);
+    this.bulletController?.update();
     this.movementController?.update(delta);
 
     if (this.bulletController?.isShooting) {

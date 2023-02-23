@@ -49,7 +49,7 @@ export class GameScene extends Scene {
     const now = Date.now();
     const d = now - this.lastTimestamp;
     this.lastTimestamp = now;
-    this.gameState?.updatePlayers(d / 1000);
+    this.gameState?.updatePlayers(d);
     this.gameState?.updateEnemies();
   }
 

@@ -5,11 +5,18 @@ export type ServerMovement = {
   down: boolean;
 };
 
-export type ServerShootData = {
-  playerId: string;
+export type ClientShootData = {
+  clientId: string;
   isShooting: boolean;
   playerPos: XYPosition;
-  velocity: XYPosition;
+  mousePos: XYPosition;
+};
+
+export type ServerShootData = {
+  clientId: string;
+  isShooting: boolean;
+  playerPos: XYPosition;
+  mousePos: XYPosition;
 };
 
 export type ServerPlayer = {
@@ -17,6 +24,7 @@ export type ServerPlayer = {
   x: number;
   y: number;
   speed: number;
+  bulletSpeed: number;
   move: ServerMovement;
 };
 
