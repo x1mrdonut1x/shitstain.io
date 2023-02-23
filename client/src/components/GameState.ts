@@ -61,9 +61,9 @@ export class GameState {
     });
   }
 
-  public updateEnemies() {
+  public updateEnemies(delta: number) {
     this.enemies.forEach(enemy => {
-      enemy.update();
+      enemy.update(delta);
     });
   }
 

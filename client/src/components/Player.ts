@@ -20,7 +20,7 @@ export class Player extends Physics.Matter.Sprite {
   ) {
     super(world, x, y, 'fireWizard');
     this.isLocalPlayer = id === gameServer.clientId;
-
+    (this.body as MatterJS.BodyType).label = 'Dupasraka';
     console.log('player', id, 'created');
 
     this.bulletController = new BulletController(scene, world, this);

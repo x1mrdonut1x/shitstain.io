@@ -50,7 +50,7 @@ export class GameScene extends Scene {
     const d = now - this.lastTimestamp;
     this.lastTimestamp = now;
     this.gameState?.updatePlayers(d);
-    this.gameState?.updateEnemies();
+    this.gameState?.updateEnemies(d);
   }
 
   private loadSprite(key: string, path: string, size = 128) {

@@ -1,27 +1,33 @@
 import { Physics } from 'phaser';
 import { XYPosition } from '../../../types';
+import { Player } from './Player';
 
 export class Bullet extends Physics.Matter.Sprite {
   constructor(
     world: Phaser.Physics.Matter.World,
     x: number,
     y: number,
+    player: Player,
     private velocity: XYPosition
   ) {
-    super(world, x, y, 'fire-ball', undefined);
+    super(world, x, y, 'fire-ball', undefined, { label: 'bullet' });
     const angle = Math.atan2(velocity.y, velocity.x);
 
     this.setFriction(0);
     this.setFrictionAir(0);
     this.setBounce(0);
 
-    this.setRectangle(10, 10);
+    this.setCircle(7);
+    (this.body as MatterJS.BodyType).label = 'bullet';
     this.setOrigin(0.8, 0.5);
 
     this.setRotation(angle);
 
     this.anims.play('fire-ball', true);
     this.setCollisionGroup(-1);
+
+    this.setData('damage', 10);
+    this.setData('playerId', player.id);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.setOnCollide((e: Phaser.Types.Physics.Matter.MatterCollisionData) => {
