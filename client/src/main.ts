@@ -18,6 +18,4 @@ async function initialize() {
   new Phaser.Game(config);
 }
 
-window.onload = () => {
-  initialize();
-};
+initialize();
