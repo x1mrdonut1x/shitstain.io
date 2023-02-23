@@ -7,23 +7,24 @@ import fireWizardFireballUrl from '@/assets/wizards/fire-wizard/Fireball.png';
 import tile1 from '@/assets/background/Ground_Tile_01.png';
 import tile2 from '@/assets/background/Ground_Tile_02.png';
 import fireballUrl from '@/assets/wizards/fire-wizard/Charge.png';
-import monsterHydraWalkUrl from '@/assets/monsters/1/Walk.png';
 import { GameState } from '@/components/GameState';
-import { MAP_HEIGHT, MAP_WIDTH, TILE_WIDTH } from '@/constants';
+import { MAP_HEIGHT, MAP_WIDTH, TILE_WIDTH } from '../../../shared/constants';
 
 export class GameScene extends Scene {
   private gameState: GameState | undefined;
 
   constructor() {
-    super('gameScene');
+    super({ key: 'gameScene' });
+    console.log('GameScene constructor');
   }
 
   preload() {
+    console.log('GameScene preload');
     this.loadSprites();
   }
 
   create() {
-    console.log('Phaser create');
+    console.log('GameScene create');
 
     this.matter.world.setBounds(
       0,
@@ -76,8 +77,6 @@ export class GameScene extends Scene {
     this.loadSprite('fire-wizard-idle', fireWizardIdleUrl);
     this.loadSprite('fire-wizard-fireball', fireWizardFireballUrl);
     this.loadSprite('fire-ball', fireballUrl, 64);
-
-    this.loadSprite('monster-hydra-walk', monsterHydraWalkUrl, 96);
 
     this.load.image('tile1', tile1);
     this.load.image('tile2', tile2);
