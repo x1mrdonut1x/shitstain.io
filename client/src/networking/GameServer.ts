@@ -1,10 +1,10 @@
 import { io as client, Socket } from 'socket.io-client';
+import { ClientShootData, ServerShootData } from '../../../types';
 import {
   GetPlayersEvent,
   GetWorldStateEvent,
   PlayerConnectEvent,
   PlayerMoveEvent,
-  PlayerShootEvent,
   SocketEvent,
 } from '../../../types/events';
 
@@ -15,7 +15,6 @@ class GameServer {
   constructor() {
     console.log('GameServer constructor');
     this.io = client(import.meta.env.VITE_SOCKET_SERVER);
-    console.log(this.io);
   }
 
   async init() {
@@ -47,7 +46,7 @@ class GameServer {
   }
 
   get shoot() {
-    return this.createSocket<PlayerShootEvent>(SocketEvent.PLAYER_SHOOT);
+    return this.createSocket<ClientShootData, ServerShootData>(SocketEvent.PLAYER_SHOOT);
   }
 
   private createSocket<TEmit = unknown, TOn = TEmit, TOff = TEmit>(

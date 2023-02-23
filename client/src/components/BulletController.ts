@@ -1,16 +1,15 @@
 import { gameServer } from '@/networking/GameServer';
 import { Scene } from 'phaser';
-import { XYPosition } from '../../../types';
+import { ServerShootData, XYPosition } from '../../../types';
 import { Bullet } from './Bullet';
 import { Player } from './Player';
 
 export class BulletController {
   private bullets: Bullet[] = [];
-  private timeDelta = 0; //ms
-  private shootingSpeed = 100; //ms
-  private bulletSpeed = 10;
+  private lastShotAt = 0; //ms
+  private shootingSpeed = 150; //ms
 
-  private serverVelocity: XYPosition = { x: 0, y: 0 };
+  private serverStep?: ServerShootData;
 
   public isShooting = false;
 
@@ -19,79 +18,109 @@ export class BulletController {
     private world: Phaser.Physics.Matter.World,
     private player: Player
   ) {
-    if (this.player.id === gameServer.clientId) {
+    if (this.player.isLocalPlayer) {
       this.scene.input.on('pointerdown', () => {
         this.isShooting = true;
-        this.emitShoot(true);
+        this.emitShoot();
+        this.shoot();
       });
 
       this.scene.input.on('pointermove', () => {
-        if (this.isShooting) this.emitShoot(true);
+        if (this.isShooting) {
+          this.emitShoot();
+          this.shoot();
+        }
       });
 
       this.scene.input.on('pointerup', () => {
         this.isShooting = false;
-        this.emitShoot(false);
+        this.emitShoot();
+        this.shoot();
       });
     }
 
     gameServer.shoot.on(data => {
-      if (data.playerId === player.id) {
-        this.isShooting = this.isShooting ?? data.isShooting;
-        this.serverVelocity = data.velocity;
-      }
+      if (data.clientId !== player.id) return;
+
+      this.isShooting = data.isShooting;
+      this.serverStep = data;
+      // TODO the first argument should be data.playerPos to have the correct starting point
+      this.shoot(this.player, this.getVelocity(data.mousePos));
     });
   }
 
-  private tryFlipX(x: number) {
+  private tryFlipX() {
     if (this.isShooting) {
-      if (x > this.player.x) {
-        this.player.flipX = false;
+      if (this.player.isLocalPlayer) {
+        this.player.flipX = this.scene.input.mousePointer.worldX < 0;
       } else {
-        this.player.flipX = true;
+        this.player.flipX =
+          (this.serverStep?.mousePos.x || 0) > (this.serverStep?.playerPos.x || 0);
       }
     }
   }
 
-  emitShoot(isShooting: boolean) {
+  emitShoot() {
     gameServer.shoot.emit({
-      playerId: this.player.id,
-      isShooting,
+      isShooting: this.isShooting,
       playerPos: {
-        x: Math.round(this.player.x),
-        y: Math.round(this.player.y),
+        x: this.player.x,
+        y: this.player.y,
       },
-      velocity: this.getVelocity(),
+      mousePos: {
+        x: this.scene.input.mousePointer.worldX,
+        y: this.scene.input.mousePointer.worldY,
+      },
     });
   }
 
-  shoot(velocity: XYPosition) {
-    this.tryFlipX(this.scene.input.mousePointer.worldX);
+  shoot(
+    startPos: XYPosition = this.player,
+    velocity: XYPosition = this.getVelocity({
+      x: this.scene.input.mousePointer.worldX,
+      y: this.scene.input.mousePointer.worldY,
+    })
+  ) {
+    const now = Date.now();
+    const delta = now - this.lastShotAt;
 
-    const bullet = new Bullet(this.world, this.player.x, this.player.y, velocity);
+    if (delta < this.shootingSpeed) return;
+
+    this.tryFlipX();
+
+    const bullet = new Bullet(this.world, startPos.x, startPos.y, velocity);
     this.bullets.push(bullet);
 
     this.scene.add.existing(bullet);
+    this.lastShotAt = Date.now();
   }
 
-  private getVelocity() {
+  private getVelocity(
+    data: XYPosition = {
+      x: this.scene.input.mousePointer.worldX,
+      y: this.scene.input.mousePointer.worldY,
+    }
+  ) {
     const angle = Math.atan2(
-      Math.round(this.scene.input.mousePointer.worldY - this.player.y),
-      Math.round(this.scene.input.mousePointer.worldX - this.player.x)
+      Math.round(data.y - this.player.y),
+      Math.round(data.x - this.player.x)
     );
 
-    const velocityX = Math.cos(angle) * this.bulletSpeed;
-    const velocityY = Math.sin(angle) * this.bulletSpeed;
+    const velocityX = Math.cos(angle) * this.player.bulletSpeed;
+    const velocityY = Math.sin(angle) * this.player.bulletSpeed;
 
     return { x: velocityX, y: velocityY };
   }
 
-  update(delta: number): void {
-    this.timeDelta += delta;
-    if (this.isShooting && this.timeDelta > this.shootingSpeed) {
-      this.timeDelta = 0;
-
-      this.shoot(this.serverVelocity ?? this.getVelocity());
+  update() {
+    if (this.isShooting) {
+      this.shoot(
+        {
+          x: this.player.x,
+          y: this.player.y,
+        },
+        this.getVelocity(this.serverStep?.mousePos)
+      );
     }
 
     this.bullets.forEach(bullet => {

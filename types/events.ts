@@ -1,4 +1,4 @@
-import { ServerMovement, ServerPlayer, ServerShootData, ServerSnapshot } from '.';
+import { ServerMovement, ServerPlayer, ClientShootData, ServerSnapshot } from '.';
 
 export enum SocketEvent {
   DISCONNECT = 'disconnect',
@@ -19,7 +19,7 @@ export type PlayerConnectEvent = {
   clientId: string;
 };
 
-export type PlayerShootEvent = ServerShootData;
+export type EmitPlayerShootEvent = Omit<ClientShootData, 'playerPos'>;
 
 export type GetWorldStateEvent = ServerSnapshot;
 

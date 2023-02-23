@@ -1,21 +1,9 @@
 import { Scene } from 'phaser';
 import { ServerPlayer, XYPosition } from '../../../types';
 import { gameServer } from '../networking/GameServer';
-import { cloneDeep, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { Player } from './Player';
 import { KeyboardController } from './KeyboardController';
-
-const defaultMovement: Omit<ServerPlayer, 'clientId'> = {
-  x: 0,
-  y: 0,
-  speed: 200,
-  move: {
-    left: false,
-    right: false,
-    up: false,
-    down: false,
-  },
-};
 
 export class MovementController {
   private existenceTime = 0;
@@ -26,20 +14,17 @@ export class MovementController {
   private basePosition: XYPosition | undefined;
   private nextPosition: XYPosition | undefined;
 
-  private serverPosition = cloneDeep(defaultMovement);
+  private serverPosition?: ServerPlayer;
   private keyboardController: KeyboardController | undefined;
   private readonly speed = 200;
 
   constructor(private scene: Scene, private player: Player) {
-    if (this.player.id === gameServer.clientId) {
+    if (this.player.isLocalPlayer) {
       this.keyboardController = new KeyboardController(scene);
     }
-
-    this.serverPosition.x = this.player.x;
-    this.serverPosition.y = this.player.y;
   }
 
-  public updatePositionFromServer(timestamp: number, position: Omit<ServerPlayer, 'clientId'>) {
+  public updatePositionFromServer(timestamp: number, position: ServerPlayer) {
     this.serverPosition = position;
 
     if (!this.baseTimestamp) {
@@ -77,45 +62,48 @@ export class MovementController {
         velocityX = this.speed;
       }
 
-      this.player.x += velocityX * delta;
-      this.player.y += velocityY * delta;
+      this.player.x += (velocityX * delta) / 1000;
+      this.player.y += (velocityY * delta) / 1000;
 
       if (this.nextPosition) {
         const dx = Math.abs(this.player.x - this.nextPosition.x);
         const dy = Math.abs(this.player.y - this.nextPosition.y);
-        const maxAllowedShift = 100;
-        // console.log(dx, dy);
+        const maxAllowedShift = 80;
 
         if (dx > maxAllowedShift || dy > maxAllowedShift) {
           this.player.x = this.nextPosition.x;
           this.player.y = this.nextPosition.y;
         }
       }
+
+      if (!isEqual(this.keyboardController?.movement, this.serverPosition?.move)) {
+        gameServer.movePlayer.emit({ movement: this.keyboardController.movement });
+      }
+
+      if (this.keyboardController.movement.left || this.keyboardController.movement.right) {
+        this.player.flipX = this.keyboardController.movement.left;
+      }
+      this.player.isMoving = this.keyboardController?.isMoving;
     } else {
       if (this.basePosition && this.nextPosition && this.nextTimestamp && this.baseTimestamp) {
         const fullTimeStep = this.nextTimestamp - this.baseTimestamp;
         const step = Math.min(this.existenceTime, fullTimeStep) / fullTimeStep;
-        this.existenceTime += delta * 1000;
+        this.existenceTime += delta;
 
         this.player.x = Phaser.Math.Linear(this.basePosition.x, this.nextPosition.x, step);
         this.player.y = Phaser.Math.Linear(this.basePosition.y, this.nextPosition.y, step);
       }
-    }
 
-    if (!isEqual(this.keyboardController?.movement, this.serverPosition.move)) {
-      this.player.flipX = this.keyboardController?.movement.left ?? this.serverPosition.move.left;
-    }
+      if (this.serverPosition) {
+        if (this.serverPosition.move.left || this.serverPosition.move.right) {
+          this.player.flipX = this.serverPosition.move.left;
+        }
 
-    this.player.isMoving =
-      this.keyboardController?.isMoving ??
-      (this.serverPosition.move.right ||
-        this.serverPosition.move.left ||
-        this.serverPosition.move.up ||
-        this.serverPosition.move.down);
-
-    if (this.player.id === gameServer.clientId && this.keyboardController) {
-      if (!isEqual(this.keyboardController?.movement, this.serverPosition.move)) {
-        gameServer.movePlayer.emit({ movement: this.keyboardController.movement });
+        this.player.isMoving =
+          this.serverPosition.move.right ||
+          this.serverPosition.move.left ||
+          this.serverPosition.move.up ||
+          this.serverPosition.move.down;
       }
     }
   }

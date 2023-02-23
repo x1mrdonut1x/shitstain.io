@@ -3,11 +3,11 @@ import {
   GetPlayersEvent,
   PlayerConnectEvent,
   PlayerMoveEvent,
-  PlayerShootEvent,
   SocketEvent,
 } from '../../types/events';
 import { broadcast } from './socket-server';
 import { GameState } from './GameState';
+import { ClientShootData, ServerShootData } from '../../types';
 
 export interface WrappedServerSocket<T> {
   event: string;
@@ -28,9 +28,24 @@ export class SocketActions {
 
     this.createSocket<PlayerMoveEvent>(SocketEvent.PLAYER_MOVE).on(this.onPlayerMove.bind(this));
 
-    this.createSocket<PlayerShootEvent>(SocketEvent.PLAYER_SHOOT).on(
-      broadcast(SocketEvent.PLAYER_SHOOT)
-    );
+    this.createSocket<ClientShootData>(SocketEvent.PLAYER_SHOOT).on(this.onPlayerShoot.bind(this));
+  }
+
+  private onPlayerShoot(data: ClientShootData) {
+    const foundPlayer = this.gameState.players.find(p => p.data.clientId === data.clientId);
+    if (!foundPlayer) return;
+
+    const output: ServerShootData = {
+      clientId: data.clientId,
+      isShooting: data.isShooting,
+      mousePos: data.mousePos,
+      playerPos: {
+        x: foundPlayer?.data.x,
+        y: foundPlayer.data.y,
+      },
+    };
+
+    broadcast(SocketEvent.PLAYER_SHOOT)(output);
   }
 
   private onPlayerConnected(data: { clientId: string }) {

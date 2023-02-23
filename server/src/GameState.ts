@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash';
 import { World } from 'matter-js';
-import { ServerMovement, ServerWorldPlayer } from '../../types';
+import { ServerMovement, ServerPlayer, ServerWorldPlayer } from '../../types';
 
 export class GameState {
   public hasChanged = false;
@@ -22,10 +22,11 @@ export class GameState {
     const x = Math.random() * 1100 + 100;
     const y = Math.random() * 600 + 100;
 
-    const player = {
+    const player: ServerPlayer = {
       clientId: id,
       x,
       y,
+      bulletSpeed: 10, //px per tick
       speed: 200,
       move: {
         up: false,
