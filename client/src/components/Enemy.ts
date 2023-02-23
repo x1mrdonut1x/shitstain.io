@@ -1,8 +1,8 @@
 import { EnemyController } from '@/components/EnemyController';
 import { GameState } from '@/components/GameState';
-import { Scene } from 'phaser';
+import { Physics, Scene } from 'phaser';
 
-export class Enemy {
+export class Enemy extends Physics.Matter.Sprite {
   private enemyController?: EnemyController;
   private health = 100;
 
@@ -13,10 +13,7 @@ export class Enemy {
     x: number,
     y: number
   ) {
-    const enemy = scene.matter.add.rectangle(x, y, 50, 50);
-    enemy.render.fillOpacity = 1;
-    enemy.render.fillColor = 0x00ff00;
-    enemy.render.opacity = 1;
+    super(world, x, y, 'monster-hydra-walk');
 
     // this.setPosition(x, y);
     // this.setSize(100, 100);
@@ -25,7 +22,6 @@ export class Enemy {
     // this.setOrigin(0.75, 0.75);
     // this.enemyController = new EnemyController(this, gameState.players);
 
-    world.add(this);
     // scene.sys.displayList.add(this);
     // scene.sys.updateList.add(this);
     // this.setCollisionGroup(1);
@@ -35,6 +31,10 @@ export class Enemy {
     //   // console.log(event.bodyA);
     //   // console.log(event.bodyB);
     // });
+    scene.sys.displayList.add(this);
+    scene.sys.updateList.add(this);
+
+    this.anims.play('monster-hydra-walk', true);
   }
 
   update() {

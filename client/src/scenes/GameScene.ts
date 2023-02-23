@@ -1,5 +1,7 @@
 import { Scene } from 'phaser';
 import { createGameServer } from '@/networking/GameServer';
+import { GameState } from '@/components/GameState';
+import { MAP_HEIGHT, MAP_WIDTH, TILE_WIDTH } from '../../../shared/constants';
 
 import fireWizardWalkUrl from '@/assets/wizards/fire-wizard/Walk.png';
 import fireWizardIdleUrl from '@/assets/wizards/fire-wizard/Idle.png';
@@ -7,8 +9,8 @@ import fireWizardFireballUrl from '@/assets/wizards/fire-wizard/Fireball.png';
 import tile1 from '@/assets/background/Ground_Tile_01.png';
 import tile2 from '@/assets/background/Ground_Tile_02.png';
 import fireballUrl from '@/assets/wizards/fire-wizard/Charge.png';
-import { GameState } from '@/components/GameState';
-import { MAP_HEIGHT, MAP_WIDTH, TILE_WIDTH } from '../../../shared/constants';
+import monsterHydraWalkUrl from '@/assets/monsters/1/Walk.png';
+
 export class GameScene extends Scene {
   private gameState?: GameState;
 
@@ -76,20 +78,13 @@ export class GameScene extends Scene {
     this.loadSprite('fire-wizard-fireball', fireWizardFireballUrl);
     this.loadSprite('fire-ball', fireballUrl, 64);
 
-    // this.loadSprite('monster-idle', dood, 96);
+    this.loadSprite('monster-hydra-walk', monsterHydraWalkUrl, 96);
 
     this.load.image('tile1', tile1);
     this.load.image('tile2', tile2);
   }
 
   private createAnimations() {
-    this.anims.create({
-      key: 'monster-idle',
-      frames: this.anims.generateFrameNumbers('monster-idle', {}),
-      frameRate: 8,
-      repeat: -1,
-    });
-
     this.anims.create({
       key: 'fire-wizard-idle',
       frames: this.anims.generateFrameNumbers('fire-wizard-idle', {}),
