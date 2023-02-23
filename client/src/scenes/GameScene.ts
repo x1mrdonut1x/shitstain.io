@@ -23,6 +23,8 @@ export class GameScene extends Scene {
   }
 
   create() {
+    console.log('Phaser create');
+
     this.matter.world.setBounds(
       0,
       0,

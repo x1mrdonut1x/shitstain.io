@@ -13,8 +13,8 @@ export class GameState {
   constructor(private scene: Scene, private world: Phaser.Physics.Matter.World) {}
 
   public initialize() {
+    console.log('GameState.initialize');
     gameServer.getPlayers.on(data => {
-      console.log(data);
       this.updatePlayersFromServer(data);
     });
 
