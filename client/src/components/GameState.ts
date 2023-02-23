@@ -92,10 +92,10 @@ export class GameState {
   }
 
   public movePlayers(data: GetWorldStateEvent) {
-    console.log(
-      data.timestamp,
-      data.state.players.map(player => `${Math.floor(player.x)}; ${Math.floor(player.y)}`)
-    );
+    // console.log(
+    //   data.timestamp,
+    //   data.state.players.map(player => `${Math.floor(player.x)}; ${Math.floor(player.y)}`)
+    // );
     data.state.players.forEach(object => {
       const foundPlayer = this.players.find(player => player.id === object.clientId);
 

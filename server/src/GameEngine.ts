@@ -1,4 +1,4 @@
-import { Engine, Events } from 'matter-js';
+import { Engine } from 'matter-js';
 import { ServerSnapshot } from '../../types';
 import { GameState } from './GameState';
 import { TIMESTEP, SNAPSHOT_STEP } from '../../shared/constants';

@@ -26,7 +26,7 @@ export class GameState {
       clientId: id,
       x,
       y,
-      speed: 80,
+      speed: 200,
       move: {
         up: false,
         right: false,

@@ -8,7 +8,7 @@ import { KeyboardController } from './KeyboardController';
 const defaultMovement: Omit<ServerPlayer, 'clientId'> = {
   x: 0,
   y: 0,
-  speed: 80,
+  speed: 200,
   move: {
     left: false,
     right: false,
@@ -28,7 +28,7 @@ export class MovementController {
 
   private serverPosition = cloneDeep(defaultMovement);
   private keyboardController: KeyboardController | undefined;
-  private readonly speed = 80;
+  private readonly speed = 200;
 
   constructor(private scene: Scene, private player: Player) {
     if (this.player.id === gameServer.clientId) {
@@ -83,9 +83,8 @@ export class MovementController {
       if (this.nextPosition) {
         const dx = Math.abs(this.player.x - this.nextPosition.x);
         const dy = Math.abs(this.player.y - this.nextPosition.y);
-        const maxAllowedShift = 50;
-
-        console.log(dx, dy);
+        const maxAllowedShift = 100;
+        // console.log(dx, dy);
 
         if (dx > maxAllowedShift || dy > maxAllowedShift) {
           this.player.x = this.nextPosition.x;
@@ -93,12 +92,10 @@ export class MovementController {
         }
       }
     } else {
-      // TODO this should only by run on remote players. In order to do this, we need the exact same tick rate on client and server
-
       if (this.basePosition && this.nextPosition && this.nextTimestamp && this.baseTimestamp) {
         const fullTimeStep = this.nextTimestamp - this.baseTimestamp;
-        const step = Math.max(this.existenceTime, fullTimeStep) / fullTimeStep;
-        this.existenceTime += delta;
+        const step = Math.min(this.existenceTime, fullTimeStep) / fullTimeStep;
+        this.existenceTime += delta * 1000;
 
         this.player.x = Phaser.Math.Linear(this.basePosition.x, this.nextPosition.x, step);
         this.player.y = Phaser.Math.Linear(this.basePosition.y, this.nextPosition.y, step);
