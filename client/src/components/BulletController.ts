@@ -86,7 +86,7 @@ export class BulletController {
 
     this.tryFlipX();
 
-    const bullet = new Bullet(this.world, startPos.x, startPos.y, velocity);
+    const bullet = new Bullet(this.world, startPos.x, startPos.y, this.player, velocity);
     this.bullets.push(bullet);
 
     this.scene.add.existing(bullet);

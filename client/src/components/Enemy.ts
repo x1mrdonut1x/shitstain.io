@@ -1,10 +1,12 @@
 import { EnemyController } from '@/components/EnemyController';
 import { GameState } from '@/components/GameState';
 import { Scene } from 'phaser';
+import { DamageText } from './DamageText';
 
 export class Enemy {
   private enemyController?: EnemyController;
   private health = 100;
+  private damageTexts: DamageText[] = [];
 
   constructor(
     scene: Scene,
@@ -17,27 +19,33 @@ export class Enemy {
     enemy.render.fillOpacity = 1;
     enemy.render.fillColor = 0x00ff00;
     enemy.render.opacity = 1;
+    enemy.label = 'enemy';
 
-    // this.setPosition(x, y);
-    // this.setSize(100, 100);
-
-    // this.setRectangle(50, 50);
-    // this.setOrigin(0.75, 0.75);
     // this.enemyController = new EnemyController(this, gameState.players);
 
     world.add(this);
-    // scene.sys.displayList.add(this);
-    // scene.sys.updateList.add(this);
     // this.setCollisionGroup(1);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    // this.setOnCollide((event: Phaser.Types.Physics.Matter.MatterCollisionData) => {
-    //   // console.log(event.bodyA);
-    //   // console.log(event.bodyB);
-    // });
+    enemy.onCollideCallback = (event: Phaser.Types.Physics.Matter.MatterCollisionData) => {
+      let enemy;
+      let bullet;
+
+      if (event.bodyA.label !== 'enemy') {
+        bullet = event.bodyA;
+        enemy = event.bodyB;
+      } else {
+        enemy = event.bodyA;
+        bullet = event.bodyB;
+      }
+
+      // console.log('playerId', bullet.gameObject?.getData('playerId'));
+      // console.log('damage', bullet.gameObject?.getData('damage'));
+      // console.log('enemy', enemy);
+      this.damageTexts.push(new DamageText(scene, enemy, bullet.gameObject?.getData('damage')));
+    };
   }
 
-  update() {
-    // this.enemyController.update();
+  update(delta: number) {
+    this.damageTexts.forEach(text => text.update(delta));
   }
 }

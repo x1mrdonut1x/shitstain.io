@@ -1,11 +1,13 @@
 import { Physics } from 'phaser';
 import { XYPosition } from '../../../types';
+import { Player } from './Player';
 
 export class Bullet extends Physics.Matter.Sprite {
   constructor(
     world: Phaser.Physics.Matter.World,
     x: number,
     y: number,
+    player: Player,
     private velocity: XYPosition
   ) {
     super(world, x, y, 'fire-ball', undefined);
@@ -22,6 +24,9 @@ export class Bullet extends Physics.Matter.Sprite {
 
     this.anims.play('fire-ball', true);
     this.setCollisionGroup(-1);
+
+    this.setData('damage', 10);
+    this.setData('playerId', player.id);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.setOnCollide((e: Phaser.Types.Physics.Matter.MatterCollisionData) => {
