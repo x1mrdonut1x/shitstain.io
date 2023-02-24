@@ -1,5 +1,5 @@
 import { Scene } from 'phaser';
-import { ServerPlayer, XYPosition } from '../../../types';
+import { ServerPlayer, XYPosition } from '../../../shared/types';
 import { gameServer } from '../networking/GameServer';
 import { isEqual } from 'lodash';
 import { Player } from './Player';

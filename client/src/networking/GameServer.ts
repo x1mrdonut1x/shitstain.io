@@ -1,12 +1,12 @@
 import { io as client, Socket } from 'socket.io-client';
-import { ClientShootData, ServerObject, ServerShootData } from '../../../types';
+import { ClientShootData, ServerObject, ServerShootData } from '../../../shared/types';
 import {
   GetPlayersEvent,
   GetWorldStateEvent,
   PlayerConnectEvent,
   PlayerMoveEvent,
   SocketEvent,
-} from '../../../types/events';
+} from '../../../shared/types/events';
 
 class GameServer {
   public clientId!: string; // initialized in main.ts

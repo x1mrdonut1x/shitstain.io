@@ -7,7 +7,7 @@ import {
   ServerPlayer,
   ServerWorldEnemy,
   ServerWorldPlayer,
-} from '../../types';
+} from '../../shared/types';
 
 export class GameState {
   public hasChanged = false;

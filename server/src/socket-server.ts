@@ -1,9 +1,9 @@
 import { Server } from 'socket.io';
 import httpServer from 'http';
 import { SocketActions } from './SocketActions';
-import { GetWorldStateEvent, SocketEvent } from '../../types/events';
+import { GetWorldStateEvent, SocketEvent } from '../../shared/types/events';
 import { GameEngine } from './GameEngine';
-import { ServerSnapshot } from '../../types';
+import { ServerSnapshot } from '../../shared/types';
 
 let io: Server;
 

@@ -1,9 +1,9 @@
 import Matter, { Bodies, Composite, Engine, Events, World } from 'matter-js';
-import { ServerObject, ServerSnapshot } from '../../types';
+import { ServerObject, ServerSnapshot } from '../../shared/types';
 import { GameState } from './GameState';
 import { TIMESTEP, SNAPSHOT_STEP, MAP_WIDTH_PX, MAP_HEIGHT_PX } from '../../shared/constants';
 import { broadcast } from './socket-server';
-import { SocketEvent } from '../../types/events';
+import { SocketEvent } from '../../shared/types/events';
 
 export class GameEngine {
   private engine: Engine;

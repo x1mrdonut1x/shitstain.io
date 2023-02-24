@@ -1,6 +1,6 @@
 import { gameServer } from '@/networking/GameServer';
 import { Scene } from 'phaser';
-import { ServerShootData, XYPosition } from '../../../types';
+import { ServerShootData, XYPosition } from '../../../shared/types';
 import { Bullet } from './Bullet';
 import { Player } from './Player';
 

@@ -3,8 +3,8 @@ import { Enemy } from '@/components/Enemy';
 import { gameServer } from '@/networking/GameServer';
 import { log } from '@/utils/logAction';
 import { Scene } from 'phaser';
-import { ServerObject } from '../../../types';
-import { GetPlayersEvent, GetWorldStateEvent } from '../../../types/events';
+import { ServerObject } from '../../../shared/types';
+import { GetPlayersEvent, GetWorldStateEvent } from '../../../shared/types/events';
 import { Player } from './Player';
 
 export class GameState {
