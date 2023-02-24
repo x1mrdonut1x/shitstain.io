@@ -58,6 +58,8 @@ export type ServerObject = {
   position: XYPosition;
   vertices: XYPosition[];
   label: string;
+  isStatic: boolean;
+  isSensor: boolean;
 };
 
 export type XYPosition = { x: number; y: number };

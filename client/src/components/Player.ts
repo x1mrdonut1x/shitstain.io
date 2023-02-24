@@ -1,5 +1,6 @@
 import { gameServer } from '@/networking/GameServer';
 import { Physics, Scene } from 'phaser';
+import { PlayerEntity } from '../../../shared/entities/PlayerEntity';
 import { ServerPlayer } from '../../../types';
 import { BulletController } from './BulletController';
 import { MovementController } from './MovementController';
@@ -22,6 +23,7 @@ export class Player extends Physics.Matter.Sprite {
     this.isLocalPlayer = id === gameServer.clientId;
     (this.body as MatterJS.BodyType).label = 'Dupasraka';
     console.log('player', id, 'created');
+    this.setBody(PlayerEntity.config);
 
     this.bulletController = new BulletController(scene, world, this);
     this.movementController = new MovementController(scene, this);
@@ -37,7 +39,7 @@ export class Player extends Physics.Matter.Sprite {
         -window.innerHeight - 50 //offset url and tabs bar
       );
     }
-
+    console.log((this.body as MatterJS.BodyType).collisionFilter);
     world.add(this);
     scene.sys.displayList.add(this);
     scene.sys.updateList.add(this);

@@ -109,20 +109,17 @@ export class GameState {
 
   public buildWorld(data: ServerObject[]) {
     data.forEach(object => {
-      if (object.label === 'wall') {
-        const wall = this.scene.matter.add.fromVertices(
-          object.position.x,
-          object.position.y,
-          object.vertices,
-          {
-            isStatic: true,
-            label: 'wall',
-          }
-        );
-        console.log(wall);
+      const wall = this.scene.matter.add.fromVertices(
+        object.position.x,
+        object.position.y,
+        object.vertices,
+        {
+          isStatic: object.isStatic,
+          label: object.label,
+        }
+      );
 
-        this.world.add(wall);
-      }
+      this.world.add(wall);
     });
   }
 }

@@ -1,4 +1,4 @@
-import { Bodies, Engine, World } from 'matter-js';
+import Matter, { Bodies, Composite, Engine, Events, World } from 'matter-js';
 import { ServerObject, ServerSnapshot } from '../../types';
 import { GameState } from './GameState';
 import { TIMESTEP, SNAPSHOT_STEP, MAP_WIDTH_PX, MAP_HEIGHT_PX } from '../../shared/constants';
@@ -21,6 +21,11 @@ export class GameEngine {
     };
     this.createWorldBounds();
 
+    Events.on(this.engine, 'collisionStart', event => {
+      console.log('collisionStart');
+      console.log(event);
+    });
+
     this.state = new GameState(this.engine.world);
   }
 
@@ -29,6 +34,8 @@ export class GameEngine {
       position: { x: body.position.x, y: body.position.y },
       vertices: body.vertices.map(v => ({ x: v.x, y: v.y })),
       label: body.label,
+      isStatic: body.isStatic,
+      isSensor: body.isSensor,
     }));
 
     return parsedBodies;
@@ -66,7 +73,10 @@ export class GameEngine {
       frictionStatic: 0,
       label: 'wall',
     });
-    World.add(this.engine.world, body);
+
+    console.log('wall', body.collisionFilter);
+
+    Composite.add(this.engine.world, body);
   }
 
   // init() {
@@ -103,10 +113,10 @@ export class GameEngine {
     this.loop = setInterval(() => {
       const now = Date.now();
       const delta = now - lastTimestamp;
+      lastTimestamp = now;
 
       this.state.updateMovement(delta / 1000);
 
-      lastTimestamp = now;
       Engine.update(this.engine, delta);
     }, TIMESTEP);
 
