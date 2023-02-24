@@ -54,4 +54,10 @@ export type ServerSnapshot = {
   };
 };
 
+export type ServerObject = {
+  position: XYPosition;
+  vertices: XYPosition[];
+  label: string;
+};
+
 export type XYPosition = { x: number; y: number };

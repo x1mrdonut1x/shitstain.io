@@ -8,6 +8,7 @@ export enum SocketEvent {
   PLAYER_MOVE = 'players:move',
   OBJECTS_CHANGE = 'objects:change',
   PLAYER_SHOOT = 'players:shoot',
+  WORLD_OBJECTS = 'world:objects',
 }
 
 export type PlayerMoveEvent = {

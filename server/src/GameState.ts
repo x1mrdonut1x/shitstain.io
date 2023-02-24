@@ -1,5 +1,5 @@
 import { cloneDeep } from 'lodash';
-import Matter, { Bodies, World } from 'matter-js';
+import Matter, { Bodies, Vector, World } from 'matter-js';
 import {
   ServerEnemy,
   ServerMovement,
@@ -26,7 +26,7 @@ export class GameState {
   public addPlayer(id: string) {
     const x = Math.random() * 1100 + 100;
     const y = Math.random() * 600 + 100;
-    const body = Bodies.rectangle(x, y, 20, 60);
+    const body = Bodies.rectangle(x, y, 20, 60, { friction: 0, frictionAir: 0, restitution: 0 });
     this.hasChanged = true;
 
     const serverPlayer: ServerPlayer = {
@@ -109,6 +109,7 @@ export class GameState {
       }
       body.position.x += velocityX * delta;
       body.position.y += velocityY * delta;
+      Matter.Body.setVelocity(body, { x: 0, y: 0 });
 
       if (velocityX !== 0 || velocityY !== 0) {
         anyPlayerChanged = true;

@@ -3,6 +3,7 @@ import { Enemy } from '@/components/Enemy';
 import { gameServer } from '@/networking/GameServer';
 import { log } from '@/utils/logAction';
 import { Scene } from 'phaser';
+import { ServerObject } from '../../../types';
 import { GetPlayersEvent, GetWorldStateEvent } from '../../../types/events';
 import { Player } from './Player';
 
@@ -22,7 +23,13 @@ export class GameState {
       this.movePlayers(data);
     });
 
+    gameServer.getWorldObjects.on(data => {
+      console.log(data);
+      this.buildWorld(data);
+    });
+
     gameServer.createPlayer.emit();
+    gameServer.getWorldObjects.emit();
 
     Array.from(Array(10)).forEach((_, index) => {
       this.addEnemy(400, 200 + index * 100);
@@ -97,6 +104,25 @@ export class GameState {
       const foundPlayer = this.players.find(player => player.id === object.clientId);
 
       foundPlayer?.setMovement(data.timestamp, object);
+    });
+  }
+
+  public buildWorld(data: ServerObject[]) {
+    data.forEach(object => {
+      if (object.label === 'wall') {
+        const wall = this.scene.matter.add.fromVertices(
+          object.position.x,
+          object.position.y,
+          object.vertices,
+          {
+            isStatic: true,
+            label: 'wall',
+          }
+        );
+        console.log(wall);
+
+        this.world.add(wall);
+      }
     });
   }
 }

@@ -1,5 +1,5 @@
 import { io as client, Socket } from 'socket.io-client';
-import { ClientShootData, ServerShootData } from '../../../types';
+import { ClientShootData, ServerObject, ServerShootData } from '../../../types';
 import {
   GetPlayersEvent,
   GetWorldStateEvent,
@@ -43,6 +43,10 @@ class GameServer {
 
   get getWorldState() {
     return this.createSocket<GetWorldStateEvent>(SocketEvent.OBJECTS_CHANGE);
+  }
+
+  get getWorldObjects() {
+    return this.createSocket<ServerObject[]>(SocketEvent.WORLD_OBJECTS);
   }
 
   get shoot() {

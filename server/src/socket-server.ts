@@ -22,7 +22,7 @@ export function createSocketServer(server: httpServer.Server) {
   });
 
   io.on('connection', socket => {
-    new SocketActions(socket, gameEngine.state);
+    new SocketActions(socket, gameEngine.state, gameEngine);
   });
 }
 
