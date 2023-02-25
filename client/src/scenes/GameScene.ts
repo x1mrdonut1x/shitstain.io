@@ -12,6 +12,12 @@ export class GameScene {
     this.app.stage.interactive = true;
     this.app.stage.hitArea = this.app.screen;
 
+    this.app.stage.pivot = { x: 0, y: 0 };
+    // this.cameraContainer = new PIXI.Container();
+    // this.app.stage.addChild(this.cameraContainer);
+
+    document.body.appendChild(this.app.view as unknown as Node);
+
     this.preload();
   }
 
@@ -32,9 +38,6 @@ export class GameScene {
     this.addPointerTracker(this.app);
 
     this.gameState = new GameState(this.app.stage);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    document.body.appendChild(this.app.view as any);
 
     this.update();
   }
@@ -60,9 +63,13 @@ export class GameScene {
 
     // Follow the pointer
     app.stage.addEventListener('pointermove', e => {
-      text.position.x = e.global.x + 10;
-      text.position.y = e.global.y - 20;
-      text.text = `x: ${e.global.x}, y: ${e.global.y}`;
+      const x = Math.round(e.global.x + app.stage.pivot.x);
+      const y = Math.round(e.global.y + app.stage.pivot.y);
+
+      text.position.x = x + 10;
+      text.position.y = y - 20;
+
+      text.text = `x: ${x}, y: ${y}`;
     });
   }
 }

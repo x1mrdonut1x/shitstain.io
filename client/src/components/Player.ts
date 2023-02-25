@@ -4,6 +4,7 @@ import { ServerPlayer } from '../../../shared/types';
 import { BulletController } from './BulletController';
 import { MovementController } from './MovementController';
 import * as PIXI from 'pixi.js';
+import { MAP_HEIGHT_PX, MAP_WIDTH_PX } from '../../../shared/constants';
 
 export class Player extends EnginePlayer {
   protected bulletController?: BulletController;
@@ -11,7 +12,7 @@ export class Player extends EnginePlayer {
   public isLocalPlayer;
   public sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
 
-  constructor(stage: PIXI.Container, x: number, y: number, public id: string) {
+  constructor(private stage: PIXI.Container, x: number, y: number, public id: string) {
     super(x, y, id);
 
     this.sprite.position.set(x, y);
@@ -32,6 +33,28 @@ export class Player extends EnginePlayer {
   update(dt: number) {
     this.bulletController?.update(dt);
     this.movementController?.update(dt);
+
+    // Camera controller
+    if (this.isLocalPlayer) {
+      const nextX = this.position.x - window.innerWidth / 2;
+      const nextY = this.position.y - window.innerHeight / 2;
+
+      if (
+        nextX > 0 &&
+        (this.stage.pivot.x >= 0 || nextX > this.stage.pivot.x) &&
+        (this.stage.pivot.x + window.innerWidth <= MAP_WIDTH_PX || nextX < this.stage.pivot.x)
+      ) {
+        this.stage.pivot.x = nextX;
+      }
+
+      if (
+        nextY > 0 &&
+        (this.stage.pivot.y >= 0 || nextY > this.stage.pivot.y) &&
+        (this.stage.pivot.y + window.innerHeight <= MAP_HEIGHT_PX || nextY < this.stage.pivot.y)
+      ) {
+        this.stage.pivot.y = nextY;
+      }
+    }
 
     this.sprite.position.set(this.position.x, this.position.y);
     super.update(dt);

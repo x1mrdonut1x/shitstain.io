@@ -29,7 +29,6 @@ export class GameState {
   }
 
   public addEnemy(x: number, y: number) {
-    console.log('dupa');
     const newEnemy = new Enemy(this.stage, x, y);
     this.enemies.push(newEnemy);
     this.stage.addChild(newEnemy.sprite);

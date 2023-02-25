@@ -18,8 +18,8 @@ export class BulletController {
     if (this.player.isLocalPlayer) {
       this.stage.addEventListener('pointerdown', e => {
         this.mousePos = {
-          x: e.global.x - this.player.position.x,
-          y: e.global.y - this.player.position.y,
+          x: e.x - this.player.position.x + stage.pivot.x,
+          y: e.y - this.player.position.y + stage.pivot.y,
         };
         this.isShooting = true;
         this.emitShoot();
@@ -28,8 +28,8 @@ export class BulletController {
 
       this.stage.addEventListener('pointermove', e => {
         this.mousePos = {
-          x: e.global.x - this.player.position.x,
-          y: e.global.y - this.player.position.y,
+          x: e.x - this.player.position.x + stage.pivot.x,
+          y: e.y - this.player.position.y + stage.pivot.y,
         };
 
         if (this.isShooting) {
@@ -103,10 +103,11 @@ export class BulletController {
 
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       const { position, radius } = this.bullets[i];
+
       if (
-        position.x + radius > document.body.clientWidth ||
+        position.x + radius > this.stage.width ||
         position.x - radius < 0 ||
-        position.y + radius > document.body.clientHeight ||
+        position.y + radius > this.stage.height ||
         position.y - radius < 0
       ) {
         this.bullets[i].sprite.destroy();
