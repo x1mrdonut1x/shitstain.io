@@ -1,10 +1,8 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-nocheck
 import { gameServer } from '@/networking/GameServer';
-import { Scene } from 'phaser';
 import { ServerShootData, XYPosition } from '../../../shared/types';
 import { Bullet } from './Bullet';
-import { Player } from '../../../engine/components/Player';
+import * as PIXI from 'pixi.js';
+import { Player } from './Player';
 
 export class BulletController {
   private bullets: Bullet[] = [];
@@ -16,32 +14,31 @@ export class BulletController {
 
   public isShooting = false;
 
-  constructor(
-    private scene: Scene,
-    private world: Phaser.Physics.Matter.World,
-    private player: Player
-  ) {
+  constructor(private stage: PIXI.Container, private player: Player) {
     if (this.player.isLocalPlayer) {
-      this.scene.input.on('pointerdown', (event: Phaser.Input.Pointer) => {
-        console.log('mouse', event.worldX, event.worldY);
-        console.log('player', this.player.x, this.player.y);
-        console.log('parsed', event.worldX - this.player.x, event.worldY - this.player.y);
-
-        this.mousePos = { x: event.worldX - this.player.x, y: event.worldY - this.player.y };
+      this.stage.addEventListener('pointerdown', e => {
+        this.mousePos = {
+          x: e.global.x - this.player.position.x,
+          y: e.global.y - this.player.position.y,
+        };
         this.isShooting = true;
         this.emitShoot();
         this.shoot();
       });
 
-      this.scene.input.on('pointermove', (event: Phaser.Input.Pointer) => {
-        this.mousePos = { x: event.worldX - this.player.x, y: event.worldY - this.player.y };
+      this.stage.addEventListener('pointermove', e => {
+        this.mousePos = {
+          x: e.global.x - this.player.position.x,
+          y: e.global.y - this.player.position.y,
+        };
+
         if (this.isShooting) {
           this.emitShoot();
           this.shoot();
         }
       });
 
-      this.scene.input.on('pointerup', () => {
+      this.stage.addEventListener('pointerup', () => {
         this.isShooting = false;
         this.emitShoot();
         this.shoot();
@@ -53,46 +50,39 @@ export class BulletController {
       if (!this.player.isLocalPlayer) this.isShooting = data.isShooting;
 
       this.serverStep = data;
-      // TODO the first argument should be data.playerPos to have the correct starting point
-      this.shoot(this.player, this.getVelocity(data.mousePos));
+      console.log(data.mousePos);
+      this.shoot(data.mousePos);
     });
-  }
-
-  private tryFlipX() {
-    if (this.isShooting) {
-      if (this.player.isLocalPlayer) {
-        this.player.flipX = this.mousePos.x < 0;
-      } else {
-        this.player.flipX =
-          (this.serverStep?.mousePos.x || 0) > (this.serverStep?.playerPos.x || 0);
-      }
-    }
   }
 
   emitShoot() {
     gameServer.shoot.emit({
       isShooting: this.isShooting,
       playerPos: {
-        x: this.player.x,
-        y: this.player.y,
+        x: this.player.position.x,
+        y: this.player.position.y,
       },
       mousePos: this.mousePos,
     });
   }
 
-  shoot(startPos: XYPosition = this.player, velocity: XYPosition = this.getVelocity()) {
+  shoot(mouse = this.mousePos) {
     const now = Date.now();
     const delta = now - this.lastShotAt;
 
     if (delta < this.shootingSpeed) return;
 
-    this.tryFlipX();
+    const bullet = new Bullet(
+      this.stage,
+      this.player.position.x,
+      this.player.position.y,
+      this.getVelocity(mouse)
+    );
 
-    const bullet = new Bullet(this.world, startPos.x, startPos.y, this.player, velocity);
     this.bullets.push(bullet);
+    this.stage.addChild(bullet.sprite);
 
-    this.scene.add.existing(bullet);
-    this.lastShotAt = Date.now();
+    this.lastShotAt = now;
   }
 
   private getVelocity(data: XYPosition = this.mousePos) {
@@ -107,14 +97,24 @@ export class BulletController {
     return { x: velocityX, y: velocityY };
   }
 
-  update() {
+  update(dt: number) {
     if (this.isShooting) {
-      this.shoot(this.player, this.getVelocity(this.serverStep?.mousePos));
+      this.shoot(this.serverStep?.mousePos);
     }
 
-    this.bullets.forEach(bullet => {
-      if (!bullet.active) return;
-      bullet.update();
-    });
+    for (let i = this.bullets.length - 1; i >= 0; i--) {
+      const { position } = this.bullets[i].sprite;
+      if (
+        position.x > document.body.clientWidth ||
+        position.x < 0 ||
+        position.y > document.body.clientHeight ||
+        position.y < 0
+      ) {
+        this.bullets[i].sprite.destroy();
+        this.bullets.splice(i, 1);
+      } else {
+        this.bullets[i].update(dt);
+      }
+    }
   }
 }

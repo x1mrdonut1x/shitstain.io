@@ -1,55 +1,25 @@
-import { Physics } from 'phaser';
-import { XYPosition } from '../../../shared/types';
-import { Player } from '../../../engine/components/Player';
+import { Circle } from '../../../engine/entities/Circle';
+import * as PIXI from 'pixi.js';
+import { Vector2 } from '../../../engine/entities/Vector2';
 
-export class Bullet extends Physics.Matter.Sprite {
-  constructor(
-    world: Phaser.Physics.Matter.World,
-    x: number,
-    y: number,
-    player: Player,
-    private velocity: XYPosition
-  ) {
-    super(world, x, y, 'fire-ball', undefined, { label: 'bullet' });
-    const angle = Math.atan2(velocity.y, velocity.x);
+export class Bullet extends Circle {
+  public sprite: PIXI.Graphics;
 
-    this.setCircle(7);
-    (this.body as MatterJS.BodyType).label = 'bullet';
-    this.setOrigin(0.8, 0.5);
+  constructor(stage: PIXI.Container, x: number, y: number, velocity: Vector2) {
+    super(x, y, 6);
 
-    this.setRotation(angle);
+    this.setVelocity(velocity);
 
-    this.anims.play('fire-ball', true);
-    this.setCollisionGroup(-1);
+    this.sprite = new PIXI.Graphics();
+    this.sprite.lineStyle(2, 0xffffff);
+    this.sprite.drawCircle(0, 0, 10);
+    this.sprite.endFill();
 
-    this.setData('damage', 10);
-    this.setData('playerId', player.id);
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    this.setOnCollide((e: Phaser.Types.Physics.Matter.MatterCollisionData) => {
-      this.setStatic(true);
-      this.anims.play('fire-ball-explode', true);
-      this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-        this.destroy(true);
-      });
-    });
-
-    world.add(this);
+    this.sprite.position.set(x, y);
   }
 
-  update(): void {
-    if (this.isStatic()) return;
-    this.x += this.velocity.x;
-    this.y += this.velocity.y;
-
-    if (
-      this.x > this.scene.game.config.width ||
-      this.x < 0 ||
-      this.y > this.scene.game.config.height ||
-      this.y < 0
-    ) {
-      console.log('destruction');
-      this.destroy(true);
-    }
+  update(dt: number) {
+    super.update(dt);
+    this.sprite.position.set(this.position.x, this.position.y);
   }
 }

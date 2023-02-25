@@ -21,6 +21,10 @@ export class GameScene {
     console.log('GameScene create');
     const app = new PIXI.Application({ width: MAP_WIDTH_PX, height: MAP_HEIGHT_PX });
     app.stage.interactive = true;
+    app.stage.hitArea = app.screen;
+
+    // DEBUG
+    this.addPointerTracker(app);
 
     this.gameState = new GameState(app.stage);
 
@@ -39,5 +43,21 @@ export class GameScene {
     // this.gameState?.updateEnemies(dt);
 
     requestAnimationFrame(this.update.bind(this));
+  }
+
+  addPointerTracker(app: PIXI.Application) {
+    const text = new PIXI.Text('asd');
+    text.style.fill = 'red';
+    text.style.stroke = 'red';
+    text.style.fontSize = 16;
+
+    app.stage.addChild(text);
+
+    // Follow the pointer
+    app.stage.addEventListener('pointermove', e => {
+      text.position.x = e.global.x + 10;
+      text.position.y = e.global.y - 20;
+      text.text = `x: ${e.global.x}, y: ${e.global.y}`;
+    });
   }
 }

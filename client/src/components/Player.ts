@@ -2,9 +2,12 @@ import { gameServer } from '@/networking/GameServer';
 import * as PIXI from 'pixi.js';
 import { Player as EnginePlayer } from '../../../engine/components/Player';
 import { ServerPlayer } from '../../../shared/types';
+import { BulletController } from './BulletController';
 import { MovementController } from './MovementController';
 
 export class Player extends EnginePlayer {
+  protected bulletController?: BulletController;
+  protected movementController?: MovementController;
   public isLocalPlayer;
   public sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
 
@@ -23,14 +26,15 @@ export class Player extends EnginePlayer {
     this.isLocalPlayer = id === gameServer?.clientId;
 
     this.movementController = new MovementController(this);
+    this.bulletController = new BulletController(stage, this);
   }
 
   update(dt: number) {
-    // this.bulletController?.update();
+    this.bulletController?.update(dt);
     this.movementController?.update(dt);
 
-    super.update(dt);
     this.sprite.position.set(this.position.x, this.position.y);
+    super.update(dt);
   }
 
   public setMovement(timestamp: number, position: ServerPlayer) {

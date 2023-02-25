@@ -1,4 +1,3 @@
-import MatterJS from 'matter-js';
 import { Player } from '../../engine/components/Player';
 
 export type ServerMovement = {
@@ -45,7 +44,7 @@ export type ServerWorldPlayer = {
 
 export type ServerWorldEnemy = {
   data: ServerEnemy;
-  body: MatterJS.Body;
+  body: unknown;
 };
 
 export type ServerSnapshot = {

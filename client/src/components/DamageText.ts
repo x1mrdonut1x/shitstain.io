@@ -1,15 +1,14 @@
-import { Scene } from 'phaser';
+import * as PIXI from 'pixi.js';
+import { Entity } from '../../../engine/entities/Entity';
 
 export class DamageText {
-  private text: Phaser.GameObjects.Text;
+  private text: PIXI.Text;
   private life = 300;
   private elapsed = 0;
 
-  constructor(scene: Scene, private parent: MatterJS.BodyType, value: string) {
-    this.text = scene.add.text(parent.position.x, parent.position.y, value, {
-      color: 'red',
-      fontSize: '20px',
-    });
+  constructor(stage: PIXI.Container, private parent: Entity, value: string) {
+    this.text = new PIXI.Text(value);
+    stage.addChild(this.text);
   }
 
   update(delta: number) {
@@ -17,7 +16,8 @@ export class DamageText {
 
     const newX = this.parent.position.x;
     const newY = this.parent.position.y - 30 - 20 * (this.elapsed / this.life);
-    this.text.setPosition(newX, newY);
+    this.text.position.x = newX;
+    this.text.position.y = newY;
 
     if (this.elapsed > this.life) {
       this.text.destroy(true);
