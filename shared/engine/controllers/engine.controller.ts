@@ -15,7 +15,7 @@ export function useEngine() {
       const delta = now - lastTimestamp;
       lastTimestamp = now;
 
-      move(delta);
+      move(delta, now);
     }, TIMESTEP);
   };
 
