@@ -1,8 +1,8 @@
-import { Scene } from 'phaser';
 import { ServerMovement } from '../../../../shared/types';
+
 interface Keys {
-  [keyCode: string]: {
-    key: Phaser.Input.Keyboard.Key;
+  [key: string]: {
+    isDown: boolean;
     onDown: () => void;
     onUp: () => void;
   };
@@ -10,15 +10,30 @@ interface Keys {
 
 export class KeyboardController {
   private readonly keys: Keys = {};
-  private events: (() => void)[] = [];
   private _movement: ServerMovement = { up: false, down: false, left: false, right: false };
 
-  constructor(private scene: Scene) {
+  constructor() {
     this.initKeyboard();
+    window.addEventListener('keydown', this.onKeyDown.bind(this));
+    window.addEventListener('keyup', this.onKeyUp.bind(this));
   }
 
-  public addEvent(callback: () => void) {
-    this.events.push(callback);
+  public onKeyUp(e: KeyboardEvent) {
+    Object.keys(this.keys).forEach(key => {
+      if (e.key === key) {
+        this.keys[key].isDown = false;
+        this.keys[key].onUp.bind(this)();
+      }
+    });
+  }
+
+  public onKeyDown(e: KeyboardEvent) {
+    Object.keys(this.keys).forEach(key => {
+      if (e.key === key) {
+        this.keys[key].isDown = true;
+        this.keys[key].onDown.bind(this)();
+      }
+    });
   }
 
   get movement() {
@@ -31,30 +46,12 @@ export class KeyboardController {
     );
   }
 
-  public update() {
-    Object.keys(this.keys).forEach(key => {
-      const entry = this.keys[key];
-
-      if (Phaser.Input.Keyboard.JustDown(entry.key)) {
-        entry.onDown();
-      } else if (Phaser.Input.Keyboard.JustUp(entry.key)) {
-        entry.onUp();
-      }
-
-      if (this.isMoving) {
-        this.events.forEach(event => {
-          event();
-        });
-      }
-    });
-  }
-
   private initKeyboard() {
-    this.keys['W'] = {
-      key: this.scene.input.keyboard.addKey('W'),
+    this.keys['w'] = {
+      isDown: false,
       onDown: () => this.onMoveUp(),
       onUp: () => {
-        if (this.keys['S'].key.isDown) {
+        if (this.keys['s']?.isDown) {
           this.onMoveDown();
         } else {
           this._movement.up = false;
@@ -62,11 +59,11 @@ export class KeyboardController {
       },
     };
 
-    this.keys['S'] = {
-      key: this.scene.input.keyboard.addKey('S'),
+    this.keys['s'] = {
+      isDown: false,
       onDown: () => this.onMoveDown(),
       onUp: () => {
-        if (this.keys['W'].key.isDown) {
+        if (this.keys['w']?.isDown) {
           this.onMoveUp();
         } else {
           this._movement.down = false;
@@ -74,11 +71,11 @@ export class KeyboardController {
       },
     };
 
-    this.keys['A'] = {
-      key: this.scene.input.keyboard.addKey('A'),
+    this.keys['a'] = {
+      isDown: false,
       onDown: () => this.onMoveLeft(),
       onUp: () => {
-        if (this.keys['D'].key.isDown) {
+        if (this.keys['d']?.isDown) {
           this.onMoveRight();
         } else {
           this._movement.left = false;
@@ -86,11 +83,11 @@ export class KeyboardController {
       },
     };
 
-    this.keys['D'] = {
-      key: this.scene.input.keyboard.addKey('D'),
+    this.keys['d'] = {
+      isDown: false,
       onDown: () => this.onMoveRight(),
       onUp: () => {
-        if (this.keys['A'].key.isDown) {
+        if (this.keys['a']?.isDown) {
           this.onMoveLeft();
         } else {
           this._movement.right = false;

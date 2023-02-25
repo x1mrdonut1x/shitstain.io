@@ -1,44 +1,27 @@
-import Matter, { Bodies, Composite, Engine, Events, World } from 'matter-js';
-import { ServerObject, ServerSnapshot } from '../../shared/types';
+import { ServerSnapshot } from '../../shared/types';
 import { GameState } from './GameState';
 import { TIMESTEP, SNAPSHOT_STEP, MAP_WIDTH_PX, MAP_HEIGHT_PX } from '../../shared/constants';
-import { broadcast } from './socket-server';
-import { SocketEvent } from '../../shared/types/events';
+import { Rectangle } from '../../engine/entities/Rectangle';
 
 export class GameEngine {
-  private engine: Engine;
   public state: GameState;
   private loop: ReturnType<typeof setInterval> | undefined;
 
   constructor() {
-    this.engine = Engine.create({
-      gravity: { y: 0, x: 0 },
-    });
-
-    this.engine.world.bounds = {
-      min: { x: 0, y: 0 },
-      max: { x: MAP_WIDTH_PX, y: MAP_HEIGHT_PX },
-    };
     this.createWorldBounds();
 
-    Events.on(this.engine, 'collisionStart', event => {
-      console.log('collisionStart');
-      console.log(event);
-    });
-
-    this.state = new GameState(this.engine.world);
+    this.state = new GameState();
   }
 
   public getWorldObjects() {
-    const parsedBodies: ServerObject[] = this.engine.world.bodies.map(body => ({
-      position: { x: body.position.x, y: body.position.y },
-      vertices: body.vertices.map(v => ({ x: v.x, y: v.y })),
-      label: body.label,
-      isStatic: body.isStatic,
-      isSensor: body.isSensor,
-    }));
-
-    return parsedBodies;
+    // const parsedBodies: ServerObject[] = Array.from(this.world.bodies).map(body => ({
+    //   position: { x: body.position.x, y: body.position.y },
+    //   vertices: body.vertices.map(v => ({ x: v.x, y: v.y })),
+    //   label: body.label,
+    //   isStatic: body.isStatic,
+    //   isSensor: body.isSensor,
+    // }));
+    // return parsedBodies;
   }
 
   private createWorldBounds() {
@@ -67,16 +50,7 @@ export class GameEngine {
     x += width / 2;
     y += height / 2;
 
-    const body = Bodies.rectangle(x, y, width, height, {
-      isStatic: true,
-      friction: 0,
-      frictionStatic: 0,
-      label: 'wall',
-    });
-
-    console.log('wall', body.collisionFilter);
-
-    Composite.add(this.engine.world, body);
+    const body = new Rectangle(x, y, width, height);
   }
 
   // init() {
@@ -115,20 +89,20 @@ export class GameEngine {
       const delta = now - lastTimestamp;
       lastTimestamp = now;
 
-      this.state.updateMovement(delta / 1000);
-
-      Engine.update(this.engine, delta);
+      this.state.updateMovement();
+      this.state.updatePlayers(delta);
     }, TIMESTEP);
 
     setInterval(() => {
       const now = Date.now();
+
       this.handleSnapshot({
         timestamp: now,
         state: {
           players: this.state.players.map(player => {
-            const { data, body } = player;
-            data.x = body.position.x;
-            data.y = body.position.y;
+            const { data, entity } = player;
+            data.x = entity.position.x;
+            data.y = entity.position.y;
             return data;
           }),
         },

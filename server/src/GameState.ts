@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash';
-import Matter, { Bodies, Composite, World } from 'matter-js';
-import { PlayerEntity } from '../../shared/entities/PlayerEntity';
+import { Player } from '../../engine/components/Player';
+import { Rectangle } from '../../engine/entities/Rectangle';
 import {
   ServerEnemy,
   ServerMovement,
@@ -14,8 +14,6 @@ export class GameState {
   private _players: ServerWorldPlayer[] = [];
   private _enemies: ServerWorldEnemy[] = [];
 
-  constructor(private world: World) {}
-
   get players() {
     return cloneDeep(this._players);
   }
@@ -27,13 +25,13 @@ export class GameState {
   public addPlayer(id: string) {
     const x = Math.random() * 1100 + 100;
     const y = Math.random() * 600 + 100;
-    const body = PlayerEntity.create(x, y);
+    const entity = new Player(x, y, id);
     this.hasChanged = true;
 
     const serverPlayer: ServerPlayer = {
       clientId: id,
-      x: body.position.x,
-      y: body.position.y,
+      x: entity.position.x,
+      y: entity.position.y,
       bulletSpeed: 10, //px per tick
       speed: 200,
       move: {
@@ -44,15 +42,13 @@ export class GameState {
       },
     };
 
-    console.log('player', body.collisionFilter);
-    this._players.push({ data: serverPlayer, body });
-    Composite.add(this.world, body);
+    this._players.push({ data: serverPlayer, entity: entity });
   }
 
   public addEnemy() {
     const x = Math.random() * 100 + 100;
     const y = Math.random() * 100 + 100;
-    const body = Bodies.rectangle(x, y, 20, 60);
+    const body = new Rectangle(x, y, 20, 60);
     this.hasChanged = true;
 
     const serverEnemy: ServerEnemy = {
@@ -67,18 +63,16 @@ export class GameState {
       },
     };
 
-    this._enemies.push({ data: serverEnemy, body });
-    World.add(this.world, body);
+    // this._enemies.push({ data: serverEnemy, body });
+    // this.world.add(body);
   }
 
   public removePlayer(id: string) {
     this.hasChanged = true;
 
-    const foundPlayer = this._players.find(p => p.data.clientId === id);
+    this._players.find(p => p.data.clientId === id);
 
     this._players = this._players.filter(p => p.data.clientId !== id);
-
-    if (foundPlayer) World.remove(this.world, foundPlayer.body);
   }
 
   public movePlayer(id: string, data: ServerMovement) {
@@ -90,10 +84,14 @@ export class GameState {
     }
   }
 
-  public updateMovement(delta: number) {
+  public updatePlayers(dt: number) {
+    this._players.forEach(p => p.entity.update(dt));
+  }
+
+  public updateMovement() {
     let anyPlayerChanged = false;
 
-    this._players.forEach(({ body, data }) => {
+    this._players.forEach(({ entity: body, data }) => {
       let velocityX = 0;
       let velocityY = 0;
 
@@ -109,9 +107,8 @@ export class GameState {
       if (data.move.right) {
         velocityX = data.speed;
       }
-      body.position.x += velocityX * delta;
-      body.position.y += velocityY * delta;
-      Matter.Body.setVelocity(body, { x: 0, y: 0 });
+      body.velocity.x = velocityX;
+      body.velocity.y = velocityY;
 
       if (velocityX !== 0 || velocityY !== 0) {
         anyPlayerChanged = true;

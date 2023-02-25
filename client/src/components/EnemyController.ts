@@ -1,5 +1,5 @@
 import { Enemy } from '@/components/Enemy';
-import { Player } from '@/components/Player';
+import { Player } from './Player';
 
 export class EnemyController {
   private readonly speed = 2;

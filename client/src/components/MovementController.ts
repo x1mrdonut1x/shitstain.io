@@ -1,9 +1,8 @@
-import { Scene } from 'phaser';
 import { ServerPlayer, XYPosition } from '../../../shared/types';
-import { gameServer } from '../networking/GameServer';
-import { isEqual } from 'lodash';
-import { Player } from './Player';
 import { KeyboardController } from './input-controllers/KeyboardController';
+import { isEqual } from 'lodash';
+import { gameServer } from '@/networking/GameServer';
+import { Player } from './Player';
 
 export class MovementController {
   private existenceTime = 0;
@@ -18,10 +17,8 @@ export class MovementController {
   private keyboardController: KeyboardController | undefined;
   private readonly speed = 200;
 
-  constructor(private scene: Scene, private player: Player) {
-    if (this.player.isLocalPlayer) {
-      this.keyboardController = new KeyboardController(scene);
-    }
+  constructor(private player: Player) {
+    if (this.player.isLocalPlayer) this.keyboardController = new KeyboardController();
   }
 
   public updatePositionFromServer(timestamp: number, position: ServerPlayer) {
@@ -42,8 +39,6 @@ export class MovementController {
   }
 
   public update(delta: number) {
-    this.keyboardController?.update();
-
     if (this.keyboardController) {
       const { left, right, up, down } = this.keyboardController.movement;
       let velocityY = 0;
@@ -62,17 +57,17 @@ export class MovementController {
         velocityX = this.speed;
       }
 
-      this.player.x += (velocityX * delta) / 1000;
-      this.player.y += (velocityY * delta) / 1000;
+      this.player.velocity.x = velocityX;
+      this.player.velocity.y = velocityY;
 
       if (this.nextPosition) {
-        const dx = Math.abs(this.player.x - this.nextPosition.x);
-        const dy = Math.abs(this.player.y - this.nextPosition.y);
+        const dx = Math.abs(this.player.position.x - this.nextPosition.x);
+        const dy = Math.abs(this.player.position.y - this.nextPosition.y);
         const maxAllowedShift = 80;
 
         if (dx > maxAllowedShift || dy > maxAllowedShift) {
-          this.player.x = this.nextPosition.x;
-          this.player.y = this.nextPosition.y;
+          this.player.position.x = this.nextPosition.x;
+          this.player.position.y = this.nextPosition.y;
         }
       }
 
@@ -80,9 +75,9 @@ export class MovementController {
         gameServer.movePlayer.emit({ movement: this.keyboardController.movement });
       }
 
-      if (this.keyboardController.movement.left || this.keyboardController.movement.right) {
-        this.player.flipX = this.keyboardController.movement.left;
-      }
+      // if (this.keyboardController.movement.left || this.keyboardController.movement.right) {
+      //   this.player.flipX = this.keyboardController.movement.left;
+      // }
       this.player.isMoving = this.keyboardController?.isMoving;
     } else {
       if (this.basePosition && this.nextPosition && this.nextTimestamp && this.baseTimestamp) {
@@ -90,14 +85,14 @@ export class MovementController {
         const step = Math.min(this.existenceTime, fullTimeStep) / fullTimeStep;
         this.existenceTime += delta;
 
-        this.player.x = Phaser.Math.Linear(this.basePosition.x, this.nextPosition.x, step);
-        this.player.y = Phaser.Math.Linear(this.basePosition.y, this.nextPosition.y, step);
+        this.player.position.x = lerp(this.basePosition.x, this.nextPosition.x, step);
+        this.player.position.y = lerp(this.basePosition.y, this.nextPosition.y, step);
       }
 
       if (this.serverPosition) {
-        if (this.serverPosition.move.left || this.serverPosition.move.right) {
-          this.player.flipX = this.serverPosition.move.left;
-        }
+        // if (this.serverPosition.move.left || this.serverPosition.move.right) {
+        //   this.player.flipX = this.serverPosition.move.left;
+        // }
 
         this.player.isMoving =
           this.serverPosition.move.right ||
@@ -108,3 +103,4 @@ export class MovementController {
     }
   }
 }
+const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a;

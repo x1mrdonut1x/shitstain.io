@@ -1,19 +1,18 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-nocheck
 import { Enemy } from '@/components/Enemy';
 // import { MAP_HEIGHT, MAP_WIDTH } from '@/constants';
 import { gameServer } from '@/networking/GameServer';
 import { log } from '@/utils/logAction';
-import { Scene } from 'phaser';
-import { ServerObject } from '../../../shared/types';
 import { GetPlayersEvent, GetWorldStateEvent } from '../../../shared/types/events';
 import { Player } from './Player';
+import * as PIXI from 'pixi.js';
 
 export class GameState {
   public players: Player[] = [];
   public enemies: Enemy[] = [];
 
-  constructor(private scene: Scene, private world: Phaser.Physics.Matter.World) {}
-
-  public initialize() {
+  constructor(private stage: PIXI.Container) {
     console.log('GameState.initialize');
     gameServer.getPlayers.on(data => {
       this.updatePlayersFromServer(data);
@@ -23,13 +22,13 @@ export class GameState {
       this.movePlayers(data);
     });
 
-    gameServer.getWorldObjects.on(data => {
-      console.log(data);
-      this.buildWorld(data);
-    });
+    // gameServer.getWorldObjects.on(data => {
+    //   console.log(data);
+    //   this.buildWorld(data);
+    // });
 
     gameServer.createPlayer.emit();
-    gameServer.getWorldObjects.emit();
+    // gameServer.getWorldObjects.emit();
 
     Array.from(Array(10)).forEach((_, index) => {
       this.addEnemy(400, 200 + index * 100);
@@ -38,9 +37,10 @@ export class GameState {
     document.getElementById('loading')?.remove();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public addEnemy(x: number, y: number) {
-    const newEnemy = new Enemy(this.scene, this.world, this, x, y);
-    this.enemies.push(newEnemy);
+    // const newEnemy = new Enemy(this.stage, this, x, y);
+    // this.enemies.push(newEnemy);
   }
 
   public getPlayerCount() {
@@ -49,7 +49,7 @@ export class GameState {
 
   public addPlayer(id: string, x: number, y: number) {
     log(`Player ${id} connected`);
-    this.players.push(new Player(this.scene, this.world, x, y, id));
+    this.players.push(new Player(this.stage, x, y, id));
   }
 
   public removePlayer(id: string) {
@@ -96,30 +96,25 @@ export class GameState {
   }
 
   public movePlayers(data: GetWorldStateEvent) {
-    // console.log(
-    //   data.timestamp,
-    //   data.state.players.map(player => `${Math.floor(player.x)}; ${Math.floor(player.y)}`)
-    // );
     data.state.players.forEach(object => {
       const foundPlayer = this.players.find(player => player.id === object.clientId);
-
       foundPlayer?.setMovement(data.timestamp, object);
     });
   }
 
-  public buildWorld(data: ServerObject[]) {
-    data.forEach(object => {
-      const wall = this.scene.matter.add.fromVertices(
-        object.position.x,
-        object.position.y,
-        object.vertices,
-        {
-          isStatic: object.isStatic,
-          label: object.label,
-        }
-      );
+  // public buildWorld(data: ServerObject[]) {
+  //   data.forEach(object => {
+  //     const wall = this.stage.addChild.fromVertices(
+  //       object.position.x,
+  //       object.position.y,
+  //       object.vertices,
+  //       {
+  //         isStatic: object.isStatic,
+  //         label: object.label,
+  //       }
+  //     );
 
-      this.world.add(wall);
-    });
-  }
+  //     this.world.add(wall);
+  //   });
+  // }
 }

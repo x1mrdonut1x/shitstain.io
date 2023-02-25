@@ -96,7 +96,6 @@ interface ListenerCallback<T> {
 export let gameServer: GameServer;
 
 export async function createGameServer() {
-  console.log('createGameServer');
   gameServer = new GameServer();
   await gameServer.init();
 
