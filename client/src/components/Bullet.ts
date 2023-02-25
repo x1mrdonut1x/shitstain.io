@@ -1,6 +1,6 @@
 import { Physics } from 'phaser';
-import { XYPosition } from '../../../types';
-import { Player } from './Player';
+import { XYPosition } from '../../../shared/types';
+import { Player } from '../../../engine/components/Player';
 
 export class Bullet extends Physics.Matter.Sprite {
   constructor(
@@ -12,10 +12,6 @@ export class Bullet extends Physics.Matter.Sprite {
   ) {
     super(world, x, y, 'fire-ball', undefined, { label: 'bullet' });
     const angle = Math.atan2(velocity.y, velocity.x);
-
-    this.setFriction(0);
-    this.setFrictionAir(0);
-    this.setBounce(0);
 
     this.setCircle(7);
     (this.body as MatterJS.BodyType).label = 'bullet';

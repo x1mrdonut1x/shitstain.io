@@ -4,10 +4,11 @@ import {
   PlayerConnectEvent,
   PlayerMoveEvent,
   SocketEvent,
-} from '../../types/events';
+} from '../../shared/types/events';
 import { broadcast } from './socket-server';
 import { GameState } from './GameState';
-import { ClientShootData, ServerShootData } from '../../types';
+import { ClientShootData, ServerShootData } from '../../shared/types';
+import { GameEngine } from './GameEngine';
 
 export interface WrappedServerSocket<T> {
   event: string;
@@ -17,7 +18,11 @@ export interface WrappedServerSocket<T> {
 type SocketActionFn<T> = (message: T) => void;
 
 export class SocketActions {
-  constructor(private socket: Socket, private gameState: GameState) {
+  constructor(
+    private socket: Socket,
+    private gameState: GameState,
+    private gameEngine: GameEngine
+  ) {
     socket.send(socket.id);
 
     this.createSocket(SocketEvent.DISCONNECT).on(this.onPlayerDisconnect.bind(this));
@@ -29,6 +34,9 @@ export class SocketActions {
     this.createSocket<PlayerMoveEvent>(SocketEvent.PLAYER_MOVE).on(this.onPlayerMove.bind(this));
 
     this.createSocket<ClientShootData>(SocketEvent.PLAYER_SHOOT).on(this.onPlayerShoot.bind(this));
+    this.createSocket<ClientShootData>(SocketEvent.WORLD_OBJECTS).on(() => {
+      broadcast(SocketEvent.WORLD_OBJECTS)(gameEngine.getWorldObjects());
+    });
   }
 
   private onPlayerShoot(data: ClientShootData) {
@@ -40,8 +48,8 @@ export class SocketActions {
       isShooting: data.isShooting,
       mousePos: data.mousePos,
       playerPos: {
-        x: foundPlayer?.data.x,
-        y: foundPlayer.data.y,
+        x: foundPlayer?.entity.position.x,
+        y: foundPlayer.entity.position.y,
       },
     };
 

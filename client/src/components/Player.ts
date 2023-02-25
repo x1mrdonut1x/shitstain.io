@@ -1,62 +1,44 @@
 import { gameServer } from '@/networking/GameServer';
-import { Physics, Scene } from 'phaser';
-import { ServerPlayer } from '../../../types';
-import { BulletController } from './BulletController';
+import * as PIXI from 'pixi.js';
+import { Player as EnginePlayer } from '../../../engine/components/Player';
+import { ServerPlayer } from '../../../shared/types';
 import { MovementController } from './MovementController';
 
-export class Player extends Physics.Matter.Sprite {
-  private bulletController: BulletController | undefined;
-  private movementController: MovementController | undefined;
-  public isMoving = false;
+export class Player extends EnginePlayer {
   public isLocalPlayer;
-  public bulletSpeed = 10;
+  public sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
 
-  constructor(
-    scene: Scene,
-    world: Phaser.Physics.Matter.World,
-    x: number,
-    y: number,
-    public id: string
-  ) {
-    super(world, x, y, 'fireWizard');
-    this.isLocalPlayer = id === gameServer.clientId;
-    (this.body as MatterJS.BodyType).label = 'Dupasraka';
-    console.log('player', id, 'created');
+  constructor(stage: PIXI.Container, x: number, y: number, public id: string) {
+    super(x, y, id);
 
-    this.bulletController = new BulletController(scene, world, this);
-    this.movementController = new MovementController(scene, this);
+    this.sprite.position.set(x, y);
+    this.sprite.width = this.width;
+    this.sprite.height = this.height;
+    this.sprite.tint = 0xff0000;
+    this.sprite.anchor.x = 0.5;
+    this.sprite.anchor.y = 0.5;
 
-    if (this.isLocalPlayer) {
-      this.scene.cameras.main.startFollow(
-        this,
-        true,
-        1,
-        1,
-        -window.innerWidth / 4,
-        -window.innerHeight - 50 //offset url and tabs bar
-      );
-    }
+    stage.addChild(this.sprite);
 
-    world.add(this);
-    scene.sys.displayList.add(this);
-    scene.sys.updateList.add(this);
-    this.setCollisionGroup(-1);
+    this.isLocalPlayer = id === gameServer?.clientId;
+
+    this.movementController = new MovementController(this);
   }
 
-  update(delta: number) {
-    this.bulletController?.update();
-    this.movementController?.update(delta);
+  update(dt: number) {
+    // this.bulletController?.update();
+    this.movementController?.update(dt);
 
-    if (this.bulletController?.isShooting) {
-      this.anims.play('fire-wizard-fireball', true);
-    } else if (this.isMoving) {
-      this.anims.play('fire-wizard-walk', true);
-    } else {
-      this.anims.play('fire-wizard-idle', true);
-    }
+    super.update(dt);
+    this.sprite.position.set(this.position.x, this.position.y);
   }
 
-  public setMovement(timestamp: number, movement: ServerPlayer) {
-    this.movementController?.updatePositionFromServer(timestamp, movement);
+  public setMovement(timestamp: number, position: ServerPlayer) {
+    this.setVelocityFromMovement(position.move);
+    this.movementController?.updatePositionFromServer(timestamp, position);
+  }
+
+  destroy(options: boolean) {
+    this.sprite.destroy(options);
   }
 }

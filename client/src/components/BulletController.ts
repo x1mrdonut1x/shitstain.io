@@ -1,8 +1,10 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
 import { gameServer } from '@/networking/GameServer';
 import { Scene } from 'phaser';
-import { ServerShootData, XYPosition } from '../../../types';
+import { ServerShootData, XYPosition } from '../../../shared/types';
 import { Bullet } from './Bullet';
-import { Player } from './Player';
+import { Player } from '../../../engine/components/Player';
 
 export class BulletController {
   private bullets: Bullet[] = [];

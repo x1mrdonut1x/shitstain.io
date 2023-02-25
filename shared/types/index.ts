@@ -1,3 +1,6 @@
+import MatterJS from 'matter-js';
+import { Player } from '../../engine/components/Player';
+
 export type ServerMovement = {
   left: boolean;
   right: boolean;
@@ -28,8 +31,21 @@ export type ServerPlayer = {
   move: ServerMovement;
 };
 
+export type ServerEnemy = {
+  x: number;
+  y: number;
+  speed: number;
+  move: ServerMovement;
+};
+
 export type ServerWorldPlayer = {
   data: ServerPlayer;
+  entity: Player;
+};
+
+export type ServerWorldEnemy = {
+  data: ServerEnemy;
+  body: MatterJS.Body;
 };
 
 export type ServerSnapshot = {
@@ -37,6 +53,14 @@ export type ServerSnapshot = {
   state: {
     players: ServerPlayer[];
   };
+};
+
+export type ServerObject = {
+  position: XYPosition;
+  vertices: XYPosition[];
+  label: string;
+  isStatic: boolean;
+  isSensor: boolean;
 };
 
 export type XYPosition = { x: number; y: number };

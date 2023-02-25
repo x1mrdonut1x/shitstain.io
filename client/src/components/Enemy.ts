@@ -1,29 +1,17 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-nocheck
 import { EnemyController } from '@/components/EnemyController';
-import { GameState } from '@/components/GameState';
 import { DamageText } from './DamageText';
+import * as PIXI from 'pixi.js';
+import { Rectangle } from '../../../engine/entities/Rectangle';
 
-import { Physics, Scene } from 'phaser';
-
-export class Enemy extends Physics.Matter.Sprite {
+export class Enemy extends Rectangle {
   private enemyController?: EnemyController;
   private health = 100;
   private damageTexts: DamageText[] = [];
 
-  constructor(
-    scene: Scene,
-    world: Phaser.Physics.Matter.World,
-    gameState: GameState,
-    x: number,
-    y: number
-  ) {
-    super(world, x, y, 'monster-hydra-walk', undefined, { label: 'enemy' });
-    const body = this.body as MatterJS.BodyType;
-
-    body.label = 'enemy';
-    this.name = 'enemy';
-
-    this.setRectangle(60, 50);
-    this.setOrigin(0.65, 0.75);
+  constructor(private stage: PIXI.Container, x: number, y: number) {
+    super(x, y, 50, 50);
 
     world.add(this);
 
@@ -41,11 +29,6 @@ export class Enemy extends Physics.Matter.Sprite {
 
       this.damageTexts.push(new DamageText(scene, enemy, bullet.gameObject?.getData('damage')));
     });
-
-    scene.sys.displayList.add(this);
-    scene.sys.updateList.add(this);
-
-    this.anims.play('monster-hydra-walk', true);
   }
 
   update(delta: number) {

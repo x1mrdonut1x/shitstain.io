@@ -1,41 +1,62 @@
-import { Engine } from 'matter-js';
-import { ServerSnapshot } from '../../types';
+import { ServerSnapshot } from '../../shared/types';
 import { GameState } from './GameState';
-import { TIMESTEP, SNAPSHOT_STEP } from '../../shared/constants';
+import { TIMESTEP, SNAPSHOT_STEP, MAP_WIDTH_PX, MAP_HEIGHT_PX } from '../../shared/constants';
+import { Rectangle } from '../../engine/entities/Rectangle';
 
 export class GameEngine {
-  private engine: Engine;
   public state: GameState;
   private loop: ReturnType<typeof setInterval> | undefined;
 
   constructor() {
-    this.engine = Engine.create({ gravity: { y: 0 } });
-    this.state = new GameState(this.engine.world);
+    this.createWorldBounds();
+
+    this.state = new GameState();
   }
 
-  // init() {
-  //   createEnvironment(this.state, this.engine);
-  //   this.registerPhysicsEvents();
-  // }
+  public getWorldObjects() {
+    // const parsedBodies: ServerObject[] = Array.from(this.world.bodies).map(body => ({
+    //   position: { x: body.position.x, y: body.position.y },
+    //   vertices: body.vertices.map(v => ({ x: v.x, y: v.y })),
+    //   label: body.label,
+    //   isStatic: body.isStatic,
+    //   isSensor: body.isSensor,
+    // }));
+    // return parsedBodies;
+  }
 
-  // onCollisionStart = (event: any) => {
-  //   const pairs = event.pairs;
+  private createWorldBounds() {
+    const WALL_THICKNESS = 200;
 
-  //   for (let i = 0; i < pairs.length; i++) {
-  //     const pair = pairs[i];
-  //     const bodyA = pair.bodyA;
-  //     const bodyB = pair.bodyB;
-  //   }
-  // };
+    this.updateWall(
+      0 - WALL_THICKNESS,
+      0 - WALL_THICKNESS,
+      WALL_THICKNESS,
+      MAP_HEIGHT_PX + WALL_THICKNESS * 2
+    );
 
-  // registerPhysicsEvents() {
-  //   // Collision Events
-  //   Events.on(this.engine, 'collisionStart', this.onCollisionStart);
-  // }
+    this.updateWall(
+      0 + MAP_WIDTH_PX,
+      0 - WALL_THICKNESS,
+      WALL_THICKNESS,
+      MAP_HEIGHT_PX + WALL_THICKNESS * 2
+    );
+
+    this.updateWall(0, 0 - WALL_THICKNESS, MAP_WIDTH_PX, WALL_THICKNESS);
+    this.updateWall(0, 0 + MAP_HEIGHT_PX, MAP_WIDTH_PX, WALL_THICKNESS);
+  }
+
+  private updateWall(x: number, y: number, width: number, height: number) {
+    //  adjust center
+    x += width / 2;
+    y += height / 2;
+
+    const body = new Rectangle(x, y, width, height);
+  }
 
   private handleSnapshot: (snapshot: ServerSnapshot) => void = () => {
     /* empty */
   };
+
   public onSnapshot(callback: typeof this.handleSnapshot) {
     this.handleSnapshot = callback;
   }
@@ -46,21 +67,22 @@ export class GameEngine {
     this.loop = setInterval(() => {
       const now = Date.now();
       const delta = now - lastTimestamp;
-
-      this.state.updateMovement(delta / 1000);
-
       lastTimestamp = now;
+
+      this.state.updateMovement();
+      this.state.updatePlayers(delta);
     }, TIMESTEP);
 
     setInterval(() => {
       const now = Date.now();
+
       this.handleSnapshot({
         timestamp: now,
         state: {
           players: this.state.players.map(player => {
-            const { data } = player;
-            // data.x = body.position.x;
-            // data.y = body.position.y;
+            const { data, entity } = player;
+            data.x = entity.position.x;
+            data.y = entity.position.y;
             return data;
           }),
         },

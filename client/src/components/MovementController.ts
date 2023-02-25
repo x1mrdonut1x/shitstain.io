@@ -1,32 +1,28 @@
-import { Scene } from 'phaser';
-import { ServerPlayer, XYPosition } from '../../../types';
-import { gameServer } from '../networking/GameServer';
-import { isEqual } from 'lodash';
-import { Player } from './Player';
+import { XYPosition } from '../../../shared/types';
 import { KeyboardController } from './input-controllers/KeyboardController';
+import { gameServer } from '@/networking/GameServer';
+import { Player } from './Player';
 
 export class MovementController {
   private existenceTime = 0;
 
-  private baseTimestamp: number | undefined;
-  private nextTimestamp: number | undefined;
+  private baseTimestamp?: number;
+  private nextTimestamp?: number;
 
-  private basePosition: XYPosition | undefined;
-  private nextPosition: XYPosition | undefined;
+  private basePosition?: XYPosition;
+  private nextPosition?: XYPosition;
 
-  private serverPosition?: ServerPlayer;
-  private keyboardController: KeyboardController | undefined;
-  private readonly speed = 200;
+  private keyboardController?: KeyboardController;
 
-  constructor(private scene: Scene, private player: Player) {
-    if (this.player.isLocalPlayer) {
-      this.keyboardController = new KeyboardController(scene);
-    }
+  constructor(private player: Player) {
+    if (this.player.isLocalPlayer)
+      this.keyboardController = new KeyboardController(movement => {
+        this.player.setVelocityFromMovement(movement);
+        gameServer.movePlayer.emit({ movement });
+      });
   }
 
-  public updatePositionFromServer(timestamp: number, position: ServerPlayer) {
-    this.serverPosition = position;
-
+  public updatePositionFromServer(timestamp: number, position: XYPosition) {
     if (!this.baseTimestamp) {
       this.baseTimestamp = timestamp;
       this.basePosition = position;
@@ -42,47 +38,18 @@ export class MovementController {
   }
 
   public update(delta: number) {
-    this.keyboardController?.update();
-
     if (this.keyboardController) {
-      const { left, right, up, down } = this.keyboardController.movement;
-      let velocityY = 0;
-      let velocityX = 0;
-
-      if (up) {
-        velocityY = -this.speed;
-      }
-      if (down) {
-        velocityY = this.speed;
-      }
-      if (left) {
-        velocityX = -this.speed;
-      }
-      if (right) {
-        velocityX = this.speed;
-      }
-
-      this.player.x += (velocityX * delta) / 1000;
-      this.player.y += (velocityY * delta) / 1000;
-
       if (this.nextPosition) {
-        const dx = Math.abs(this.player.x - this.nextPosition.x);
-        const dy = Math.abs(this.player.y - this.nextPosition.y);
+        const dx = Math.abs(this.player.position.x - this.nextPosition.x);
+        const dy = Math.abs(this.player.position.y - this.nextPosition.y);
         const maxAllowedShift = 80;
 
         if (dx > maxAllowedShift || dy > maxAllowedShift) {
-          this.player.x = this.nextPosition.x;
-          this.player.y = this.nextPosition.y;
+          this.player.position.x = this.nextPosition.x;
+          this.player.position.y = this.nextPosition.y;
         }
       }
 
-      if (!isEqual(this.keyboardController?.movement, this.serverPosition?.move)) {
-        gameServer.movePlayer.emit({ movement: this.keyboardController.movement });
-      }
-
-      if (this.keyboardController.movement.left || this.keyboardController.movement.right) {
-        this.player.flipX = this.keyboardController.movement.left;
-      }
       this.player.isMoving = this.keyboardController?.isMoving;
     } else {
       if (this.basePosition && this.nextPosition && this.nextTimestamp && this.baseTimestamp) {
@@ -90,21 +57,10 @@ export class MovementController {
         const step = Math.min(this.existenceTime, fullTimeStep) / fullTimeStep;
         this.existenceTime += delta;
 
-        this.player.x = Phaser.Math.Linear(this.basePosition.x, this.nextPosition.x, step);
-        this.player.y = Phaser.Math.Linear(this.basePosition.y, this.nextPosition.y, step);
-      }
-
-      if (this.serverPosition) {
-        if (this.serverPosition.move.left || this.serverPosition.move.right) {
-          this.player.flipX = this.serverPosition.move.left;
-        }
-
-        this.player.isMoving =
-          this.serverPosition.move.right ||
-          this.serverPosition.move.left ||
-          this.serverPosition.move.up ||
-          this.serverPosition.move.down;
+        this.player.position.x = lerp(this.basePosition.x, this.nextPosition.x, step);
+        this.player.position.y = lerp(this.basePosition.y, this.nextPosition.y, step);
       }
     }
   }
 }
+const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a;

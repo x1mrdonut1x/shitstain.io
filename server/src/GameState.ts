@@ -1,12 +1,18 @@
 import { cloneDeep } from 'lodash';
-import { World } from 'matter-js';
-import { ServerMovement, ServerPlayer, ServerWorldPlayer } from '../../types';
+import { Player } from '../../engine/components/Player';
+import { Rectangle } from '../../engine/entities/Rectangle';
+import {
+  ServerEnemy,
+  ServerMovement,
+  ServerPlayer,
+  ServerWorldEnemy,
+  ServerWorldPlayer,
+} from '../../shared/types';
 
 export class GameState {
   public hasChanged = false;
   private _players: ServerWorldPlayer[] = [];
-
-  constructor(private world: World) {}
+  private _enemies: ServerWorldEnemy[] = [];
 
   get players() {
     return cloneDeep(this._players);
@@ -17,15 +23,15 @@ export class GameState {
   }
 
   public addPlayer(id: string) {
-    this.hasChanged = true;
-
     const x = Math.random() * 1100 + 100;
     const y = Math.random() * 600 + 100;
+    const entity = new Player(x, y, id);
+    this.hasChanged = true;
 
-    const player: ServerPlayer = {
+    const serverPlayer: ServerPlayer = {
       clientId: id,
-      x,
-      y,
+      x: entity.position.x,
+      y: entity.position.y,
       bulletSpeed: 10, //px per tick
       speed: 200,
       move: {
@@ -36,14 +42,36 @@ export class GameState {
       },
     };
 
-    // const body = Bodies.rectangle(x, y, 128, 128);
+    this._players.push({ data: serverPlayer, entity: entity });
+  }
 
-    this._players.push({ data: player });
-    // World.add(this.world, body);
+  public addEnemy() {
+    const x = Math.random() * 100 + 100;
+    const y = Math.random() * 100 + 100;
+    const body = new Rectangle(x, y, 20, 60);
+    this.hasChanged = true;
+
+    const serverEnemy: ServerEnemy = {
+      x: body.position.x,
+      y: body.position.y,
+      speed: 200,
+      move: {
+        up: false,
+        right: false,
+        down: false,
+        left: false,
+      },
+    };
+
+    // this._enemies.push({ data: serverEnemy, body });
+    // this.world.add(body);
   }
 
   public removePlayer(id: string) {
     this.hasChanged = true;
+
+    this._players.find(p => p.data.clientId === id);
+
     this._players = this._players.filter(p => p.data.clientId !== id);
   }
 
@@ -56,29 +84,17 @@ export class GameState {
     }
   }
 
-  public updateMovement(delta: number) {
+  public updatePlayers(dt: number) {
+    this._players.forEach(p => p.entity.update(dt));
+  }
+
+  public updateMovement() {
     let anyPlayerChanged = false;
 
-    this._players.forEach(({ data: player }) => {
-      let velocityX = 0;
-      let velocityY = 0;
+    this._players.forEach(({ entity, data }) => {
+      entity.setVelocityFromMovement(data.move);
 
-      if (player.move.up) {
-        velocityY = -player.speed;
-      }
-      if (player.move.down) {
-        velocityY = player.speed;
-      }
-      if (player.move.left) {
-        velocityX = -player.speed;
-      }
-      if (player.move.right) {
-        velocityX = player.speed;
-      }
-      player.x += velocityX * delta;
-      player.y += velocityY * delta;
-
-      if (velocityX !== 0 || velocityY !== 0) {
+      if (entity.velocity.x !== 0 || entity.velocity.y !== 0) {
         anyPlayerChanged = true;
       }
     });
