@@ -3,15 +3,18 @@ import { Rectangle } from '../entities/Rectangle';
 
 export class Player extends Rectangle {
   public isMoving = false;
-  public bulletSpeed = 400;
+  public bulletSpeed = 700;
+  public shootingSpeed = 120;
   public speed = 200;
+  public movement: ServerMovement = { left: false, right: false, up: false, down: false };
 
   constructor(x: number, y: number, public id: string) {
     super(x, y, 40, 60);
   }
 
   public setVelocityFromMovement(movement: ServerMovement) {
-    const { left, right, up, down } = movement;
+    this.movement = { ...movement };
+    const { left, right, up, down } = this.movement;
     let velocityY = 0;
     let velocityX = 0;
 

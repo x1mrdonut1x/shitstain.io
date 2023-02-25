@@ -1,4 +1,5 @@
 import { Player } from '../../engine/components/Player';
+import { Vector2 } from '../../engine/entities/Vector2';
 
 export type ServerMovement = {
   left: boolean;
@@ -23,8 +24,7 @@ export type ServerShootData = {
 
 export type ServerPlayer = {
   clientId: string;
-  x: number;
-  y: number;
+  position: Vector2;
   speed: number;
   bulletSpeed: number;
   move: ServerMovement;

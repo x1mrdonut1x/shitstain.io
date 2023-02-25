@@ -3,12 +3,13 @@ import { ServerShootData, XYPosition } from '../../../shared/types';
 import { Bullet } from './Bullet';
 import * as PIXI from 'pixi.js';
 import { Player } from './Player';
+import { PointerController } from './input-controllers/PointerController';
 
 export class BulletController {
-  private bullets: Bullet[] = [];
+  private bullets: Set<Bullet> = new Set();
   private lastShotAt = 0; //ms
-  private shootingSpeed = 150; //ms
   private mousePos: XYPosition = { x: 0, y: 0 };
+  private pointerController?: PointerController;
 
   private serverStep?: ServerShootData;
 
@@ -16,32 +17,10 @@ export class BulletController {
 
   constructor(private stage: PIXI.Container, private player: Player) {
     if (this.player.isLocalPlayer) {
-      this.stage.addEventListener('pointerdown', e => {
-        this.mousePos = {
-          x: e.x - this.player.position.x + stage.pivot.x,
-          y: e.y - this.player.position.y + stage.pivot.y,
-        };
-        this.isShooting = true;
-        this.emitShoot();
-        this.shoot();
-      });
-
-      this.stage.addEventListener('pointermove', e => {
-        this.mousePos = {
-          x: e.x - this.player.position.x + stage.pivot.x,
-          y: e.y - this.player.position.y + stage.pivot.y,
-        };
-
-        if (this.isShooting) {
-          this.emitShoot();
-          this.shoot();
-        }
-      });
-
-      this.stage.addEventListener('pointerup', () => {
-        this.isShooting = false;
-        this.emitShoot();
-        this.shoot();
+      this.pointerController = new PointerController(stage, player);
+      this.pointerController.onMove((isShooting, position) => {
+        this.isShooting = isShooting;
+        this.mousePos = position;
       });
     }
 
@@ -69,16 +48,21 @@ export class BulletController {
     const now = Date.now();
     const delta = now - this.lastShotAt;
 
-    if (delta < this.shootingSpeed) return;
+    if (delta < this.player.shootingSpeed) return;
 
     const bullet = new Bullet(
-      this.stage,
       this.player.position.x,
       this.player.position.y,
       this.getVelocity(mouse)
     );
 
-    this.bullets.push(bullet);
+    bullet.onCollide = () => {
+      console.log('destruction');
+      bullet.sprite.destroy();
+      this.bullets.delete(bullet);
+    };
+
+    this.bullets.add(bullet);
     this.stage.addChild(bullet.sprite);
 
     this.lastShotAt = now;
@@ -101,20 +85,6 @@ export class BulletController {
       this.shoot(this.serverStep?.mousePos);
     }
 
-    for (let i = this.bullets.length - 1; i >= 0; i--) {
-      const { position, radius } = this.bullets[i];
-
-      if (
-        position.x + radius > this.stage.width ||
-        position.x - radius < 0 ||
-        position.y + radius > this.stage.height ||
-        position.y - radius < 0
-      ) {
-        this.bullets[i].sprite.destroy();
-        this.bullets.splice(i, 1);
-      } else {
-        this.bullets[i].update(dt);
-      }
-    }
+    this.bullets.forEach(bullet => bullet.update(dt));
   }
 }

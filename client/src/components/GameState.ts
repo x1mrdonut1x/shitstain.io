@@ -4,12 +4,14 @@ import { log } from '@/utils/logAction';
 import { GetPlayersEvent, GetWorldStateEvent } from '../../../shared/types/events';
 import { Player } from './Player';
 import * as PIXI from 'pixi.js';
+import { GameEngine } from '../../../engine/GameEngine';
 
-export class GameState {
-  public players: Player[] = [];
-  public enemies: Enemy[] = [];
+export class GameState extends GameEngine<Player, Enemy> {
+  public players: Set<Player> = new Set();
+  public enemies: Set<Enemy> = new Set();
 
   constructor(private stage: PIXI.Container) {
+    super();
     console.log('GameState.initialize');
     gameServer.getPlayers.on(data => {
       this.updatePlayersFromServer(data);
@@ -22,70 +24,57 @@ export class GameState {
     gameServer.createPlayer.emit();
 
     Array.from(Array(10)).forEach((_, index) => {
-      this.addEnemy(200, 100 + index * 100);
+      const enemy = new Enemy(this.stage, 200, 100 + index * 100);
+      this.addEnemy(enemy);
     });
 
     document.getElementById('loading')?.remove();
   }
 
-  public addEnemy(x: number, y: number) {
-    const newEnemy = new Enemy(this.stage, x, y);
-    this.enemies.push(newEnemy);
-    this.stage.addChild(newEnemy.sprite);
+  public addEnemy(enemy: Enemy) {
+    super.addEnemy(enemy);
+
+    this.stage.addChild(enemy.sprite);
   }
 
-  public getPlayerCount() {
-    return this.players.length;
+  public addPlayer(player: Player) {
+    super.addPlayer(player);
+
+    log(`Player ${player.id} connected`);
+    this.stage.addChild(player.sprite);
   }
 
-  public addPlayer(id: string, x: number, y: number) {
-    log(`Player ${id} connected`);
-    this.players.push(new Player(this.stage, x, y, id));
-  }
+  public removePlayer(player: Player) {
+    super.removePlayer(player);
 
-  public removePlayer(id: string) {
-    const foundPlayer = this.players.find(player => player.id === id);
-
-    if (foundPlayer) {
-      log(`Player ${id} disconnected`);
-      foundPlayer.destroy(true);
-      this.players = this.players.filter(p => p.id !== id);
-    }
-  }
-
-  public updatePlayers(delta: number) {
-    this.players.forEach(player => {
-      player.update(delta);
-    });
-  }
-
-  public updateEnemies(delta: number) {
-    this.enemies.forEach(enemy => {
-      enemy.update(delta);
-    });
+    log(`Player ${player.id} disconnected`);
+    player.sprite.destroy(true);
   }
 
   public updatePlayersFromServer(data: GetPlayersEvent) {
     this.players.forEach(localPlayer => {
       if (!data.find(serverPlayer => localPlayer.id === serverPlayer.clientId)) {
-        this.removePlayer(localPlayer.id);
+        this.removePlayer(localPlayer);
       }
     });
 
     data.forEach(serverPlayer => {
-      const foundPlayer = this.players.find(
-        localPlayer => localPlayer.id === serverPlayer.clientId
-      );
+      const {
+        clientId,
+        position: { x, y },
+      } = serverPlayer;
+      const foundPlayer = this.getPlayerById(clientId);
 
       if (!foundPlayer) {
-        this.addPlayer(serverPlayer.clientId, serverPlayer.x, serverPlayer.y);
+        const player = new Player(this.stage, x, y, clientId);
+        this.addPlayer(player);
       }
     });
   }
 
   public movePlayers(data: GetWorldStateEvent) {
     data.state.players.forEach(object => {
-      const foundPlayer = this.players.find(player => player.id === object.clientId);
+      const foundPlayer = this.getPlayerById(object.clientId);
       foundPlayer?.setMovement(data.timestamp, object);
     });
   }

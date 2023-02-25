@@ -61,11 +61,7 @@ export class Player extends EnginePlayer {
   }
 
   public setMovement(timestamp: number, position: ServerPlayer) {
-    this.setVelocityFromMovement(position.move);
-    this.movementController?.updatePositionFromServer(timestamp, position);
-  }
-
-  destroy(options: boolean) {
-    this.sprite.destroy(options);
+    if (!this.isLocalPlayer) this.setVelocityFromMovement(position.move);
+    this.movementController?.updatePositionFromServer(timestamp, position.position);
   }
 }

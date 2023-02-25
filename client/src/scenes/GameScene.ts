@@ -47,12 +47,13 @@ export class GameScene {
     const now = Date.now();
     const dt = now - this.lastTimestamp;
     this.lastTimestamp = now;
-    this.gameState?.updatePlayers(dt);
-    this.gameState?.updateEnemies(dt);
+
+    this.gameState?.update(dt);
 
     requestAnimationFrame(this.update.bind(this));
   }
 
+  // DEBUG
   addPointerTracker(app: PIXI.Application) {
     const text = new PIXI.Text('asd');
     text.style.fill = 'red';
@@ -61,7 +62,6 @@ export class GameScene {
 
     app.stage.addChild(text);
 
-    // Follow the pointer
     app.stage.addEventListener('pointermove', e => {
       const x = Math.round(e.global.x + app.stage.pivot.x);
       const y = Math.round(e.global.y + app.stage.pivot.y);
