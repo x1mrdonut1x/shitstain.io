@@ -91,26 +91,10 @@ export class GameState {
   public updateMovement() {
     let anyPlayerChanged = false;
 
-    this._players.forEach(({ entity: body, data }) => {
-      let velocityX = 0;
-      let velocityY = 0;
+    this._players.forEach(({ entity, data }) => {
+      entity.setVelocityFromMovement(data.move);
 
-      if (data.move.up) {
-        velocityY = -data.speed;
-      }
-      if (data.move.down) {
-        velocityY = data.speed;
-      }
-      if (data.move.left) {
-        velocityX = -data.speed;
-      }
-      if (data.move.right) {
-        velocityX = data.speed;
-      }
-      body.velocity.x = velocityX;
-      body.velocity.y = velocityY;
-
-      if (velocityX !== 0 || velocityY !== 0) {
+      if (entity.velocity.x !== 0 || entity.velocity.y !== 0) {
         anyPlayerChanged = true;
       }
     });

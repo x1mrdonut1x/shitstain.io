@@ -53,26 +53,6 @@ export class GameEngine {
     const body = new Rectangle(x, y, width, height);
   }
 
-  // init() {
-  //   createEnvironment(this.state, this.engine);
-  //   this.registerPhysicsEvents();
-  // }
-
-  // onCollisionStart = (event: any) => {
-  //   const pairs = event.pairs;
-
-  //   for (let i = 0; i < pairs.length; i++) {
-  //     const pair = pairs[i];
-  //     const bodyA = pair.bodyA;
-  //     const bodyB = pair.bodyB;
-  //   }
-  // };
-
-  // registerPhysicsEvents() {
-  //   // Collision Events
-  //   Events.on(this.engine, 'collisionStart', this.onCollisionStart);
-  // }
-
   private handleSnapshot: (snapshot: ServerSnapshot) => void = () => {
     /* empty */
   };

@@ -11,29 +11,36 @@ interface Keys {
 export class KeyboardController {
   private readonly keys: Keys = {};
   private _movement: ServerMovement = { up: false, down: false, left: false, right: false };
+  private onMovement?: (movement: ServerMovement) => void;
 
-  constructor() {
+  constructor(callback?: (move: ServerMovement) => void) {
     this.initKeyboard();
     window.addEventListener('keydown', this.onKeyDown.bind(this));
     window.addEventListener('keyup', this.onKeyUp.bind(this));
+
+    if (callback) this.onMovement = callback;
   }
 
   public onKeyUp(e: KeyboardEvent) {
+    if (e.repeat) return;
     Object.keys(this.keys).forEach(key => {
       if (e.key === key) {
         this.keys[key].isDown = false;
         this.keys[key].onUp.bind(this)();
       }
     });
+    this.onMovement?.(this._movement);
   }
 
   public onKeyDown(e: KeyboardEvent) {
+    if (e.repeat) return;
     Object.keys(this.keys).forEach(key => {
       if (e.key === key) {
         this.keys[key].isDown = true;
         this.keys[key].onDown.bind(this)();
       }
     });
+    this.onMovement?.(this._movement);
   }
 
   get movement() {

@@ -33,8 +33,9 @@ export class Player extends EnginePlayer {
     this.sprite.position.set(this.position.x, this.position.y);
   }
 
-  public setMovement(timestamp: number, movement: ServerPlayer) {
-    this.movementController?.updatePositionFromServer(timestamp, movement);
+  public setMovement(timestamp: number, position: ServerPlayer) {
+    this.setVelocityFromMovement(position.move);
+    this.movementController?.updatePositionFromServer(timestamp, position);
   }
 
   destroy(options: boolean) {
