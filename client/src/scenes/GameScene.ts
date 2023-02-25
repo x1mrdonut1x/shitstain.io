@@ -1,7 +1,7 @@
 import { GameState } from '@/components/GameState';
 import { MAP_HEIGHT_PX, MAP_WIDTH_PX } from '../../../shared/constants';
 import * as PIXI from 'pixi.js';
-import { World } from '../../../engine/entities/World';
+import { World } from '../../../shared/engine/entities/World';
 import { Player } from '@/components/Player';
 
 export class GameScene {
@@ -29,7 +29,6 @@ export class GameScene {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     document.body.appendChild(app.view as any);
-
 
     const player = new Player(app.stage, 100, 100, 'dupa');
     world.add(player);

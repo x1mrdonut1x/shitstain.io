@@ -11,6 +11,6 @@
     "useDefineForClassFields": true,
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "../shared/**/*.ts", "../engine/**/*.ts"],
+  "include": ["src/**/*.ts", "../shared/**/*.ts", "../shared/engine/**/*.ts"],
   "exclude": ["node_modules"]
 }

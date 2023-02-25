@@ -1,6 +1,6 @@
 import { Physics } from 'phaser';
 import { XYPosition } from '../../../shared/types';
-import { Player } from '../../../engine/components/Player';
+import { Player } from '../../../shared/engine/components/Player';
 
 export class Bullet extends Physics.Matter.Sprite {
   constructor(

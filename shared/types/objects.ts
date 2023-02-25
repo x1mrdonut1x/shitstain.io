@@ -14,30 +14,65 @@ export type Point = {
 
 export type Vector = Point;
 
-export type Movable = {
-  speed: Vector;
-  position: Point;
-};
-
-export type Collidable = Movable & {
+export type Collision = {
   body: Rectangle | Circle;
   group: string;
 };
 
-export type Drawable = {
+export type View = {
   sprite: string;
 };
 
-// export const Wizard: Collidable & Drawable = {};
+export type EntityKey = string;
 
-// export const Bullet: Collidable & Drawable = {};
+export type State = {
+  objects: Map<EntityKey, Entity>;
+  changed: Map<EntityKey, SnapshotObject>;
+  snapshot?: Snapshot;
+  authority: string;
+};
 
-// export const Monster: Collidable & Drawable = {};
+export type Entity = {
+  id: EntityKey;
+  clientId?: string;
+  model: Model;
+  position?: Point;
+  movement?: Vector;
+  collision?: Collision;
+  view?: View;
+};
 
-// export type Input = { up: boolean };
+export type Model = {
+  type: string;
+  physics?: {
+    speed?: number;
+  };
+  abilities?: {
+    shooting?: {
+      projectile: Model;
+    };
+  };
+};
 
-// export type Player = {
-//   clientId: string;
-//   input: Input;
-//   character: typeof Wizard;
-// };
+export type Snapshot = {
+  timestamp: number;
+  changed: Map<EntityKey, SnapshotObject>;
+};
+
+export type SnapshotObject = {
+  id: EntityKey;
+  state: 'created' | 'updated' | 'deleted';
+  change: Partial<Entity>;
+};
+
+export type MovementInput = {
+  up: boolean;
+  down: boolean;
+  left: boolean;
+  right: boolean;
+};
+
+export type ShootInput = {
+  x: number;
+  y: number;
+};

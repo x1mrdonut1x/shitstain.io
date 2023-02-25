@@ -11,13 +11,14 @@ export enum SocketEvent {
   WORLD_OBJECTS = 'world:objects',
 }
 
-export type PlayerMoveEvent = {
-  clientId: string;
-  movement: ServerMovement;
+export type SocketEventHandler<T> = (data: T) => void;
+
+export type SocketEventListener = {
+  [SocketEvent.PLAYER_MOVE]: SocketEventHandler<PlayerMoveEvent>;
 };
 
-export type PlayerConnectEvent = {
-  clientId: string;
+export type PlayerMoveEvent = {
+  movement: ServerMovement;
 };
 
 export type EmitPlayerShootEvent = Omit<ClientShootData, 'playerPos'>;

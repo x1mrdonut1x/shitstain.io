@@ -1,6 +1,3 @@
-import MatterJS from 'matter-js';
-import { Player } from '../../engine/components/Player';
-
 export type ServerMovement = {
   left: boolean;
   right: boolean;
@@ -36,11 +33,6 @@ export type ServerEnemy = {
   y: number;
   speed: number;
   move: ServerMovement;
-};
-
-export type ServerWorldPlayer = {
-  data: ServerPlayer;
-  entity: Player;
 };
 
 export type ServerWorldEnemy = {

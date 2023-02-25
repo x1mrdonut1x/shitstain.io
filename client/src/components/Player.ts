@@ -1,6 +1,6 @@
 import { gameServer } from '@/networking/GameServer';
 import * as PIXI from 'pixi.js';
-import { Player as EnginePlayer } from '../../../engine/components/Player';
+import { Player as EnginePlayer } from '../../../shared/engine/components/Player';
 import { ServerPlayer } from '../../../shared/types';
 import { MovementController } from './MovementController';
 

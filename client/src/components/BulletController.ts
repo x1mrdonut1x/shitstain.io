@@ -4,7 +4,7 @@ import { gameServer } from '@/networking/GameServer';
 import { Scene } from 'phaser';
 import { ServerShootData, XYPosition } from '../../../shared/types';
 import { Bullet } from './Bullet';
-import { Player } from '../../../engine/components/Player';
+import { Player } from '../../../shared/engine/components/Player';
 
 export class BulletController {
   private bullets: Bullet[] = [];

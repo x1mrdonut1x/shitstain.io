@@ -1,7 +1,7 @@
 import { ServerSnapshot } from '../../shared/types';
 import { GameState } from './GameState';
 import { TIMESTEP, SNAPSHOT_STEP, MAP_WIDTH_PX, MAP_HEIGHT_PX } from '../../shared/constants';
-import { Rectangle } from '../../engine/entities/Rectangle';
+import { Rectangle } from '../../shared/engine/entities/Rectangle';
 
 export class GameEngine {
   public state: GameState;

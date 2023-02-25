@@ -3,7 +3,7 @@
 import { EnemyController } from '@/components/EnemyController';
 import { DamageText } from './DamageText';
 import * as PIXI from 'pixi.js';
-import { Rectangle } from '../../../engine/entities/Rectangle';
+import { Rectangle } from '../../../shared/engine/entities/Rectangle';
 
 export class Enemy extends Rectangle {
   private enemyController?: EnemyController;

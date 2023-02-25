@@ -1,6 +1,6 @@
 import { cloneDeep } from 'lodash';
-import { Player } from '../../engine/components/Player';
-import { Rectangle } from '../../engine/entities/Rectangle';
+import { Player } from '../../shared/engine/components/Player';
+import { Rectangle } from '../../shared/engine/entities/Rectangle';
 import {
   ServerEnemy,
   ServerMovement,
