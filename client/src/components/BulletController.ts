@@ -50,7 +50,6 @@ export class BulletController {
       if (!this.player.isLocalPlayer) this.isShooting = data.isShooting;
 
       this.serverStep = data;
-      console.log(data.mousePos);
       this.shoot(data.mousePos);
     });
   }
@@ -103,12 +102,12 @@ export class BulletController {
     }
 
     for (let i = this.bullets.length - 1; i >= 0; i--) {
-      const { position } = this.bullets[i].sprite;
+      const { position, radius } = this.bullets[i];
       if (
-        position.x > document.body.clientWidth ||
-        position.x < 0 ||
-        position.y > document.body.clientHeight ||
-        position.y < 0
+        position.x + radius > document.body.clientWidth ||
+        position.x - radius < 0 ||
+        position.y + radius > document.body.clientHeight ||
+        position.y - radius < 0
       ) {
         this.bullets[i].sprite.destroy();
         this.bullets.splice(i, 1);

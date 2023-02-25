@@ -3,6 +3,7 @@ import { Vector2 } from './Vector2';
 export class Entity {
   public position: Vector2;
   public velocity: Vector2 = new Vector2();
+  public onCollide?: (entity: Entity) => void;
 
   constructor(x: number, y: number) {
     this.position = new Vector2(x, y);

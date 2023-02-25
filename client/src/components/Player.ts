@@ -1,9 +1,9 @@
 import { gameServer } from '@/networking/GameServer';
-import * as PIXI from 'pixi.js';
 import { Player as EnginePlayer } from '../../../engine/components/Player';
 import { ServerPlayer } from '../../../shared/types';
 import { BulletController } from './BulletController';
 import { MovementController } from './MovementController';
+import * as PIXI from 'pixi.js';
 
 export class Player extends EnginePlayer {
   protected bulletController?: BulletController;
@@ -17,7 +17,7 @@ export class Player extends EnginePlayer {
     this.sprite.position.set(x, y);
     this.sprite.width = this.width;
     this.sprite.height = this.height;
-    this.sprite.tint = 0xff0000;
+    this.sprite.tint = 0x00ff00;
     this.sprite.anchor.x = 0.5;
     this.sprite.anchor.y = 0.5;
 

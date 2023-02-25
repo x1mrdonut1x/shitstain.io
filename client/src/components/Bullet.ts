@@ -11,7 +11,7 @@ export class Bullet extends Circle {
     this.setVelocity(velocity);
 
     this.sprite = new PIXI.Graphics();
-    this.sprite.lineStyle(2, 0xffffff);
+    this.sprite.lineStyle(1, 0xffffff);
     this.sprite.drawCircle(0, 0, 10);
     this.sprite.endFill();
 

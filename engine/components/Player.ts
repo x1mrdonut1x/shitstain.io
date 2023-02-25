@@ -7,7 +7,7 @@ export class Player extends Rectangle {
   public speed = 200;
 
   constructor(x: number, y: number, public id: string) {
-    super(x, y, 60, 60);
+    super(x, y, 40, 60);
   }
 
   public setVelocityFromMovement(movement: ServerMovement) {

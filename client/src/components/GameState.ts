@@ -1,7 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-nocheck
 import { Enemy } from '@/components/Enemy';
-// import { MAP_HEIGHT, MAP_WIDTH } from '@/constants';
 import { gameServer } from '@/networking/GameServer';
 import { log } from '@/utils/logAction';
 import { GetPlayersEvent, GetWorldStateEvent } from '../../../shared/types/events';
@@ -22,25 +19,20 @@ export class GameState {
       this.movePlayers(data);
     });
 
-    // gameServer.getWorldObjects.on(data => {
-    //   console.log(data);
-    //   this.buildWorld(data);
-    // });
-
     gameServer.createPlayer.emit();
-    // gameServer.getWorldObjects.emit();
 
     Array.from(Array(10)).forEach((_, index) => {
-      this.addEnemy(400, 200 + index * 100);
+      this.addEnemy(200, 100 + index * 100);
     });
 
     document.getElementById('loading')?.remove();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public addEnemy(x: number, y: number) {
-    // const newEnemy = new Enemy(this.stage, this, x, y);
-    // this.enemies.push(newEnemy);
+    console.log('dupa');
+    const newEnemy = new Enemy(this.stage, x, y);
+    this.enemies.push(newEnemy);
+    this.stage.addChild(newEnemy.sprite);
   }
 
   public getPlayerCount() {
@@ -90,9 +82,6 @@ export class GameState {
         this.addPlayer(serverPlayer.clientId, serverPlayer.x, serverPlayer.y);
       }
     });
-
-    console.log('serverPlayers', data);
-    console.log('localPlayers', this.players);
   }
 
   public movePlayers(data: GetWorldStateEvent) {
@@ -101,20 +90,4 @@ export class GameState {
       foundPlayer?.setMovement(data.timestamp, object);
     });
   }
-
-  // public buildWorld(data: ServerObject[]) {
-  //   data.forEach(object => {
-  //     const wall = this.stage.addChild.fromVertices(
-  //       object.position.x,
-  //       object.position.y,
-  //       object.vertices,
-  //       {
-  //         isStatic: object.isStatic,
-  //         label: object.label,
-  //       }
-  //     );
-
-  //     this.world.add(wall);
-  //   });
-  // }
 }
