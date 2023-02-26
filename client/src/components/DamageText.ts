@@ -22,7 +22,7 @@ export class DamageText {
     this.elapsed += delta;
 
     const newX = this.parent.x;
-    const newY = this.parent.y - 30 - 20 * (this.elapsed / this.life);
+    const newY = this.parent.y - 10 - 20 * (this.elapsed / this.life);
     this.text.position.x = newX;
     this.text.position.y = newY;
 

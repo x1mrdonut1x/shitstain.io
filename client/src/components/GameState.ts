@@ -32,8 +32,6 @@ export class GameState extends GameEngine<Player, Enemy> {
 
   public addEnemy(enemy: Enemy) {
     super.addEnemy(enemy);
-
-    this.stage.addChild(enemy.sprite);
   }
 
   public addPlayer(player: Player) {

@@ -15,8 +15,6 @@ export class GameScene {
     this.app.stage.hitArea = this.app.screen;
 
     this.app.stage.pivot = { x: 0, y: 0 };
-    // this.cameraContainer = new PIXI.Container();
-    // this.app.stage.addChild(this.cameraContainer);
 
     document.body.appendChild(this.app.view as unknown as Node);
 
