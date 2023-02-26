@@ -28,8 +28,6 @@ export class GameState extends GameEngine<Player, Enemy> {
       const enemy = new Enemy(this.stage, this, 200, 100 + index * 100);
       this.addEnemy(enemy);
     });
-
-    document.getElementById('loading')?.remove();
   }
 
   public addEnemy(enemy: Enemy) {

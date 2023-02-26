@@ -3,6 +3,7 @@ import { MAP_HEIGHT_PX, MAP_WIDTH_PX } from '../../../shared/constants';
 import tile from '../assets/background/Ground_Tile_02.png';
 import attack from '../assets/wizards/fire-wizard/Charge/charge.json?url';
 import * as PIXI from 'pixi.js';
+import { createGameServer } from '@/networking/GameServer';
 
 export class GameScene {
   private app: PIXI.Application;
@@ -30,6 +31,12 @@ export class GameScene {
     this.app.stage.addChild(tilingSprite);
 
     await PIXI.Assets.load(attack);
+
+    const loadingNode = document.getElementById('loading');
+    if (loadingNode) loadingNode.textContent = 'Waiting for server...';
+
+    await createGameServer();
+    loadingNode?.remove();
 
     this.create();
   }
