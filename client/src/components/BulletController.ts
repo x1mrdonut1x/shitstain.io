@@ -7,20 +7,18 @@ import { PointerController } from './input-controllers/PointerController';
 
 export class BulletController {
   private bullets: Set<Bullet> = new Set();
-  private lastShotAt = 0; //ms
   private mousePos: XYPosition = { x: 0, y: 0 };
   private pointerController?: PointerController;
-
   private serverStep?: ServerShootData;
-
   public isShooting = false;
 
   constructor(private stage: PIXI.Container, private player: Player) {
     if (this.player.isLocalPlayer) {
       this.pointerController = new PointerController(stage, player);
-      this.pointerController.onMove((isShooting, position) => {
+      this.pointerController.setOnChange((isShooting, position) => {
         this.isShooting = isShooting;
         this.mousePos = position;
+        this.emitShoot();
       });
     }
 
@@ -29,7 +27,6 @@ export class BulletController {
       if (!this.player.isLocalPlayer) this.isShooting = data.isShooting;
 
       this.serverStep = data;
-      this.shoot(data.mousePos);
     });
   }
 
@@ -44,28 +41,13 @@ export class BulletController {
     });
   }
 
-  shoot(mouse = this.mousePos) {
-    const now = Date.now();
-    const delta = now - this.lastShotAt;
+  shoot() {
+    const velocity = this.getVelocity(this.serverStep?.mousePos);
+    const bullet = new Bullet(this.player.position.x, this.player.position.y, velocity);
 
-    if (delta < this.player.shootingSpeed) return;
-
-    const bullet = new Bullet(
-      this.player.position.x,
-      this.player.position.y,
-      this.getVelocity(mouse)
-    );
-
-    bullet.onCollide = () => {
-      console.log('destruction');
-      bullet.sprite.destroy();
-      this.bullets.delete(bullet);
-    };
-
-    this.bullets.add(bullet);
-    this.stage.addChild(bullet.sprite);
-
-    this.lastShotAt = now;
+    if (this.player.shoot(bullet)) {
+      this.stage.addChild(bullet.sprite);
+    }
   }
 
   private getVelocity(data: XYPosition = this.mousePos) {
@@ -82,7 +64,7 @@ export class BulletController {
 
   update(dt: number) {
     if (this.isShooting) {
-      this.shoot(this.serverStep?.mousePos);
+      this.shoot();
     }
 
     this.bullets.forEach(bullet => bullet.update(dt));
