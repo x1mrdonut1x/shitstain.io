@@ -4,6 +4,7 @@
   "main": "src/main.ts",
   "license": "MIT",
   "dependencies": {
+    "@timohausmann/quadtree-ts": "^2.0.0-beta.1",
     "express": "^4.18.2",
     "socket.io": "^4.6.0"
   },
