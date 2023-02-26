@@ -93,6 +93,17 @@ export class GameState extends GameEngine<Player, Enemy> {
 
       if (foundSprite) {
         foundSprite.position = { x: x, y: y };
+
+        // Draw red if colliding
+        const lineStyle = entity.isColliding ? 0xff0000 : 0xffffff;
+        const bounds = foundSprite.children[0] as PIXI.Graphics;
+        bounds.lineStyle(1, lineStyle);
+        if (entity instanceof Rectangle) {
+          bounds.drawRect(0, 0, entity.width, entity.height);
+        } else if (entity instanceof Circle) {
+          bounds.drawCircle(0, 0, entity.radius);
+        }
+
         return;
       }
 
