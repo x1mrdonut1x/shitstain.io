@@ -11,8 +11,8 @@ export class Enemy extends EngineEnemy {
     super(engine, x, y);
 
     const idText = new PIXI.Text(this.id);
-    idText.position.x = this.x + this.width / 2;
-    idText.position.y = this.y - this.height + 12;
+    idText.position.x = this.x;
+    idText.position.y = this.y;
     idText.style.fontSize = 12;
     stage.addChild(idText);
 

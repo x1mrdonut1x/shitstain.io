@@ -46,9 +46,13 @@ export class BulletController {
 
     //TODO this should not be created if player cannot shoot
     const bullet = new Bullet(this.player.x, this.player.y, velocity, velocity.angle);
+    bullet.onCollide = () => {
+      bullet.sprite.destroy(true);
+      this.bullets.delete(bullet);
+    };
 
     if (this.player.shoot(bullet)) {
-      // this.stage.addChild(bullet.sprite);
+      this.stage.addChild(bullet.sprite);
     }
   }
 

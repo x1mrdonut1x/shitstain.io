@@ -10,8 +10,6 @@ import { Circle } from '../../../engine/entities/Circle';
 
 export class GameState extends GameEngine<Player, Enemy> {
   private drawableEntities: Map<Rectangle | Circle, PIXI.Container> = new Map();
-  public players: Set<Player> = new Set();
-  public enemies: Set<Enemy> = new Set();
 
   constructor(private stage: PIXI.Container) {
     super();
@@ -95,13 +93,23 @@ export class GameState extends GameEngine<Player, Enemy> {
         foundSprite.position = { x: x, y: y };
 
         // Draw red if colliding
-        const lineStyle = entity.isColliding ? 0xff0000 : 0xffffff;
         const bounds = foundSprite.children[0] as PIXI.Graphics;
-        bounds.lineStyle(1, lineStyle);
-        if (entity instanceof Rectangle) {
-          bounds.drawRect(0, 0, entity.width, entity.height);
-        } else if (entity instanceof Circle) {
-          bounds.drawCircle(0, 0, entity.radius);
+
+        // if is colliding and is not red
+        if (entity.isColliding && bounds.line.color === 16777215) {
+          bounds.lineStyle(1, 0xff0000);
+          if (entity instanceof Rectangle) {
+            bounds.drawRect(0, 0, entity.width, entity.height);
+          } else if (entity instanceof Circle) {
+            bounds.drawCircle(0, 0, entity.radius);
+          }
+        } else if (!entity.isColliding && bounds.line.color !== 16777215) {
+          bounds.lineStyle(1, 0xffffff);
+          if (entity instanceof Rectangle) {
+            bounds.drawRect(0, 0, entity.width, entity.height);
+          } else if (entity instanceof Circle) {
+            bounds.drawCircle(0, 0, entity.radius);
+          }
         }
 
         return;
