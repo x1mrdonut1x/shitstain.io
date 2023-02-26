@@ -20,7 +20,7 @@ export class GameState {
 
     const x = Math.random() * 1100 + 100;
     const y = Math.random() * 600 + 100;
-    const entity = new Player(x, y, id);
+    const entity = new Player(this.engine, x, y, id);
 
     this.engine.addPlayer(entity);
   }
@@ -30,7 +30,7 @@ export class GameState {
 
     const x = Math.random() * 100 + 100;
     const y = Math.random() * 100 + 100;
-    const enemy = new Enemy(x, y);
+    const enemy = new Enemy(this.engine, x, y);
 
     this.engine.addEnemy(enemy);
   }

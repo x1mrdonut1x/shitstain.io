@@ -5,6 +5,7 @@ import { BulletController } from './BulletController';
 import { MovementController } from './MovementController';
 import * as PIXI from 'pixi.js';
 import { MAP_HEIGHT_PX, MAP_WIDTH_PX } from '../../../shared/constants';
+import { GameEngine } from '../../../engine/GameEngine';
 
 export class Player extends EnginePlayer {
   protected bulletController?: BulletController;
@@ -12,8 +13,14 @@ export class Player extends EnginePlayer {
   public isLocalPlayer;
   public sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
 
-  constructor(private stage: PIXI.Container, x: number, y: number, public id: string) {
-    super(x, y, id);
+  constructor(
+    private stage: PIXI.Container,
+    engine: GameEngine,
+    x: number,
+    y: number,
+    public id: string | number
+  ) {
+    super(engine, x, y, id);
 
     this.sprite.position.set(x, y);
     this.sprite.width = this.width;
@@ -36,8 +43,8 @@ export class Player extends EnginePlayer {
 
     // Camera controller
     if (this.isLocalPlayer) {
-      const nextX = this.position.x - window.innerWidth / 2;
-      const nextY = this.position.y - window.innerHeight / 2;
+      const nextX = this.x - window.innerWidth / 2;
+      const nextY = this.y - window.innerHeight / 2;
 
       if (
         nextX > 0 &&
@@ -56,7 +63,7 @@ export class Player extends EnginePlayer {
       }
     }
 
-    this.sprite.position.set(this.position.x, this.position.y);
+    this.sprite.position.set(this.x, this.y);
     super.update(dt);
   }
 

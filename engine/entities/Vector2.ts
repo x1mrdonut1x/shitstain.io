@@ -3,7 +3,7 @@ export class Vector2 {
   public y: number;
 
   constructor(x?: number, y?: number) {
-    this.x = x ?? 0;
-    this.y = y ?? 0;
+    this.x = Math.round(x ?? 0);
+    this.y = Math.round(y ?? 0);
   }
 }

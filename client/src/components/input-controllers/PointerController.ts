@@ -10,8 +10,8 @@ export class PointerController {
   constructor(private stage: PIXI.Container, private player: Player) {
     this.stage.addEventListener('pointerdown', e => {
       this.mousePos = {
-        x: e.x - this.player.position.x + stage.pivot.x,
-        y: e.y - this.player.position.y + stage.pivot.y,
+        x: e.x - this.player.x + stage.pivot.x,
+        y: e.y - this.player.y + stage.pivot.y,
       };
       this.isShooting = true;
       this.onChangeCallback?.(this.isShooting, this.mousePos);
@@ -19,8 +19,8 @@ export class PointerController {
 
     this.stage.addEventListener('pointermove', e => {
       this.mousePos = {
-        x: e.x - this.player.position.x + stage.pivot.x,
-        y: e.y - this.player.position.y + stage.pivot.y,
+        x: e.x - this.player.x + stage.pivot.x,
+        y: e.y - this.player.y + stage.pivot.y,
       };
       this.onChangeCallback?.(this.isShooting, this.mousePos);
     });
