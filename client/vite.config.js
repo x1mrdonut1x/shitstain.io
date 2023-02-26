@@ -4,7 +4,7 @@ import checker from 'vite-plugin-checker';
 
 export default defineConfig({
   publicDir: resolve(__dirname, 'public'),
-  assetsInclude: ['**/*.png'],
+  assetsInclude: ['**/*.png', '**/*.json'],
   build: {
     assetsInlineLimit: 0,
   },
