@@ -48,7 +48,7 @@ export class BulletController {
     const bullet = new Bullet(this.player.x, this.player.y, velocity, velocity.angle);
 
     if (this.player.shoot(bullet)) {
-      this.stage.addChild(bullet.sprite);
+      // this.stage.addChild(bullet.sprite);
     }
   }
 
