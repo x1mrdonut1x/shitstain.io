@@ -1,14 +1,13 @@
 import { DamageText } from './DamageText';
 import * as PIXI from 'pixi.js';
-import { Rectangle } from '../../../engine/entities/Rectangle';
+import { Enemy as EngineEnemy } from '../../../engine/components/Enemy';
 
-export class Enemy extends Rectangle {
-  private health = 100;
+export class Enemy extends EngineEnemy {
   private damageTexts: DamageText[] = [];
   public sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
 
   constructor(private stage: PIXI.Container, x: number, y: number) {
-    super(x, y, 50, 50);
+    super(x, y);
 
     this.sprite.position.set(x, y);
     this.sprite.width = this.width;
@@ -24,5 +23,6 @@ export class Enemy extends Rectangle {
 
   update(delta: number) {
     this.damageTexts.forEach(text => text.update(delta));
+    super.update(delta);
   }
 }

@@ -1,17 +1,37 @@
 import { ServerMovement } from '../../shared/types';
 import { Rectangle } from '../entities/Rectangle';
+import { Bullet } from './Bullet';
 
 export class Player extends Rectangle {
+  public bullets: Set<Bullet> = new Set();
   public isMoving = false;
-  public bulletSpeed = 400;
+  public bulletSpeed = 700;
+  public shootingSpeed = 120;
   public speed = 200;
+  public movement: ServerMovement = { left: false, right: false, up: false, down: false };
+
+  private lastShot = Date.now();
 
   constructor(x: number, y: number, public id: string) {
     super(x, y, 40, 60);
   }
 
+  public shoot(bullet: Bullet) {
+    const now = Date.now();
+    const dt = now - this.lastShot;
+
+    if (dt >= this.shootingSpeed) {
+      this.bullets.add(bullet);
+      this.lastShot = now;
+      return bullet;
+    }
+
+    return;
+  }
+
   public setVelocityFromMovement(movement: ServerMovement) {
-    const { left, right, up, down } = movement;
+    this.movement = { ...movement };
+    const { left, right, up, down } = this.movement;
     let velocityY = 0;
     let velocityX = 0;
 
@@ -30,5 +50,11 @@ export class Player extends Rectangle {
 
     this.velocity.x = velocityX;
     this.velocity.y = velocityY;
+  }
+
+  public update(dt: number) {
+    super.update(dt);
+
+    this.bullets.forEach(bullet => bullet.update(dt));
   }
 }

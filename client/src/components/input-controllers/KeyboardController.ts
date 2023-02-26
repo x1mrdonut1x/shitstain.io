@@ -23,24 +23,34 @@ export class KeyboardController {
 
   public onKeyUp(e: KeyboardEvent) {
     if (e.repeat) return;
+    let hasAnyChanged = false;
+
     Object.keys(this.keys).forEach(key => {
       if (e.key === key) {
+        hasAnyChanged = true;
+
         this.keys[key].isDown = false;
         this.keys[key].onUp.bind(this)();
       }
     });
-    this.onMovement?.(this._movement);
+
+    if (hasAnyChanged) this.onMovement?.(this._movement);
   }
 
   public onKeyDown(e: KeyboardEvent) {
     if (e.repeat) return;
+    let hasAnyChanged = false;
+
     Object.keys(this.keys).forEach(key => {
       if (e.key === key) {
+        hasAnyChanged = true;
+
         this.keys[key].isDown = true;
         this.keys[key].onDown.bind(this)();
       }
     });
-    this.onMovement?.(this._movement);
+
+    if (hasAnyChanged) this.onMovement?.(this._movement);
   }
 
   get movement() {

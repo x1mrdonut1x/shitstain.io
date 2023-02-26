@@ -8,7 +8,7 @@ import {
 import { broadcast } from './socket-server';
 import { GameState } from './GameState';
 import { ClientShootData, ServerShootData } from '../../shared/types';
-import { GameEngine } from './GameEngine';
+import { Player } from '../../engine/components/Player';
 
 export interface WrappedServerSocket<T> {
   event: string;
@@ -18,11 +18,7 @@ export interface WrappedServerSocket<T> {
 type SocketActionFn<T> = (message: T) => void;
 
 export class SocketActions {
-  constructor(
-    private socket: Socket,
-    private gameState: GameState,
-    private gameEngine: GameEngine
-  ) {
+  constructor(private socket: Socket, private gameState: GameState) {
     socket.send(socket.id);
 
     this.createSocket(SocketEvent.DISCONNECT).on(this.onPlayerDisconnect.bind(this));
@@ -34,13 +30,10 @@ export class SocketActions {
     this.createSocket<PlayerMoveEvent>(SocketEvent.PLAYER_MOVE).on(this.onPlayerMove.bind(this));
 
     this.createSocket<ClientShootData>(SocketEvent.PLAYER_SHOOT).on(this.onPlayerShoot.bind(this));
-    this.createSocket<ClientShootData>(SocketEvent.WORLD_OBJECTS).on(() => {
-      broadcast(SocketEvent.WORLD_OBJECTS)(gameEngine.getWorldObjects());
-    });
   }
 
   private onPlayerShoot(data: ClientShootData) {
-    const foundPlayer = this.gameState.players.find(p => p.data.clientId === data.clientId);
+    const foundPlayer = this.gameState.engine.getPlayerById(data.clientId);
     if (!foundPlayer) return;
 
     const output: ServerShootData = {
@@ -48,8 +41,8 @@ export class SocketActions {
       isShooting: data.isShooting,
       mousePos: data.mousePos,
       playerPos: {
-        x: foundPlayer?.entity.position.x,
-        y: foundPlayer.entity.position.y,
+        x: foundPlayer?.position.x,
+        y: foundPlayer.position.y,
       },
     };
 
@@ -61,7 +54,9 @@ export class SocketActions {
 
     this.gameState.addPlayer(data.clientId);
 
-    broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(this.gameState.players.map(p => p.data));
+    broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(
+      Array.from(this.gameState.engine.players).map(fromServerPlayer)
+    );
     console.log('Total players', this.gameState.getPlayerCount());
   }
 
@@ -69,7 +64,9 @@ export class SocketActions {
     console.log(`player ${this.socket.id} disconnected`);
     this.gameState.removePlayer(this.socket.id);
 
-    broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(this.gameState.players.map(p => p.data));
+    broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(
+      Array.from(this.gameState.engine.players).map(fromServerPlayer)
+    );
     console.log('Total players', this.gameState.getPlayerCount());
   }
 
@@ -85,3 +82,13 @@ export class SocketActions {
     };
   }
 }
+
+export const fromServerPlayer = (player: Player) => {
+  return {
+    clientId: player.id,
+    position: player.position,
+    speed: player.speed,
+    bulletSpeed: player.bulletSpeed,
+    move: player.movement,
+  };
+};
