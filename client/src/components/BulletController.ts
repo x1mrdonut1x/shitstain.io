@@ -43,7 +43,9 @@ export class BulletController {
 
   shoot() {
     const velocity = this.getVelocity(this.serverStep?.mousePos);
-    const bullet = new Bullet(this.player.x, this.player.y, velocity);
+
+    //TODO this should not be created if player cannot shoot
+    const bullet = new Bullet(this.player.x, this.player.y, velocity, velocity.angle);
 
     if (this.player.shoot(bullet)) {
       this.stage.addChild(bullet.sprite);
@@ -59,7 +61,7 @@ export class BulletController {
     const velocityX = Math.cos(angle) * this.player.bulletSpeed;
     const velocityY = Math.sin(angle) * this.player.bulletSpeed;
 
-    return { x: velocityX, y: velocityY };
+    return { x: velocityX, y: velocityY, angle };
   }
 
   update(dt: number) {
@@ -67,6 +69,9 @@ export class BulletController {
       this.shoot();
     }
 
-    this.bullets.forEach(bullet => bullet.update(dt));
+    // TODO dispose of destroyed bullets
+    this.bullets.forEach(bullet => {
+      bullet.update(dt);
+    });
   }
 }
