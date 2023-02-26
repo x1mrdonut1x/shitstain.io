@@ -418,6 +418,11 @@
   resolved "https://registry.yarnpkg.com/@socket.io/component-emitter/-/component-emitter-3.1.0.tgz#96116f2a912e0c02817345b3c10751069920d553"
   integrity sha512-+9jVqKhRSpsc591z5vX+X5Yyw+he/HCB4iQ/RYxw35CEPaY1gnsNE43nf9n9AaYjAQrTiI/mOwKUKdUs9vf7Xg==
 
+"@timohausmann/quadtree-ts@^2.0.0-beta.1":
+  version "2.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@timohausmann/quadtree-ts/-/quadtree-ts-2.0.0-beta.1.tgz#4b8a9943d7838f688c172a3e0b3107117a91dc7f"
+  integrity sha512-zq8AnO1qoYM66OXkiC9d5wIIvNeHy3XIA0AwPtGRNkmX0uv9aktyyBRWzqPW/dZWMMkG4uLluer38QJc+QV/5w==
+
 "@tsconfig/node10@^1.0.7":
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/@tsconfig/node10/-/node10-1.0.9.tgz#df4907fc07a886922637b15e02d4cebc4c0021b2"
@@ -1910,6 +1915,11 @@ qs@6.11.0:
   integrity sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==
   dependencies:
     side-channel "^1.0.4"
+
+quadtree-ts@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/quadtree-ts/-/quadtree-ts-0.0.1.tgz#002cdb3552d0d5d11e327be18e2fca4824f06199"
+  integrity sha512-rtoRcdVIozvUiuLWo+lAhSfXGLtfT6CaxZtXaT3tM64qDGH3JgIvd8cRL9KIz2fo6r1vxNEiLtwM6Z6V6q56EA==
 
 querystring@0.2.0:
   version "0.2.0"

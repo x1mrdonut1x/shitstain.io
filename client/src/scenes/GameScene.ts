@@ -55,7 +55,7 @@ export class GameScene {
 
   // DEBUG
   addPointerTracker(app: PIXI.Application) {
-    const text = new PIXI.Text('asd');
+    const text = new PIXI.Text();
     text.style.fill = 'red';
     text.style.stroke = 'red';
     text.style.fontSize = 16;

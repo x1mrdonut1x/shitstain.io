@@ -40,13 +40,13 @@ export class MovementController {
   public update(delta: number) {
     if (this.keyboardController) {
       if (this.nextPosition) {
-        const dx = Math.abs(this.player.position.x - this.nextPosition.x);
-        const dy = Math.abs(this.player.position.y - this.nextPosition.y);
+        const dx = Math.abs(this.player.x - this.nextPosition.x);
+        const dy = Math.abs(this.player.y - this.nextPosition.y);
         const maxAllowedShift = 80;
 
         if (dx > maxAllowedShift || dy > maxAllowedShift) {
-          this.player.position.x = this.nextPosition.x;
-          this.player.position.y = this.nextPosition.y;
+          this.player.x = this.nextPosition.x;
+          this.player.y = this.nextPosition.y;
         }
       }
 
@@ -57,8 +57,8 @@ export class MovementController {
         const step = Math.min(this.existenceTime, fullTimeStep) / fullTimeStep;
         this.existenceTime += delta;
 
-        this.player.position.x = lerp(this.basePosition.x, this.nextPosition.x, step);
-        this.player.position.y = lerp(this.basePosition.y, this.nextPosition.y, step);
+        this.player.x = lerp(this.basePosition.x, this.nextPosition.x, step);
+        this.player.y = lerp(this.basePosition.y, this.nextPosition.y, step);
       }
     }
   }

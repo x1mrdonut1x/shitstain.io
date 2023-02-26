@@ -24,7 +24,7 @@ export class GameState extends GameEngine<Player, Enemy> {
     gameServer.createPlayer.emit();
 
     Array.from(Array(10)).forEach((_, index) => {
-      const enemy = new Enemy(this.stage, 200, 100 + index * 100);
+      const enemy = new Enemy(this.stage, this, 200, 100 + index * 100);
       this.addEnemy(enemy);
     });
 
@@ -66,7 +66,7 @@ export class GameState extends GameEngine<Player, Enemy> {
       const foundPlayer = this.getPlayerById(clientId);
 
       if (!foundPlayer) {
-        const player = new Player(this.stage, x, y, clientId);
+        const player = new Player(this.stage, this, x, y, clientId);
         this.addPlayer(player);
       }
     });

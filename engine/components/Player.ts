@@ -1,5 +1,6 @@
 import { ServerMovement } from '../../shared/types';
 import { Rectangle } from '../entities/Rectangle';
+import { GameEngine } from '../GameEngine';
 import { Bullet } from './Bullet';
 
 export class Player extends Rectangle {
@@ -12,8 +13,11 @@ export class Player extends Rectangle {
 
   private lastShot = Date.now();
 
-  constructor(x: number, y: number, public id: string) {
-    super(x, y, 40, 60);
+  constructor(private engine: GameEngine, x: number, y: number, public id: string | number) {
+    super(x, y, 40, 60, id);
+
+    this.id = id ?? this.engine.players.size + 1;
+    this.label = 'Player';
   }
 
   public shoot(bullet: Bullet) {
@@ -22,6 +26,8 @@ export class Player extends Rectangle {
 
     if (dt >= this.shootingSpeed) {
       this.bullets.add(bullet);
+      this.engine.addEntity(bullet);
+
       this.lastShot = now;
       return bullet;
     }

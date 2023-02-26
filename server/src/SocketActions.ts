@@ -7,7 +7,7 @@ import {
 } from '../../shared/types/events';
 import { broadcast } from './socket-server';
 import { GameState } from './GameState';
-import { ClientShootData, ServerShootData } from '../../shared/types';
+import { ClientShootData, ServerShootData, ServerPlayer } from '../../shared/types';
 import { Player } from '../../engine/components/Player';
 
 export interface WrappedServerSocket<T> {
@@ -41,8 +41,8 @@ export class SocketActions {
       isShooting: data.isShooting,
       mousePos: data.mousePos,
       playerPos: {
-        x: foundPlayer?.position.x,
-        y: foundPlayer.position.y,
+        x: foundPlayer?.x,
+        y: foundPlayer.y,
       },
     };
 
@@ -86,9 +86,9 @@ export class SocketActions {
 export const fromServerPlayer = (player: Player) => {
   return {
     clientId: player.id,
-    position: player.position,
+    position: { x: player.x, y: player.y },
     speed: player.speed,
     bulletSpeed: player.bulletSpeed,
     move: player.movement,
-  };
+  } satisfies ServerPlayer;
 };

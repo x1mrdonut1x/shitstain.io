@@ -19,6 +19,6 @@ export class Bullet extends EngineBullet {
   update(dt: number) {
     super.update(dt);
 
-    this.sprite.position.set(this.position.x, this.position.y);
+    this.sprite.position.set(this.x, this.y);
   }
 }

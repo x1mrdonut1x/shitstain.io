@@ -34,8 +34,8 @@ export class BulletController {
     gameServer.shoot.emit({
       isShooting: this.isShooting,
       playerPos: {
-        x: this.player.position.x,
-        y: this.player.position.y,
+        x: this.player.x,
+        y: this.player.y,
       },
       mousePos: this.mousePos,
     });
@@ -43,7 +43,7 @@ export class BulletController {
 
   shoot() {
     const velocity = this.getVelocity(this.serverStep?.mousePos);
-    const bullet = new Bullet(this.player.position.x, this.player.position.y, velocity);
+    const bullet = new Bullet(this.player.x, this.player.y, velocity);
 
     if (this.player.shoot(bullet)) {
       this.stage.addChild(bullet.sprite);
