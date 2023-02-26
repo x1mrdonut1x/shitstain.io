@@ -1,6 +1,5 @@
 import { GameState } from '@/components/GameState';
 import { MAP_HEIGHT_PX, MAP_WIDTH_PX } from '../../../shared/constants';
-import tile from '../assets/background/Ground_Tile_02.png';
 import * as PIXI from 'pixi.js';
 
 export class GameScene {
@@ -21,12 +20,14 @@ export class GameScene {
     this.preload();
   }
 
-  preload() {
+  async preload() {
     console.log('GameScene preload');
 
-    const texture = PIXI.Texture.from(tile);
+    const texture = PIXI.Texture.from('src/assets/background/Ground_Tile_02.png');
     const tilingSprite = new PIXI.TilingSprite(texture, MAP_WIDTH_PX, MAP_HEIGHT_PX);
     this.app.stage.addChild(tilingSprite);
+
+    await PIXI.Assets.load('src/assets/wizards/fire-wizard/Charge/charge.json');
 
     this.create();
   }

@@ -11,7 +11,6 @@ export class Player extends EnginePlayer {
   protected bulletController?: BulletController;
   protected movementController?: MovementController;
   public isLocalPlayer;
-  public sprite = new PIXI.Sprite(PIXI.Texture.WHITE);
 
   constructor(
     private stage: PIXI.Container,
@@ -21,15 +20,6 @@ export class Player extends EnginePlayer {
     public id: string | number
   ) {
     super(engine, x, y, id);
-
-    this.sprite.position.set(x, y);
-    this.sprite.width = this.width;
-    this.sprite.height = this.height;
-    this.sprite.tint = 0x00ff00;
-    this.sprite.anchor.x = 0.5;
-    this.sprite.anchor.y = 0.5;
-
-    stage.addChild(this.sprite);
 
     this.isLocalPlayer = id === gameServer?.clientId;
 
@@ -63,7 +53,6 @@ export class Player extends EnginePlayer {
       }
     }
 
-    this.sprite.position.set(this.x, this.y);
     super.update(dt);
   }
 

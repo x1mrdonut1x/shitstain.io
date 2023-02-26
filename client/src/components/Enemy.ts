@@ -10,13 +10,6 @@ export class Enemy extends EngineEnemy {
   constructor(private stage: PIXI.Container, engine: GameEngine, x: number, y: number) {
     super(engine, x, y);
 
-    this.sprite.position.set(x, y);
-    this.sprite.width = this.width;
-    this.sprite.height = this.height;
-    this.sprite.tint = 0xff0000;
-    this.sprite.anchor.x = 0.5;
-    this.sprite.anchor.y = 0.5;
-
     const idText = new PIXI.Text(this.id);
     idText.position.x = this.x + this.width / 2;
     idText.position.y = this.y - this.height + 12;

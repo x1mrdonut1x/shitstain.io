@@ -5,8 +5,11 @@ import { GetPlayersEvent, GetWorldStateEvent } from '../../../shared/types/event
 import { Player } from './Player';
 import * as PIXI from 'pixi.js';
 import { GameEngine } from '../../../engine/GameEngine';
+import { Rectangle } from '../../../engine/entities/Rectangle';
+import { Circle } from '../../../engine/entities/Circle';
 
 export class GameState extends GameEngine<Player, Enemy> {
+  private drawableEntities: Map<Rectangle | Circle, PIXI.Container> = new Map();
   public players: Set<Player> = new Set();
   public enemies: Set<Enemy> = new Set();
 
@@ -41,14 +44,12 @@ export class GameState extends GameEngine<Player, Enemy> {
     super.addPlayer(player);
 
     log(`Player ${player.id} connected`);
-    this.stage.addChild(player.sprite);
   }
 
   public removePlayer(player: Player) {
     super.removePlayer(player);
 
     log(`Player ${player.id} disconnected`);
-    player.sprite.destroy(true);
   }
 
   public updatePlayersFromServer(data: GetPlayersEvent) {
@@ -76,6 +77,49 @@ export class GameState extends GameEngine<Player, Enemy> {
     data.state.players.forEach(object => {
       const foundPlayer = this.getPlayerById(object.clientId);
       foundPlayer?.setMovement(data.timestamp, object);
+    });
+  }
+
+  update(dt: number) {
+    this.drawDebugBounds();
+
+    super.update(dt);
+  }
+
+  private drawDebugBounds() {
+    this.entities.forEach(entity => {
+      const { x, y, anchor } = entity;
+      const foundSprite = this.drawableEntities.get(entity);
+
+      if (foundSprite) {
+        foundSprite.position = { x: x, y: y };
+        return;
+      }
+
+      // If sprite not drawn yet
+      const boundsContainer = new PIXI.Container();
+      const bounds = new PIXI.Graphics();
+      const anchorPoint = new PIXI.Graphics();
+      bounds.lineStyle(1, 0xffffff);
+
+      if (entity instanceof Rectangle) {
+        bounds.drawRect(0, 0, entity.width, entity.height);
+      } else if (entity instanceof Circle) {
+        bounds.drawCircle(0, 0, entity.radius);
+      }
+
+      anchorPoint.lineStyle(1, 0xbf40bf);
+      anchorPoint.beginFill(0xbf40bf);
+      anchorPoint.drawCircle(0, 0, 2);
+      anchorPoint.position.set(anchor.x, anchor.y);
+      anchorPoint.endFill();
+      boundsContainer.position.set(x, y);
+
+      boundsContainer.addChild(bounds);
+      boundsContainer.addChild(anchorPoint);
+      this.stage.addChild(boundsContainer);
+
+      this.drawableEntities.set(entity, boundsContainer);
     });
   }
 }

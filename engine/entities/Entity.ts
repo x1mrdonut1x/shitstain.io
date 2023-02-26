@@ -6,13 +6,15 @@ export class Entity {
   public id?: string | number;
   public x: number;
   public y: number;
-  public velocity: Vector2 = new Vector2();
+  public anchor = new Vector2(0, 0);
+  public velocity = new Vector2();
   public onCollide?: (entity: Entity) => void;
   public isColliding = false;
 
   constructor(x: number, y: number, id?: string | number) {
     this.x = x;
     this.y = y;
+    this.id = id;
   }
 
   public getPosition() {
