@@ -5,6 +5,7 @@ import { MAP_HEIGHT_PX, MAP_WIDTH_PX } from '../shared/constants';
 import { Circle } from './entities/Circle';
 import { Rectangle } from './entities/Rectangle';
 import { Entity } from './entities/Entity';
+import { CollisionDetector } from './helpers/CollisionDetector';
 
 export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = Enemy> {
   public entities: Set<Rectangle | Circle> = new Set();
@@ -90,43 +91,22 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
 
       candidates.forEach(candidate => {
         if (entity === candidate) return;
-
-        if (entity instanceof Rectangle && candidate instanceof Rectangle) {
-          const isColliding = getIntersection(entity, candidate);
-          const isAlreadyColliding = entityCollidingWith.has(candidate);
-          if (!isColliding && isAlreadyColliding) {
-            entityCollidingWith.delete(candidate);
-          }
-
-          if (isColliding && !isAlreadyColliding) {
+        if (!(candidate instanceof Rectangle) && !(candidate instanceof Circle)) return;
+        const isColliding = CollisionDetector.isColliding(entity, candidate);
+        const isAlreadyColliding = entityCollidingWith.has(candidate);
+        if (!isColliding && isAlreadyColliding) {
+          entityCollidingWith.delete(candidate);
+        }
+        if (isColliding) {
+          if (!isAlreadyColliding) {
             entityCollidingWith.add(candidate);
-            candidate.onCollide?.(entity);
-            entity.onCollide?.(candidate);
-            console.log(`${candidate.label}_${candidate.id}`, `${entity.label}_${entity.id}`);
           }
-
-          candidate.isColliding = isColliding;
+          entity.onCollide?.(candidate);
         }
       });
-      entity.isColliding = entityCollidingWith.size > 0;
 
+      entity.isColliding = entityCollidingWith.size > 0;
       this.collisions.set(entity, entityCollidingWith);
     });
-  }
-}
-
-function getIntersection(r1: Rectangle, r2: Rectangle) {
-  const r1w = r1.width / 2,
-    r1h = r1.height / 2,
-    r2w = r2.width / 2,
-    r2h = r2.height / 2;
-
-  const distX = r1.x + r1w - (r2.x + r2w);
-  const distY = r1.y + r1h - (r2.y + r2h);
-
-  if (Math.abs(distX) < r1w + r2w && Math.abs(distY) < r1h + r2h) {
-    return true;
-  } else {
-    return false;
   }
 }
