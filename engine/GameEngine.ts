@@ -91,7 +91,7 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
 
       candidates.forEach(candidate => {
         if (entity === candidate) return;
-
+        
         const isColliding = CollisionDetector.isColliding(entity, candidate);
         const isAlreadyColliding = entityCollidingWith.has(candidate);
         if (!isColliding && isAlreadyColliding) {
