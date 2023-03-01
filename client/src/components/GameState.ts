@@ -85,6 +85,12 @@ export class GameState extends GameEngine<Player, Enemy> {
       const { x, y, anchor } = entity;
       const foundSprite = this.drawableEntities.get(entity);
 
+      if (foundSprite && !entity.isActive) {
+        foundSprite.destroy();
+        this.drawableEntities.delete(entity);
+        return;
+      }
+
       if (foundSprite) {
         foundSprite.position = { x: x, y: y };
 

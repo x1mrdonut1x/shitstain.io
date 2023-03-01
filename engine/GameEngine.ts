@@ -11,7 +11,7 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
   public entities: Set<Rectangle | Circle> = new Set();
   public players: Set<TPlayer> = new Set();
   public enemies: Set<Enemy> = new Set();
-  private tree = new Quadtree.Quadtree({
+  private tree = new Quadtree.Quadtree<Rectangle | Circle>({
     width: MAP_WIDTH_PX,
     height: MAP_HEIGHT_PX,
   });
@@ -76,6 +76,12 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
     this.collisionDetector();
     this.updatePlayers(dt);
     this.updateEnemies(dt);
+
+    this.entities.forEach(entity => {
+      if (!entity.isActive) {
+        this.removeEntity(entity);
+      }
+    });
   }
 
   public collisionDetector() {
@@ -85,17 +91,17 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
 
       candidates.forEach(candidate => {
         if (entity === candidate) return;
-        if (!(candidate instanceof Rectangle) && !(candidate instanceof Circle)) return;
+        
         const isColliding = CollisionDetector.isColliding(entity, candidate);
         const isAlreadyColliding = entityCollidingWith.has(candidate);
         if (!isColliding && isAlreadyColliding) {
           entityCollidingWith.delete(candidate);
         }
-        if (isColliding) {
-          if (!isAlreadyColliding) {
-            entityCollidingWith.add(candidate);
-          }
+
+        if (isColliding && !isAlreadyColliding) {
+          entityCollidingWith.add(candidate);
           entity.onCollide?.(candidate);
+          candidate.onCollide?.(entity);
         }
       });
 
