@@ -2,10 +2,12 @@ import { Vector2 } from './Vector2';
 
 export class Entity {
   public label?: string;
-
   public id?: string | number;
+
   public x: number;
   public y: number;
+
+  public isActive = true; // used for destroying unused entities
   public anchor = new Vector2(0, 0);
   public velocity = new Vector2();
   public onCollide?: (entity: Entity) => void;

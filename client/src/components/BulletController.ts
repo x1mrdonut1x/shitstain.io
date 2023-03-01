@@ -24,7 +24,10 @@ export class BulletController {
 
     gameServer.shoot.on(data => {
       if (data.clientId !== player.id) return;
-      if (!this.player.isLocalPlayer) this.isShooting = data.isShooting;
+
+      if (!this.player.isLocalPlayer) {
+        this.isShooting = data.isShooting;
+      }
 
       this.serverStep = data;
     });
@@ -46,12 +49,8 @@ export class BulletController {
 
     //TODO this should not be created if player cannot shoot
     const bullet = new Bullet(this.player.x, this.player.y, velocity, velocity.angle);
-    bullet.onCollide = () => {
-      bullet.sprite.destroy(true);
-      this.bullets.delete(bullet);
-    };
 
-    if (this.player.shoot(bullet)) {
+    if (this.player.shoot(bullet) && bullet.sprite) {
       this.stage.addChild(bullet.sprite);
     }
   }
@@ -73,9 +72,13 @@ export class BulletController {
       this.shoot();
     }
 
-    // TODO dispose of destroyed bullets
     this.bullets.forEach(bullet => {
-      bullet.update(dt);
+      if (!bullet.isActive) {
+        bullet.destroy();
+        this.bullets.delete(bullet);
+      } else {
+        bullet.update(dt);
+      }
     });
   }
 }
