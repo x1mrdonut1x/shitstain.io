@@ -4,25 +4,42 @@ import { Bullet as EngineBullet } from '../../../engine/components/Bullet';
 import attack from '../assets/wizards/fire-wizard/Charge/charge.json?url';
 
 export class Bullet extends EngineBullet {
-  public sprite: PIXI.Sprite;
+  public sprite?: PIXI.AnimatedSprite;
 
   constructor(x: number, y: number, velocity: Vector2, angle: number) {
     super(x, y, velocity);
 
-    const animations = PIXI.Assets.cache.get(attack).data.animations;
-    const firingAnimation = PIXI.AnimatedSprite.fromFrames(animations['Charge'].slice(0, 5));
+    this.animate(x, y, angle);
+  }
 
-    firingAnimation.animationSpeed = 1 / 4; // 6 fps
-    firingAnimation.position.set(x, y);
-    firingAnimation.anchor.set(0.9, 0.5);
-    firingAnimation.rotation = angle;
-    firingAnimation.play();
-    this.sprite = firingAnimation;
+  private animate(x: number, y: number, angle: number) {
+    const { animations } = PIXI.Assets.cache.get(attack);
+    this.sprite = new PIXI.AnimatedSprite(animations['Charge'].slice(0, 5));
+
+    this.sprite.animationSpeed = 1 / 4;
+    this.sprite.position.set(x, y);
+    this.sprite.anchor.set(0.9, 0.5);
+    this.sprite.rotation = angle;
+    this.sprite.play();
+
+    this.onCollide = () => {
+      if (!this.sprite) return;
+
+      this.sprite.textures = animations['Charge'].slice(5);
+      this.sprite.gotoAndPlay(0);
+      this.sprite.onComplete = () => {
+        this.isActive = false;
+      };
+    };
+  }
+
+  destroy() {
+    this.sprite?.destroy(true);
   }
 
   update(dt: number) {
     super.update(dt);
 
-    this.sprite.position.set(this.x, this.y);
+    this.sprite?.position.set(this.x, this.y);
   }
 }
