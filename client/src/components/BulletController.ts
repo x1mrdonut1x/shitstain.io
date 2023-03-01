@@ -67,18 +67,10 @@ export class BulletController {
     return { x: velocityX, y: velocityY, angle };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   update(dt: number) {
     if (this.isShooting) {
       this.shoot();
     }
-
-    this.bullets.forEach(bullet => {
-      if (!bullet.isActive) {
-        bullet.destroy();
-        this.bullets.delete(bullet);
-      } else {
-        bullet.update(dt);
-      }
-    });
   }
 }

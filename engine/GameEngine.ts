@@ -10,7 +10,7 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
   public entities: Set<Rectangle | Circle> = new Set();
   public players: Set<TPlayer> = new Set();
   public enemies: Set<Enemy> = new Set();
-  private tree = new Quadtree.Quadtree({
+  private tree = new Quadtree.Quadtree<Rectangle | Circle>({
     width: MAP_WIDTH_PX,
     height: MAP_HEIGHT_PX,
   });
@@ -75,6 +75,12 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
     this.collisionDetector();
     this.updatePlayers(dt);
     this.updateEnemies(dt);
+
+    this.entities.forEach(entity => {
+      if (!entity.isActive) {
+        this.removeEntity(entity);
+      }
+    });
   }
 
   public collisionDetector() {

@@ -61,6 +61,13 @@ export class Player extends Rectangle {
   public update(dt: number) {
     super.update(dt);
 
-    this.bullets.forEach(bullet => bullet.update(dt));
+    this.bullets.forEach(bullet => {
+      if (!bullet.isActive) {
+        this.bullets.delete(bullet);
+        bullet.destroy();
+      } else {
+        bullet.update(dt);
+      }
+    });
   }
 }
