@@ -91,17 +91,17 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
 
       candidates.forEach(candidate => {
         if (entity === candidate) return;
-        if (!(candidate instanceof Rectangle) && !(candidate instanceof Circle)) return;
+
         const isColliding = CollisionDetector.isColliding(entity, candidate);
         const isAlreadyColliding = entityCollidingWith.has(candidate);
         if (!isColliding && isAlreadyColliding) {
           entityCollidingWith.delete(candidate);
         }
-        if (isColliding) {
-          if (!isAlreadyColliding) {
-            entityCollidingWith.add(candidate);
-          }
+
+        if (isColliding && !isAlreadyColliding) {
+          entityCollidingWith.add(candidate);
           entity.onCollide?.(candidate);
+          candidate.onCollide?.(entity);
         }
       });
 
