@@ -76,6 +76,7 @@ export class GameState extends GameEngine<Player, Enemy> {
 
   update(dt: number) {
     this.drawDebugBounds();
+    super.removeInactiveEntities();
 
     super.update(dt);
   }

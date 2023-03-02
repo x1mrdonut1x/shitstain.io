@@ -24,19 +24,21 @@ export class Bullet extends EngineBullet {
 
     this.onCollide = () => {
       this.isStatic = true;
+      this.isActive = false;
+
       if (!this.sprite) return;
 
       this.sprite.textures = animations['Charge'].slice(5);
       this.sprite.gotoAndPlay(0);
       this.sprite.loop = false;
       this.sprite.onComplete = () => {
-        this.isActive = false;
+        this.sprite?.destroy();
       };
     };
   }
 
   destroy() {
-    this.sprite?.destroy();
+    //
   }
 
   update(dt: number) {

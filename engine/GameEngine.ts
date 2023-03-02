@@ -72,16 +72,18 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
     this.enemies.forEach(enemy => enemy.update(dt));
   }
 
-  public update(dt: number) {
-    this.collisionDetector();
-    this.updatePlayers(dt);
-    this.updateEnemies(dt);
-
+  public removeInactiveEntities() {
     this.entities.forEach(entity => {
       if (!entity.isActive) {
         this.removeEntity(entity);
       }
     });
+  }
+
+  public update(dt: number) {
+    this.collisionDetector();
+    this.updatePlayers(dt);
+    this.updateEnemies(dt);
   }
 
   public collisionDetector() {
@@ -91,7 +93,7 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
 
       candidates.forEach(candidate => {
         if (entity === candidate) return;
-        
+
         const isColliding = CollisionDetector.isColliding(entity, candidate);
         const isAlreadyColliding = entityCollidingWith.has(candidate);
         if (!isColliding && isAlreadyColliding) {
