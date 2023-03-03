@@ -108,6 +108,7 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
         if (isColliding && !isAlreadyColliding) {
           console.log(entity.label, candidate.label);
           entityCollidingWith.add(candidate);
+          // TODO this should only be called once per entity collision
           entity.onCollide?.(candidate);
           candidate.onCollide?.(entity);
         }
