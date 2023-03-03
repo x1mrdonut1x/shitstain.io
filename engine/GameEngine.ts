@@ -26,6 +26,10 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
 
   public removeEntity(entity: Rectangle | Circle) {
     this.entities.delete(entity);
+
+    // TODO This is probably not very efficient
+    this.tree.clear();
+    this.entities.forEach(entity => this.tree.insert(entity));
   }
 
   // Players
@@ -53,7 +57,7 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
     }
   }
 
-  private updatePlayers(dt: number) {
+  public updatePlayers(dt: number) {
     this.players.forEach(player => player.update(dt));
   }
 
@@ -68,7 +72,7 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
     this.removeEntity(enemy);
   }
 
-  private updateEnemies(dt: number) {
+  public updateEnemies(dt: number) {
     this.enemies.forEach(enemy => enemy.update(dt));
   }
 
@@ -82,6 +86,7 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
 
   public update(dt: number) {
     this.collisionDetector();
+    this.removeInactiveEntities();
     this.updatePlayers(dt);
     this.updateEnemies(dt);
   }
@@ -101,6 +106,7 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
         }
 
         if (isColliding && !isAlreadyColliding) {
+          console.log(entity.label, candidate.label);
           entityCollidingWith.add(candidate);
           entity.onCollide?.(candidate);
           candidate.onCollide?.(entity);

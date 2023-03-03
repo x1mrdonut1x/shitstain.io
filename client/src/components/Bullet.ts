@@ -8,6 +8,7 @@ export class Bullet extends EngineBullet {
 
   constructor(x: number, y: number, velocity: Vector2, angle: number) {
     super(x, y, velocity);
+    this.label = 'Bullet';
 
     this.animate(x, y, angle);
   }

@@ -75,10 +75,14 @@ export class GameState extends GameEngine<Player, Enemy> {
   }
 
   update(dt: number) {
+    // TODO is this the right order?
     this.drawDebugBounds();
-    super.removeInactiveEntities();
+    this.removeInactiveEntities();
 
-    super.update(dt);
+    this.collisionDetector();
+
+    this.updatePlayers(dt);
+    this.updateEnemies(dt);
   }
 
   private drawDebugBounds() {
