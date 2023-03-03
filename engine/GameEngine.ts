@@ -97,38 +97,30 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
 
   public collisionDetector() {
     this.entities.forEach(entity => {
-      const entityCollidingWith = this.collisions.get(entity) ?? new Set<Entity>();
+      if (!entity.collisionGroup) return;
       const candidates = this.tree.retrieve(entity);
 
       if (entity instanceof Bullet) {
         console.log(candidates.length);
       }
 
+      entity.isColliding = false;
       candidates.forEach(candidate => {
+        if (!candidate.collisionGroup) return;
         if (entity === candidate) return;
         if (entity.collisionGroup === candidate.collisionGroup) return;
 
         const collision = CollisionDetector.getCollision(entity, candidate);
-        const isAlreadyColliding = entityCollidingWith.has(candidate);
 
         if (entity instanceof Bullet) {
           console.log(collision);
-          console.log(isAlreadyColliding);
         }
 
-        if (!collision && isAlreadyColliding) {
-          entityCollidingWith.delete(candidate);
-        }
-
-        if (collision && !isAlreadyColliding) {
-          entityCollidingWith.add(candidate);
-          // TODO this should only be called once per entity collision
+        if (collision) {
           entity.onCollide?.(candidate, collision);
+          entity.isColliding = true;
         }
       });
-
-      entity.isColliding = entityCollidingWith.size > 0;
-      this.collisions.set(entity, entityCollidingWith);
     });
   }
 }
