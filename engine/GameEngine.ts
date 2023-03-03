@@ -6,6 +6,7 @@ import { Circle } from './entities/Circle';
 import { Rectangle } from './entities/Rectangle';
 import { Entity } from './entities/Entity';
 import { CollisionDetector } from './helpers/CollisionDetector';
+import { Bullet } from './components/Bullet';
 
 export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = Enemy> {
   public entities: Set<Rectangle | Circle> = new Set();
@@ -81,6 +82,9 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
       if (!entity.isActive) {
         this.removeEntity(entity);
       }
+      if (entity.x < 0 || entity.x > MAP_WIDTH_PX || entity.y < 0 || entity.y > MAP_HEIGHT_PX) {
+        this.removeEntity(entity);
+      }
     });
   }
 
@@ -96,21 +100,30 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
       const entityCollidingWith = this.collisions.get(entity) ?? new Set<Entity>();
       const candidates = this.tree.retrieve(entity);
 
+      if (entity instanceof Bullet) {
+        console.log(candidates.length);
+      }
+
       candidates.forEach(candidate => {
         if (entity === candidate) return;
+        if (entity.collisionGroup === candidate.collisionGroup) return;
 
-        const isColliding = CollisionDetector.isColliding(entity, candidate);
+        const collision = CollisionDetector.getCollision(entity, candidate);
         const isAlreadyColliding = entityCollidingWith.has(candidate);
-        if (!isColliding && isAlreadyColliding) {
+
+        if (entity instanceof Bullet) {
+          console.log(collision);
+          console.log(isAlreadyColliding);
+        }
+
+        if (!collision && isAlreadyColliding) {
           entityCollidingWith.delete(candidate);
         }
 
-        if (isColliding && !isAlreadyColliding) {
-          console.log(entity.label, candidate.label);
+        if (collision && !isAlreadyColliding) {
           entityCollidingWith.add(candidate);
           // TODO this should only be called once per entity collision
-          entity.onCollide?.(candidate);
-          candidate.onCollide?.(entity);
+          entity.onCollide?.(candidate, collision);
         }
       });
 

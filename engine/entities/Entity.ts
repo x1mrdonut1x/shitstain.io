@@ -11,8 +11,9 @@ export class Entity {
   public isStatic = false;
   public anchor = new Vector2(0, 0);
   public velocity = new Vector2();
-  public onCollide?: (entity: Entity) => void;
+  public onCollide?: (entity: Entity, collision: Vector2) => void;
   public isColliding = false;
+  public collisionGroup?: string;
 
   constructor(x: number, y: number, id?: string | number) {
     this.x = x;

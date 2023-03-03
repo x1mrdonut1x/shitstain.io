@@ -18,6 +18,7 @@ export class Player extends Rectangle {
 
     this.id = id ?? this.engine.players.size + 1;
     this.label = 'Player';
+    this.collisionGroup = 'player';
   }
 
   public shoot(bullet: Bullet) {
