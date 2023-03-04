@@ -3,17 +3,21 @@ import { Player as EnginePlayer } from '../../../engine/components/Player';
 import { ServerPlayer } from '../../../shared/types';
 import { BulletController } from './BulletController';
 import { MovementController } from './MovementController';
-import * as PIXI from 'pixi.js';
 import { MAP_HEIGHT_PX, MAP_WIDTH_PX } from '../../../shared/constants';
 import { GameEngine } from '../../../engine/GameEngine';
+import { Container, Text } from 'pixi.js';
+import { DamageText } from '@/components/DamageText';
 
 export class Player extends EnginePlayer {
   protected bulletController?: BulletController;
   protected movementController?: MovementController;
+  public spritesContainer = new Container();
   public isLocalPlayer;
+  private healthText: Text;
+  private damageTexts: Set<DamageText> = new Set();
 
   constructor(
-    private stage: PIXI.Container,
+    private stage: Container,
     engine: GameEngine,
     x: number,
     y: number,
@@ -21,10 +25,30 @@ export class Player extends EnginePlayer {
   ) {
     super(engine, x, y, id);
 
+    this.healthText = new Text(this.health);
+    this.healthText.style.fontSize = 12;
+    this.spritesContainer.addChild(this.healthText);
+    this.spritesContainer.position.x = this.x;
+    this.spritesContainer.position.y = this.y;
+
+    stage.addChild(this.spritesContainer);
+
     this.isLocalPlayer = id === gameServer?.clientId;
 
     this.movementController = new MovementController(this);
     this.bulletController = new BulletController(stage, this);
+  }
+
+  onHit(damage: number) {
+    super.onHit(damage);
+
+    const text = new DamageText(this.stage, this, damage.toString());
+
+    text.onDestroy = () => {
+      this.damageTexts.delete(text);
+      text.destroy();
+    };
+    this.damageTexts.add(text);
   }
 
   update(dt: number) {
@@ -54,10 +78,21 @@ export class Player extends EnginePlayer {
     }
 
     super.update(dt);
+
+    this.spritesContainer.position.x = this.x;
+    this.spritesContainer.position.y = this.y;
+    this.healthText.text = this.health;
+
+    this.damageTexts.forEach(text => text.update(dt));
   }
 
   public setMovement(timestamp: number, position: ServerPlayer) {
     if (!this.isLocalPlayer) this.setVelocityFromMovement(position.move);
     this.movementController?.updatePositionFromServer(timestamp, position.position);
+  }
+
+  public destroy(): void {
+    this.spritesContainer.destroy();
+    super.destroy();
   }
 }

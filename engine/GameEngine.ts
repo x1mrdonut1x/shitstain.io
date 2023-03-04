@@ -67,10 +67,19 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
 
   public removeInactiveEntities() {
     this.entities.forEach(entity => {
-      if (!entity.isActive) {
-        this.removeEntity(entity);
-      }
-      if (entity.x < 0 || entity.x > MAP_WIDTH_PX || entity.y < 0 || entity.y > MAP_HEIGHT_PX) {
+      if (
+        entity.x < 0 ||
+        entity.x > MAP_WIDTH_PX ||
+        entity.y < 0 ||
+        entity.y > MAP_HEIGHT_PX ||
+        !entity.isActive
+      ) {
+        if (entity instanceof Enemy) {
+          this.removeEnemy(entity as TEnemy);
+        } else if (entity instanceof Player) {
+          this.removePlayer(entity as TPlayer);
+        }
+
         this.removeEntity(entity);
       }
     });

@@ -6,6 +6,7 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "noImplicitReturns": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "target": "ESNext"
   }
 }
