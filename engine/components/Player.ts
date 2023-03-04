@@ -1,7 +1,10 @@
 import { ServerMovement } from '../../shared/types';
+import { Entity } from '../entities/Entity';
 import { Rectangle } from '../entities/Rectangle';
+import { Vector2 } from '../entities/Vector2';
 import { GameEngine } from '../GameEngine';
 import { Bullet } from './Bullet';
+import { Enemy } from './Enemy';
 
 export class Player extends Rectangle {
   public bullets: Set<Bullet> = new Set();
@@ -9,6 +12,7 @@ export class Player extends Rectangle {
   public bulletSpeed = 700;
   public shootingSpeed = 120;
   public speed = 200;
+  public health = 200;
   public movement: ServerMovement = { left: false, right: false, up: false, down: false };
 
   private lastShot = Date.now();
@@ -36,6 +40,10 @@ export class Player extends Rectangle {
     return;
   }
 
+  public onHit(damage: number) {
+    this.health -= damage;
+  }
+
   public setVelocityFromMovement(movement: ServerMovement) {
     this.movement = { ...movement };
     const { left, right, up, down } = this.movement;
@@ -61,6 +69,10 @@ export class Player extends Rectangle {
 
   public update(dt: number) {
     super.update(dt);
+
+    if (this.health <= 0) {
+      this.destroy();
+    }
 
     this.bullets.forEach(bullet => {
       if (!bullet.isActive) {
