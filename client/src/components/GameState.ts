@@ -86,6 +86,36 @@ export class GameState extends GameEngine<Player, Enemy> {
   }
 
   private drawDebugBounds() {
+    this.entities.forEach(entity => {
+      const { x, y, anchor } = entity;
+      if (this.drawableEntities.has(entity)) return;
+
+      // If sprite not drawn yet
+      const boundsContainer = new PIXI.Container();
+      const bounds = new PIXI.Graphics();
+      const anchorPoint = new PIXI.Graphics();
+      bounds.lineStyle(1, 0xffffff);
+
+      if (entity instanceof Rectangle) {
+        bounds.drawRect(0, 0, entity.width, entity.height);
+      } else if (entity instanceof Circle) {
+        bounds.drawCircle(0, 0, entity.radius);
+      }
+
+      anchorPoint.lineStyle(1, 0xbf40bf);
+      anchorPoint.beginFill(0xbf40bf);
+      anchorPoint.drawCircle(0, 0, 2);
+      anchorPoint.position.set(anchor.x, anchor.y);
+      anchorPoint.endFill();
+      boundsContainer.position.set(x, y);
+
+      boundsContainer.addChild(bounds);
+      boundsContainer.addChild(anchorPoint);
+      this.stage.addChild(boundsContainer);
+
+      this.drawableEntities.set(entity, boundsContainer);
+    });
+
     for (const [entity, spriteContainer] of this.drawableEntities) {
       const { x, y } = entity;
 
@@ -117,35 +147,5 @@ export class GameState extends GameEngine<Player, Enemy> {
         }
       }
     }
-
-    this.entities.forEach(entity => {
-      const { x, y, anchor } = entity;
-      if (this.drawableEntities.has(entity)) return;
-
-      // If sprite not drawn yet
-      const boundsContainer = new PIXI.Container();
-      const bounds = new PIXI.Graphics();
-      const anchorPoint = new PIXI.Graphics();
-      bounds.lineStyle(1, 0xffffff);
-
-      if (entity instanceof Rectangle) {
-        bounds.drawRect(0, 0, entity.width, entity.height);
-      } else if (entity instanceof Circle) {
-        bounds.drawCircle(0, 0, entity.radius);
-      }
-
-      anchorPoint.lineStyle(1, 0xbf40bf);
-      anchorPoint.beginFill(0xbf40bf);
-      anchorPoint.drawCircle(0, 0, 2);
-      anchorPoint.position.set(anchor.x, anchor.y);
-      anchorPoint.endFill();
-      boundsContainer.position.set(x, y);
-
-      boundsContainer.addChild(bounds);
-      boundsContainer.addChild(anchorPoint);
-      this.stage.addChild(boundsContainer);
-
-      this.drawableEntities.set(entity, boundsContainer);
-    });
   }
 }
