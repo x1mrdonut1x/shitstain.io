@@ -38,10 +38,15 @@ export class Enemy extends EngineEnemy {
 
   public destroy(): void {
     this.spritesContainer.destroy();
+    this.damageTexts.forEach(text => text.destroy());
     super.destroy();
   }
 
   update(delta: number) {
+    this.spritesContainer.children.forEach(sprite => {
+      sprite.x = this.x;
+      sprite.y = this.y;
+    });
     this.damageTexts.forEach(text => text.update(delta));
     super.update(delta);
   }
