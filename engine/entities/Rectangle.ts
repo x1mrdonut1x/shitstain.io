@@ -1,6 +1,4 @@
 import { Entity } from './Entity';
-import * as Quadtree from '@timohausmann/quadtree-ts';
-
 export class Rectangle extends Entity {
   constructor(
     x: number,
@@ -10,17 +8,5 @@ export class Rectangle extends Entity {
     public id?: string | number
   ) {
     super(x, y, id);
-  }
-
-  qtIndex(node: Quadtree.NodeGeometry) {
-    return Quadtree.Rectangle.prototype.qtIndex.call(
-      {
-        x: this.x,
-        y: this.y,
-        width: this.width,
-        height: this.height,
-      },
-      node
-    );
   }
 }
