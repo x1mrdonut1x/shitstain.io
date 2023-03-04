@@ -86,41 +86,41 @@ export class GameState extends GameEngine<Player, Enemy> {
   }
 
   private drawDebugBounds() {
+    for (const [entity, spriteContainer] of this.drawableEntities) {
+      const { x, y } = entity;
+
+      if (!entity.isActive) {
+        spriteContainer.destroy();
+        this.drawableEntities.delete(entity);
+        continue;
+      }
+
+      spriteContainer.position = { x: x, y: y };
+
+      // Draw red if colliding
+      const bounds = spriteContainer.children[0] as PIXI.Graphics;
+
+      // if is colliding and is not red
+      if (entity.isColliding && bounds.line.color === 16777215) {
+        bounds.lineStyle(1, 0xff0000);
+        if (entity instanceof Rectangle) {
+          bounds.drawRect(0, 0, entity.width, entity.height);
+        } else if (entity instanceof Circle) {
+          bounds.drawCircle(0, 0, entity.radius);
+        }
+      } else if (!entity.isColliding && bounds.line.color !== 16777215) {
+        bounds.lineStyle(1, 0xffffff);
+        if (entity instanceof Rectangle) {
+          bounds.drawRect(0, 0, entity.width, entity.height);
+        } else if (entity instanceof Circle) {
+          bounds.drawCircle(0, 0, entity.radius);
+        }
+      }
+    }
+
     this.entities.forEach(entity => {
       const { x, y, anchor } = entity;
-      const foundSprite = this.drawableEntities.get(entity);
-
-      if (foundSprite && !entity.isActive) {
-        foundSprite.destroy();
-        this.drawableEntities.delete(entity);
-        return;
-      }
-
-      if (foundSprite) {
-        foundSprite.position = { x: x, y: y };
-
-        // Draw red if colliding
-        const bounds = foundSprite.children[0] as PIXI.Graphics;
-
-        // if is colliding and is not red
-        if (entity.isColliding && bounds.line.color === 16777215) {
-          bounds.lineStyle(1, 0xff0000);
-          if (entity instanceof Rectangle) {
-            bounds.drawRect(0, 0, entity.width, entity.height);
-          } else if (entity instanceof Circle) {
-            bounds.drawCircle(0, 0, entity.radius);
-          }
-        } else if (!entity.isColliding && bounds.line.color !== 16777215) {
-          bounds.lineStyle(1, 0xffffff);
-          if (entity instanceof Rectangle) {
-            bounds.drawRect(0, 0, entity.width, entity.height);
-          } else if (entity instanceof Circle) {
-            bounds.drawCircle(0, 0, entity.radius);
-          }
-        }
-
-        return;
-      }
+      if (this.drawableEntities.has(entity)) return;
 
       // If sprite not drawn yet
       const boundsContainer = new PIXI.Container();
