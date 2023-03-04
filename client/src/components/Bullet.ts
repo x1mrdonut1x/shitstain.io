@@ -22,24 +22,20 @@ export class Bullet extends EngineBullet {
     this.sprite.anchor.set(0.9, 0.5);
     this.sprite.rotation = angle;
     this.sprite.play();
-
-    this.onCollide = () => {
-      if (!this.sprite) return;
-
-      this.sprite.textures = animations['Charge'].slice(5);
-      this.sprite.gotoAndPlay(0);
-      this.sprite.loop = false;
-      this.sprite.onComplete = () => {
-        this.sprite?.destroy();
-        this.isActive = false;
-      };
-      this.isStatic = true;
-      this.collisionGroup = undefined;
-    };
   }
 
-  destroy() {
-    //
+  public onCollide() {
+    super.onCollide();
+
+    if (!this.sprite) return;
+    const { animations } = PIXI.Assets.cache.get(attack);
+
+    this.sprite.textures = animations['Charge'].slice(5);
+    this.sprite.gotoAndPlay(0);
+    this.sprite.loop = false;
+    this.sprite.onComplete = () => {
+      this.sprite?.destroy();
+    };
   }
 
   update(dt: number) {

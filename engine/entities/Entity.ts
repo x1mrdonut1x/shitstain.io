@@ -11,7 +11,6 @@ export class Entity {
   public isStatic = false;
   public anchor = new Vector2(0, 0);
   public velocity = new Vector2();
-  public onCollide?: (entity: Entity, collision: Vector2) => void;
   public isColliding = false;
   public collisionGroup?: string;
 
@@ -20,6 +19,9 @@ export class Entity {
     this.y = y;
     this.id = id;
   }
+
+  // eslint-disable-next-line
+  public onCollide(entity: Entity, vector: Vector2) {}
 
   public getPosition() {
     return new Vector2(this.x, this.y);
@@ -30,7 +32,7 @@ export class Entity {
   }
 
   public destroy() {
-    //
+    this.isActive = false;
   }
 
   public update(dt: number) {
