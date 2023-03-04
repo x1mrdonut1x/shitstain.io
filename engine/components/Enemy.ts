@@ -8,5 +8,6 @@ export class Enemy extends Rectangle {
     super(x, y, 50, 50, id);
     this.label = 'Enemy';
     this.id = id ?? this.engine.enemies.size + 1;
+    this.collisionGroup = 'enemy';
   }
 }

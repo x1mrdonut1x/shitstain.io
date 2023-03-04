@@ -6,5 +6,6 @@ export class Bullet extends Circle {
     super(x, y, 6);
 
     this.setVelocity(velocity);
+    this.collisionGroup = 'player';
   }
 }

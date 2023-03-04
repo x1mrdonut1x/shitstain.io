@@ -24,9 +24,6 @@ export class Bullet extends EngineBullet {
     this.sprite.play();
 
     this.onCollide = () => {
-      this.isStatic = true;
-      this.isActive = false;
-
       if (!this.sprite) return;
 
       this.sprite.textures = animations['Charge'].slice(5);
@@ -34,7 +31,10 @@ export class Bullet extends EngineBullet {
       this.sprite.loop = false;
       this.sprite.onComplete = () => {
         this.sprite?.destroy();
+        this.isActive = false;
       };
+      this.isStatic = true;
+      this.collisionGroup = undefined;
     };
   }
 

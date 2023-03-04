@@ -1,6 +1,5 @@
 import { Enemy } from './components/Enemy';
 import { Player } from './components/Player';
-import * as Quadtree from '@timohausmann/quadtree-ts';
 import { MAP_HEIGHT_PX, MAP_WIDTH_PX } from '../shared/constants';
 import { Circle } from './entities/Circle';
 import { Rectangle } from './entities/Rectangle';
@@ -11,25 +10,15 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
   public entities: Set<Rectangle | Circle> = new Set();
   public players: Set<TPlayer> = new Set();
   public enemies: Set<Enemy> = new Set();
-  private tree = new Quadtree.Quadtree<Rectangle | Circle>({
-    width: MAP_WIDTH_PX,
-    height: MAP_HEIGHT_PX,
-  });
 
   private collisions = new Map<Entity, Set<Entity>>();
 
   public addEntity(entity: Rectangle | Circle) {
     this.entities.add(entity);
-
-    this.tree.insert(entity);
   }
 
   public removeEntity(entity: Rectangle | Circle) {
     this.entities.delete(entity);
-
-    // TODO This is probably not very efficient
-    this.tree.clear();
-    this.entities.forEach(entity => this.tree.insert(entity));
   }
 
   // Players
@@ -81,6 +70,9 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
       if (!entity.isActive) {
         this.removeEntity(entity);
       }
+      if (entity.x < 0 || entity.x > MAP_WIDTH_PX || entity.y < 0 || entity.y > MAP_HEIGHT_PX) {
+        this.removeEntity(entity);
+      }
     });
   }
 
@@ -93,29 +85,22 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
 
   public collisionDetector() {
     this.entities.forEach(entity => {
-      const entityCollidingWith = this.collisions.get(entity) ?? new Set<Entity>();
-      const candidates = this.tree.retrieve(entity);
+      if (!entity.collisionGroup) return;
+      const candidates = this.entities;
 
+      entity.isColliding = false;
       candidates.forEach(candidate => {
+        if (!candidate.collisionGroup) return;
         if (entity === candidate) return;
+        if (entity.collisionGroup === candidate.collisionGroup) return;
 
-        const isColliding = CollisionDetector.isColliding(entity, candidate);
-        const isAlreadyColliding = entityCollidingWith.has(candidate);
-        if (!isColliding && isAlreadyColliding) {
-          entityCollidingWith.delete(candidate);
-        }
+        const collision = CollisionDetector.getCollision(entity, candidate);
 
-        if (isColliding && !isAlreadyColliding) {
-          console.log(entity.label, candidate.label);
-          entityCollidingWith.add(candidate);
-          // TODO this should only be called once per entity collision
-          entity.onCollide?.(candidate);
-          candidate.onCollide?.(entity);
+        if (collision) {
+          entity.onCollide?.(candidate, collision);
+          entity.isColliding = true;
         }
       });
-
-      entity.isColliding = entityCollidingWith.size > 0;
-      this.collisions.set(entity, entityCollidingWith);
     });
   }
 }
