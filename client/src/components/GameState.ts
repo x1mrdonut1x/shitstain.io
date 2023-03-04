@@ -87,7 +87,7 @@ export class GameState extends GameEngine<Player, Enemy> {
 
   private drawDebugBounds() {
     this.entities.forEach(entity => {
-      const { x, y, anchor } = entity;
+      const { x, y, anchor, id } = entity;
       if (this.drawableEntities.has(entity)) return;
 
       // If sprite not drawn yet
@@ -109,8 +109,14 @@ export class GameState extends GameEngine<Player, Enemy> {
       anchorPoint.endFill();
       boundsContainer.position.set(x, y);
 
+      const idText = new PIXI.Text(id);
+      idText.position.set(0, -16);
+      idText.style.fontSize = 12;
+
       boundsContainer.addChild(bounds);
       boundsContainer.addChild(anchorPoint);
+      boundsContainer.addChild(idText);
+
       this.stage.addChild(boundsContainer);
 
       this.drawableEntities.set(entity, boundsContainer);
