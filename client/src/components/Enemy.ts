@@ -14,10 +14,10 @@ export class Enemy extends EngineEnemy {
 
     // DEBUG
     const idText = new PIXI.Text(this.id);
-    idText.position.x = this.x;
-    idText.position.y = this.y;
     idText.style.fontSize = 12;
     this.spritesContainer.addChild(idText);
+    this.spritesContainer.position.x = this.x;
+    this.spritesContainer.position.y = this.y;
 
     stage.addChild(this.spritesContainer);
   }
@@ -43,10 +43,8 @@ export class Enemy extends EngineEnemy {
   }
 
   update(delta: number) {
-    this.spritesContainer.children.forEach(sprite => {
-      sprite.x = this.x;
-      sprite.y = this.y;
-    });
+    this.spritesContainer.position.x = this.x;
+    this.spritesContainer.position.y = this.y;
     this.damageTexts.forEach(text => text.update(delta));
     super.update(delta);
   }

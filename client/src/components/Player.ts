@@ -26,10 +26,10 @@ export class Player extends EnginePlayer {
     super(engine, x, y, id);
 
     this.healthText = new Text(this.health);
-    this.healthText.position.x = this.x;
-    this.healthText.position.y = this.y;
     this.healthText.style.fontSize = 12;
     this.spritesContainer.addChild(this.healthText);
+    this.spritesContainer.position.x = this.x;
+    this.spritesContainer.position.y = this.y;
 
     stage.addChild(this.spritesContainer);
 
@@ -79,10 +79,8 @@ export class Player extends EnginePlayer {
 
     super.update(dt);
 
-    this.spritesContainer.children.forEach(sprite => {
-      sprite.x = this.x;
-      sprite.y = this.y;
-    });
+    this.spritesContainer.position.x = this.x;
+    this.spritesContainer.position.y = this.y;
     this.healthText.text = this.health;
 
     this.damageTexts.forEach(text => text.update(dt));
