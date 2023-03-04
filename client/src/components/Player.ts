@@ -43,47 +43,27 @@ export class Player extends EnginePlayer {
     super.onHit(damage);
 
     const text = new DamageText(this.stage, this, damage.toString());
+    this.damageTexts.add(text);
 
     text.onDestroy = () => {
       this.damageTexts.delete(text);
       text.destroy();
     };
-    this.damageTexts.add(text);
   }
 
   update(dt: number) {
     this.bulletController?.update(dt);
     this.movementController?.update(dt);
 
-    // Camera controller
-    if (this.isLocalPlayer) {
-      const nextX = this.x - window.innerWidth / 2;
-      const nextY = this.y - window.innerHeight / 2;
-
-      if (
-        nextX > 0 &&
-        (this.stage.pivot.x >= 0 || nextX > this.stage.pivot.x) &&
-        (this.stage.pivot.x + window.innerWidth <= MAP_WIDTH_PX || nextX < this.stage.pivot.x)
-      ) {
-        this.stage.pivot.x = nextX;
-      }
-
-      if (
-        nextY > 0 &&
-        (this.stage.pivot.y >= 0 || nextY > this.stage.pivot.y) &&
-        (this.stage.pivot.y + window.innerHeight <= MAP_HEIGHT_PX || nextY < this.stage.pivot.y)
-      ) {
-        this.stage.pivot.y = nextY;
-      }
-    }
-
-    super.update(dt);
+    this.cameraController();
 
     this.spritesContainer.position.x = this.x;
     this.spritesContainer.position.y = this.y;
     this.healthText.text = this.health;
 
     this.damageTexts.forEach(text => text.update(dt));
+
+    super.update(dt);
   }
 
   public setMovement(timestamp: number, position: ServerPlayer) {
@@ -94,5 +74,28 @@ export class Player extends EnginePlayer {
   public destroy(): void {
     this.spritesContainer.destroy();
     super.destroy();
+  }
+
+  public cameraController() {
+    if (!this.isLocalPlayer) return;
+
+    const nextX = this.x - window.innerWidth / 2;
+    const nextY = this.y - window.innerHeight / 2;
+
+    if (
+      nextX > 0 &&
+      (this.stage.pivot.x >= 0 || nextX > this.stage.pivot.x) &&
+      (this.stage.pivot.x + window.innerWidth <= MAP_WIDTH_PX || nextX < this.stage.pivot.x)
+    ) {
+      this.stage.pivot.x = nextX;
+    }
+
+    if (
+      nextY > 0 &&
+      (this.stage.pivot.y >= 0 || nextY > this.stage.pivot.y) &&
+      (this.stage.pivot.y + window.innerHeight <= MAP_HEIGHT_PX || nextY < this.stage.pivot.y)
+    ) {
+      this.stage.pivot.y = nextY;
+    }
   }
 }
