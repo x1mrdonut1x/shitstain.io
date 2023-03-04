@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { Entity } from '../../../engine/entities/Entity';
+import { Rectangle } from '../../../engine/entities/Rectangle';
 
 export class DamageText {
   private text: PIXI.Text;
@@ -8,9 +8,15 @@ export class DamageText {
 
   public onDestroy?: () => void;
 
-  constructor(stage: PIXI.Container, private parent: Entity, value: string) {
+  constructor(stage: PIXI.Container, private parent: Rectangle, value: string) {
     this.text = new PIXI.Text(value);
-    this.text.style.fontSize = 14;
+    this.text.style = {
+      fontSize: 14,
+      fill: 0xffffff,
+      stroke: 0x000000,
+      strokeThickness: 3,
+    };
+
     stage.addChild(this.text);
   }
 
@@ -21,10 +27,14 @@ export class DamageText {
   update(delta: number) {
     this.elapsed += delta;
 
-    const newX = this.parent.x;
+    const newX = this.parent.x + this.parent.width / 2 - 10;
     const newY = this.parent.y - 10 - 20 * (this.elapsed / this.life);
     this.text.position.x = newX;
     this.text.position.y = newY;
+
+    const newScale = 1 + (0.15 * this.elapsed) / this.life;
+    this.text.scale.x = newScale;
+    this.text.scale.y = newScale;
 
     if (this.elapsed > this.life) {
       this.onDestroy?.();
