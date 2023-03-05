@@ -3,47 +3,39 @@ import { Player } from './components/Player';
 import { MAP_HEIGHT_PX, MAP_WIDTH_PX } from '../shared/constants';
 import { Circle } from './entities/Circle';
 import { Rectangle } from './entities/Rectangle';
-import { Entity } from './entities/Entity';
 import { CollisionDetector } from './helpers/CollisionDetector';
+import { EntityId } from '../shared/types';
 
 export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = Enemy> {
-  public entities: Set<Rectangle | Circle> = new Set();
-  public players: Set<TPlayer> = new Set();
-  public enemies: Set<Enemy> = new Set();
-
-  private collisions = new Map<Entity, Set<Entity>>();
+  public entities: Map<EntityId, Rectangle | Circle> = new Map();
+  public players: Map<EntityId, TPlayer> = new Map();
+  public enemies: Map<EntityId, Enemy> = new Map();
 
   public addEntity(entity: Rectangle | Circle) {
-    this.entities.add(entity);
+    if (this.entities.has(entity.id)) return;
+
+    this.entities.set(entity.id, entity);
   }
 
-  public removeEntity(entity: Rectangle | Circle) {
-    this.entities.delete(entity);
+  public removeEntity(id: EntityId) {
+    this.entities.delete(id);
   }
 
   // Players
-  public getPlayerById(id: string | number) {
-    return Array.from(this.players).find(player => player.id === id);
+  public getPlayerById(id: EntityId) {
+    return this.players.get(id);
   }
 
   public addPlayer(player: TPlayer) {
-    this.players.add(player);
+    if (this.players.has(player.id)) return;
+
+    this.players.set(player.id, player);
     this.addEntity(player);
   }
 
-  public removePlayer(player: TPlayer | string) {
-    let foundPlayer: TPlayer | undefined;
-
-    if (typeof player === 'string') {
-      foundPlayer = this.getPlayerById(player);
-    } else {
-      foundPlayer = player;
-    }
-
-    if (foundPlayer) {
-      this.players.delete(foundPlayer);
-      this.removeEntity(foundPlayer);
-    }
+  public removePlayer(id: EntityId) {
+    this.players.delete(id);
+    this.removeEntity(id);
   }
 
   public updatePlayers(dt: number) {
@@ -52,13 +44,15 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
 
   // Enemies
   public addEnemy(enemy: TEnemy) {
-    this.enemies.add(enemy);
+    if (this.enemies.has(enemy.id)) return;
+
+    this.enemies.set(enemy.id, enemy);
     this.addEntity(enemy);
   }
 
-  public removeEnemy(enemy: TEnemy) {
-    this.enemies.delete(enemy);
-    this.removeEntity(enemy);
+  public removeEnemy(id: EntityId) {
+    this.enemies.delete(id);
+    this.removeEntity(id);
   }
 
   public updateEnemies(dt: number) {
@@ -75,12 +69,12 @@ export class GameEngine<TPlayer extends Player = Player, TEnemy extends Enemy = 
         !entity.isActive
       ) {
         if (entity instanceof Enemy) {
-          this.removeEnemy(entity as TEnemy);
+          this.removeEnemy(entity.id);
         } else if (entity instanceof Player) {
-          this.removePlayer(entity as TPlayer);
+          this.removePlayer(entity.id);
+        } else {
+          this.removeEntity(entity.id);
         }
-
-        this.removeEntity(entity);
       }
     });
   }

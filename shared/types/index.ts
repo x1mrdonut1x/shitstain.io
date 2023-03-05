@@ -1,6 +1,4 @@
-import { Player } from '../../engine/components/Player';
 import { Vector2 } from '../../engine/entities/Vector2';
-
 
 export type ServerMovement = {
   left: boolean;
@@ -12,15 +10,15 @@ export type ServerMovement = {
 export type ClientShootData = {
   clientId: string | number;
   isShooting: boolean;
-  playerPos: XYPosition;
-  mousePos: XYPosition;
+  playerPos: Vector2;
+  mousePos: Vector2;
 };
 
 export type ServerShootData = {
   clientId: string | number;
   isShooting: boolean;
-  playerPos: XYPosition;
-  mousePos: XYPosition;
+  playerPos: Vector2;
+  mousePos: Vector2;
 };
 
 export type ServerPlayer = {
@@ -32,35 +30,18 @@ export type ServerPlayer = {
 };
 
 export type ServerEnemy = {
-  x: number;
-  y: number;
+  id: number | string;
+  position: Vector2;
+  velocity: Vector2;
   speed: number;
-  move: ServerMovement;
-};
-
-export type ServerWorldPlayer = {
-  data: ServerPlayer;
-  entity: Player;
-};
-
-export type ServerWorldEnemy = {
-  data: ServerEnemy;
-  body: unknown;
 };
 
 export type ServerSnapshot = {
   timestamp: number;
   state: {
     players: ServerPlayer[];
+    enemies: ServerEnemy[];
   };
 };
 
-export type ServerObject = {
-  position: XYPosition;
-  vertices: XYPosition[];
-  label: string;
-  isStatic: boolean;
-  isSensor: boolean;
-};
-
-export type XYPosition = { x: number; y: number };
+export type EntityId = string | number;

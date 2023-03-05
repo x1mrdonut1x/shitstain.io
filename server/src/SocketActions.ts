@@ -1,14 +1,5 @@
-import { Socket } from 'socket.io';
-import {
-  GetPlayersEvent,
-  PlayerConnectEvent,
-  PlayerMoveEvent,
-  SocketEvent,
-} from '../../shared/types/events';
-import { broadcast } from './socket-server';
-import { GameState } from './GameState';
-import { ClientShootData, ServerShootData, ServerPlayer } from '../../shared/types';
-import { Player } from '../../engine/components/Player';
+import { Server, Socket } from 'socket.io';
+import { SocketEvent } from '../../shared/types/events';
 
 export interface WrappedServerSocket<T> {
   event: string;
@@ -18,77 +9,59 @@ export interface WrappedServerSocket<T> {
 type SocketActionFn<T> = (message: T) => void;
 
 export class SocketActions {
-  constructor(private socket: Socket, private gameState: GameState) {
-    socket.send(socket.id);
+  public readonly clientId: string;
+  public roomId?: string;
 
-    this.createSocket(SocketEvent.DISCONNECT).on(this.onPlayerDisconnect.bind(this));
-
-    this.createSocket<PlayerConnectEvent>(SocketEvent.PLAYER_CONNECT).on(
-      this.onPlayerConnected.bind(this)
-    );
-
-    this.createSocket<PlayerMoveEvent>(SocketEvent.PLAYER_MOVE).on(this.onPlayerMove.bind(this));
-
-    this.createSocket<ClientShootData>(SocketEvent.PLAYER_SHOOT).on(this.onPlayerShoot.bind(this));
+  constructor(private io: Server, private socket: Socket) {
+    this.clientId = socket.id;
   }
 
-  private onPlayerShoot(data: ClientShootData) {
-    const foundPlayer = this.gameState.engine.getPlayerById(data.clientId);
-    if (!foundPlayer) return;
-
-    const output: ServerShootData = {
-      clientId: data.clientId,
-      isShooting: data.isShooting,
-      mousePos: data.mousePos,
-      playerPos: {
-        x: foundPlayer?.x,
-        y: foundPlayer.y,
-      },
-    };
-
-    broadcast(SocketEvent.PLAYER_SHOOT)(output);
+  public joinRoom(roomId: string) {
+    this.socket.join(roomId);
   }
 
-  private onPlayerConnected(data: { clientId: string }) {
-    console.log(`player ${data.clientId} connected`);
+  public broadcastToRoom<T>(event: SocketEvent, message: T) {
+    if (!this.roomId) {
+      console.log('Could not broadcast to room');
+      return;
+    }
 
-    this.gameState.addPlayer(data.clientId);
-
-    broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(
-      Array.from(this.gameState.engine.players).map(fromServerPlayer)
-    );
-    console.log('Total players', this.gameState.getPlayerCount());
+    return this.io.to(this.roomId).emit(event, message);
   }
 
-  private onPlayerDisconnect() {
-    console.log(`player ${this.socket.id} disconnected`);
-    this.gameState.removePlayer(this.socket.id);
-
-    broadcast<GetPlayersEvent>(SocketEvent.PLAYERS)(
-      Array.from(this.gameState.engine.players).map(fromServerPlayer)
-    );
-    console.log('Total players', this.gameState.getPlayerCount());
-  }
-
-  private onPlayerMove(data: PlayerMoveEvent) {
-    this.gameState.movePlayer(data.clientId, data.movement);
-  }
-
-  private createSocket<T>(event: SocketEvent) {
+  public createSocket<TEmit = unknown, TOn = TEmit>(event: SocketEvent): DataSocket<TEmit, TOn> {
     return {
-      on: (callback: (data: T) => void) => {
-        this.socket.on(event, callback);
-      },
+      emit: this.emitCallback.bind(this)(event),
+      on: this.onCallback.bind(this)(event),
+      off: this.offCallback.bind(this)(event),
+    };
+  }
+
+  private emitCallback<T>(event: SocketEvent) {
+    return (data: T): void => {
+      this.broadcastToRoom(event, { clientId: this.clientId, ...data });
+    };
+  }
+
+  private onCallback<T>(event: SocketEvent) {
+    return (callback: ListenerCallback<T>): void => {
+      this.socket.on(event, callback);
+    };
+  }
+
+  private offCallback<T>(event: SocketEvent) {
+    return (callback: ListenerCallback<T>): void => {
+      this.socket.off(event, callback);
     };
   }
 }
 
-export const fromServerPlayer = (player: Player) => {
-  return {
-    clientId: player.id,
-    position: { x: player.x, y: player.y },
-    speed: player.speed,
-    bulletSpeed: player.bulletSpeed,
-    move: player.movement,
-  } satisfies ServerPlayer;
-};
+export interface DataSocket<TEmit, TOn> {
+  emit: (data?: Omit<TEmit, 'clientId'>) => void;
+  on: (callback: ListenerCallback<TOn>) => void;
+  off: (callback: ListenerCallback<TOn>) => void;
+}
+
+interface ListenerCallback<T> {
+  (data: T): void;
+}

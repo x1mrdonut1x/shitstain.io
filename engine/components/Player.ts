@@ -1,10 +1,7 @@
-import { ServerMovement } from '../../shared/types';
-import { Entity } from '../entities/Entity';
+import { EntityId, ServerMovement } from '../../shared/types';
 import { Rectangle } from '../entities/Rectangle';
-import { Vector2 } from '../entities/Vector2';
 import { GameEngine } from '../GameEngine';
 import { Bullet } from './Bullet';
-import { Enemy } from './Enemy';
 
 export class Player extends Rectangle {
   public bullets: Set<Bullet> = new Set();
@@ -17,10 +14,9 @@ export class Player extends Rectangle {
 
   private lastShot = Date.now();
 
-  constructor(private engine: GameEngine, x: number, y: number, public id: string | number) {
+  constructor(private engine: GameEngine, x: number, y: number, public id: EntityId) {
     super(x, y, 40, 60, id);
 
-    this.id = id ?? this.engine.players.size + 1;
     this.label = 'Player';
     this.collisionGroup = 'player';
   }

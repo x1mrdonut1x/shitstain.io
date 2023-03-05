@@ -8,11 +8,16 @@ export class DamageText {
 
   public onDestroy?: () => void;
 
-  constructor(stage: PIXI.Container, private parent: Rectangle, value: string) {
+  constructor(
+    stage: PIXI.Container,
+    private parent: Rectangle,
+    value: string,
+    color: 'red' | 'white'
+  ) {
     this.text = new PIXI.Text(value);
     this.text.style = {
       fontSize: 14,
-      fill: 0xffffff,
+      fill: color === 'red' ? 0xff0000 : 0xffffff,
       stroke: 0x000000,
       strokeThickness: 3,
     };

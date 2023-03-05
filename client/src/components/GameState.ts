@@ -7,47 +7,60 @@ import * as PIXI from 'pixi.js';
 import { GameEngine } from '../../../engine/GameEngine';
 import { Rectangle } from '../../../engine/entities/Rectangle';
 import { Circle } from '../../../engine/entities/Circle';
+import { ServerEnemy } from '../../../shared/types';
 
-export class GameState extends GameEngine<Player, Enemy> {
+export class GameState {
   private drawableEntities: Map<Rectangle | Circle, PIXI.Container> = new Map();
+  private engine: GameEngine<Player, Enemy>;
 
   constructor(private stage: PIXI.Container) {
-    super();
-    console.log('GameState.initialize');
-    gameServer.getPlayers.on(data => {
+    this.engine = new GameEngine<Player, Enemy>();
+
+    gameServer.playerConnected.on(data => {
       this.updatePlayersFromServer(data);
     });
 
     gameServer.getWorldState.on(data => {
       this.movePlayers(data);
+      this.addEnemies(data.state.enemies);
     });
 
-    gameServer.createPlayer.emit();
-
-    Array.from(Array(10)).forEach((_, index) => {
-      const enemy = new Enemy(this.stage, this, 200, 100 + index * 100);
-      this.addEnemy(enemy);
+    gameServer.addEnemies.on(data => {
+      this.addEnemies(data.data);
     });
-  }
 
-  public addEnemy(enemy: Enemy) {
-    super.addEnemy(enemy);
+    // Add player on server
+    gameServer.playerConnected.emit();
   }
 
   public addPlayer(player: Player) {
-    super.addPlayer(player);
+    this.engine.addPlayer(player);
 
     log(`Player ${player.id} connected`);
   }
 
+  public addEnemies(enemies: ServerEnemy[]) {
+    enemies.forEach(enemy => {
+      const newEnemy = new Enemy(
+        this.stage,
+        this.engine,
+        enemy.position.x,
+        enemy.position.y,
+        enemy.id
+      );
+
+      this.engine.addEnemy(newEnemy);
+    });
+  }
+
   public removePlayer(player: Player) {
-    super.removePlayer(player);
+    this.engine.removePlayer(player.id);
 
     log(`Player ${player.id} disconnected`);
   }
 
   public updatePlayersFromServer(data: GetPlayersEvent) {
-    this.players.forEach(localPlayer => {
+    this.engine.players.forEach(localPlayer => {
       if (!data.find(serverPlayer => localPlayer.id === serverPlayer.clientId)) {
         this.removePlayer(localPlayer);
       }
@@ -58,10 +71,10 @@ export class GameState extends GameEngine<Player, Enemy> {
         clientId,
         position: { x, y },
       } = serverPlayer;
-      const foundPlayer = this.getPlayerById(clientId);
+      const foundPlayer = this.engine.getPlayerById(clientId);
 
       if (!foundPlayer) {
-        const player = new Player(this.stage, this, x, y, clientId);
+        const player = new Player(this.stage, this.engine, x, y, clientId);
         this.addPlayer(player);
       }
     });
@@ -69,24 +82,26 @@ export class GameState extends GameEngine<Player, Enemy> {
 
   public movePlayers(data: GetWorldStateEvent) {
     data.state.players.forEach(object => {
-      const foundPlayer = this.getPlayerById(object.clientId);
+      const foundPlayer = this.engine.getPlayerById(object.clientId);
       foundPlayer?.setMovement(data.timestamp, object);
     });
   }
 
+  // public moveEnemies(data: GetWorldStateEvent) {
+  //   data.state.enemies.forEach(object => {
+  //     // const foundEnemy = this.engine.enemies.get(object.id);
+  //     // foundEnemy?.setMovement(data.timestamp, object);
+  //   });
+  // }
+
   update(dt: number) {
     // TODO is this the right order?
     this.drawDebugBounds();
-    this.removeInactiveEntities();
-
-    this.collisionDetector();
-
-    this.updatePlayers(dt);
-    this.updateEnemies(dt);
+    this.engine.update(dt);
   }
 
   private drawDebugBounds() {
-    this.entities.forEach(entity => {
+    this.engine.entities.forEach(entity => {
       const { x, y, anchor, id } = entity;
       if (this.drawableEntities.has(entity)) return;
 

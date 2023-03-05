@@ -1,11 +1,11 @@
-import { ServerSnapshot } from '../../shared/types';
+import { ServerSnapshot } from '../../../shared/types';
 import { GameState } from './GameState';
-import { TIMESTEP, SNAPSHOT_STEP } from '../../shared/constants';
-import { fromServerPlayer } from './SocketActions';
+import { TIMESTEP, SNAPSHOT_STEP } from '../../../shared/constants';
 
 export class GameScene {
   public state: GameState;
-  private loop: ReturnType<typeof setInterval> | undefined;
+  private gameLoop?: ReturnType<typeof setInterval>;
+
   public onSnapshot?: (snapshot: ServerSnapshot) => void;
 
   constructor() {
@@ -19,12 +19,12 @@ export class GameScene {
   startGame() {
     let lastTimestamp = Date.now();
 
-    this.loop = setInterval(() => {
+    this.gameLoop = setInterval(() => {
       const now = Date.now();
       const delta = now - lastTimestamp;
       lastTimestamp = now;
 
-      this.state.engine.update(delta);
+      this.state.update(delta);
     }, TIMESTEP);
 
     setInterval(() => {
@@ -33,13 +33,14 @@ export class GameScene {
       this.onSnapshot?.({
         timestamp: now,
         state: {
-          players: Array.from(this.state.engine.players).map(fromServerPlayer),
+          players: this.state.players,
+          enemies: this.state.enemies,
         },
       });
     }, SNAPSHOT_STEP);
   }
 
   stopGame() {
-    clearInterval(this.loop);
+    clearInterval(this.gameLoop);
   }
 }

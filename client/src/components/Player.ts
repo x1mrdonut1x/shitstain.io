@@ -1,6 +1,6 @@
 import { gameServer } from '@/networking/GameServer';
 import { Player as EnginePlayer } from '../../../engine/components/Player';
-import { ServerPlayer } from '../../../shared/types';
+import { EntityId, ServerPlayer } from '../../../shared/types';
 import { BulletController } from './BulletController';
 import { MovementController } from './MovementController';
 import { MAP_HEIGHT_PX, MAP_WIDTH_PX } from '../../../shared/constants';
@@ -21,7 +21,7 @@ export class Player extends EnginePlayer {
     engine: GameEngine,
     x: number,
     y: number,
-    public id: string | number
+    public id: EntityId
   ) {
     super(engine, x, y, id);
 
@@ -42,7 +42,7 @@ export class Player extends EnginePlayer {
   onHit(damage: number) {
     super.onHit(damage);
 
-    const text = new DamageText(this.stage, this, damage.toString());
+    const text = new DamageText(this.stage, this, damage.toString(), 'red');
     this.damageTexts.add(text);
 
     text.onDestroy = () => {
@@ -52,7 +52,7 @@ export class Player extends EnginePlayer {
   }
 
   update(dt: number) {
-    this.bulletController?.update(dt);
+    this.bulletController?.update();
     this.movementController?.update(dt);
 
     this.cameraController();

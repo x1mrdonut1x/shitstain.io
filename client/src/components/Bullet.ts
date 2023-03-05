@@ -2,12 +2,13 @@ import * as PIXI from 'pixi.js';
 import { Vector2 } from '../../../engine/entities/Vector2';
 import { Bullet as EngineBullet } from '../../../engine/components/Bullet';
 import attack from '../assets/wizards/fire-wizard/Charge/charge.json?url';
+import { EntityId } from '../../../shared/types';
 
 export class Bullet extends EngineBullet {
   public sprite?: PIXI.AnimatedSprite;
 
-  constructor(x: number, y: number, velocity: Vector2, angle: number) {
-    super(x, y, velocity);
+  constructor(x: number, y: number, velocity: Vector2, angle: number, id: EntityId) {
+    super(x, y, velocity, id);
     this.label = 'Bullet';
 
     this.animate(x, y, angle);
