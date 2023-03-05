@@ -1,13 +1,13 @@
 import { gameServer } from '@/networking/GameServer';
-import { ServerShootData, XYPosition } from '../../../shared/types';
+import { ServerShootData } from '../../../shared/types';
 import { Bullet } from './Bullet';
 import * as PIXI from 'pixi.js';
 import { Player } from './Player';
 import { PointerController } from './input-controllers/PointerController';
+import { Vector2 } from '../../../engine/entities/Vector2';
 
 export class BulletController {
-  private bullets: Set<Bullet> = new Set();
-  private mousePos: XYPosition = { x: 0, y: 0 };
+  private mousePos: Vector2 = { x: 0, y: 0 };
   private pointerController?: PointerController;
   private serverStep?: ServerShootData;
   public isShooting = false;
@@ -16,9 +16,10 @@ export class BulletController {
     if (this.player.isLocalPlayer) {
       this.pointerController = new PointerController(stage, player);
       this.pointerController.setOnChange((isShooting, position) => {
-        this.isShooting = isShooting;
         this.mousePos = position;
-        this.emitShoot();
+
+        if (isShooting || (this.isShooting && !isShooting)) this.emitShoot(isShooting);
+        this.isShooting = isShooting;
       });
     }
 
@@ -26,6 +27,7 @@ export class BulletController {
       if (data.clientId !== player.id) return;
 
       if (!this.player.isLocalPlayer) {
+        console.log(data);
         this.isShooting = data.isShooting;
       }
 
@@ -33,9 +35,9 @@ export class BulletController {
     });
   }
 
-  emitShoot() {
+  emitShoot(isShooting: boolean) {
     gameServer.shoot.emit({
-      isShooting: this.isShooting,
+      isShooting: isShooting,
       playerPos: {
         x: this.player.x,
         y: this.player.y,
@@ -48,14 +50,20 @@ export class BulletController {
     const velocity = this.getVelocity(this.serverStep?.mousePos);
 
     //TODO this should not be created if player cannot shoot
-    const bullet = new Bullet(this.player.x, this.player.y, velocity, velocity.angle);
+    const bullet = new Bullet(
+      this.player.x,
+      this.player.y,
+      velocity,
+      velocity.angle,
+      `${this.player.id}_${this.player.bullets.size + 1}_${Math.random() * 100}`
+    );
 
     if (this.player.shoot(bullet) && bullet.sprite) {
       this.stage.addChild(bullet.sprite);
     }
   }
 
-  private getVelocity(data: XYPosition = this.mousePos) {
+  private getVelocity(data: Vector2 = this.mousePos) {
     const xRelativeToPlayer = data.x;
     const yRelativeToPlayer = data.y;
 
@@ -67,8 +75,7 @@ export class BulletController {
     return { x: velocityX, y: velocityY, angle };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  update(dt: number) {
+  update() {
     if (this.isShooting) {
       this.shoot();
     }

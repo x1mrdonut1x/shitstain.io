@@ -1,8 +1,9 @@
+import { EntityId } from '../../shared/types';
 import { Vector2 } from './Vector2';
 
 export class Entity {
   public label?: string;
-  public id?: string | number;
+  public id: EntityId;
 
   public x: number;
   public y: number;
@@ -14,7 +15,7 @@ export class Entity {
   public isColliding = false;
   public collisionGroup?: string;
 
-  constructor(x: number, y: number, id?: string | number) {
+  constructor(x: number, y: number, id: EntityId) {
     this.x = x;
     this.y = y;
     this.id = id;

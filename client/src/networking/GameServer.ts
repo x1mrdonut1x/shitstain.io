@@ -1,6 +1,7 @@
 import { io as client, Socket } from 'socket.io-client';
-import { ClientShootData, ServerObject, ServerShootData } from '../../../shared/types';
+import { ClientShootData, ServerShootData } from '../../../shared/types';
 import {
+  AddEnemiesEvent,
   GetPlayersEvent,
   GetWorldStateEvent,
   PlayerConnectEvent,
@@ -9,17 +10,14 @@ import {
 } from '../../../shared/types/events';
 
 class GameServer {
-  public clientId!: string; // initialized in main.ts
-  private io!: Socket; // initialized in main.ts
+  public clientId!: string; // initialized in createGameServer
+  private io!: Socket; // initialized in createGameServer
 
   constructor() {
-    console.log('GameServer constructor');
     this.io = client(import.meta.env.VITE_SOCKET_SERVER);
   }
 
   async init() {
-    console.log('GameServer initialized');
-
     return new Promise(resolve => {
       this.io.on('message', (id: string) => {
         this.clientId = id;
@@ -29,24 +27,20 @@ class GameServer {
     });
   }
 
-  get createPlayer() {
-    return this.createSocket<PlayerConnectEvent>(SocketEvent.PLAYER_CONNECT);
-  }
-
-  get getPlayers() {
-    return this.createSocket<GetPlayersEvent>(SocketEvent.PLAYERS);
+  get playerConnected() {
+    return this.createSocket<PlayerConnectEvent, GetPlayersEvent>(SocketEvent.PLAYER_CONNECT);
   }
 
   get movePlayer() {
     return this.createSocket<PlayerMoveEvent>(SocketEvent.PLAYER_MOVE);
   }
 
-  get getWorldState() {
-    return this.createSocket<GetWorldStateEvent>(SocketEvent.OBJECTS_CHANGE);
+  get addEnemies() {
+    return this.createSocket<AddEnemiesEvent>(SocketEvent.ADD_ENEMIES);
   }
 
-  get getWorldObjects() {
-    return this.createSocket<ServerObject[]>(SocketEvent.WORLD_OBJECTS);
+  get getWorldState() {
+    return this.createSocket<GetWorldStateEvent>(SocketEvent.OBJECTS_CHANGE);
   }
 
   get shoot() {

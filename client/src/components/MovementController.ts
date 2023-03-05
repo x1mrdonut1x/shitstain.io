@@ -1,7 +1,7 @@
-import { XYPosition } from '../../../shared/types';
 import { KeyboardController } from './input-controllers/KeyboardController';
 import { gameServer } from '@/networking/GameServer';
 import { Player } from './Player';
+import { Vector2 } from '../../../engine/entities/Vector2';
 
 export class MovementController {
   private existenceTime = 0;
@@ -9,8 +9,8 @@ export class MovementController {
   private baseTimestamp?: number;
   private nextTimestamp?: number;
 
-  private basePosition?: XYPosition;
-  private nextPosition?: XYPosition;
+  private basePosition?: Vector2;
+  private nextPosition?: Vector2;
 
   private keyboardController?: KeyboardController;
 
@@ -22,7 +22,7 @@ export class MovementController {
       });
   }
 
-  public updatePositionFromServer(timestamp: number, position: XYPosition) {
+  public updatePositionFromServer(timestamp: number, position: Vector2) {
     if (!this.baseTimestamp) {
       this.baseTimestamp = timestamp;
       this.basePosition = position;
@@ -38,7 +38,7 @@ export class MovementController {
   }
 
   public update(delta: number) {
-    if (this.keyboardController) {
+    if (this.player.isLocalPlayer) {
       if (this.nextPosition) {
         const dx = Math.abs(this.player.x - this.nextPosition.x);
         const dy = Math.abs(this.player.y - this.nextPosition.y);
@@ -50,7 +50,7 @@ export class MovementController {
         }
       }
 
-      this.player.isMoving = this.keyboardController?.isMoving;
+      this.player.isMoving = Boolean(this.keyboardController?.isMoving);
     } else {
       if (this.basePosition && this.nextPosition && this.nextTimestamp && this.baseTimestamp) {
         const fullTimeStep = this.nextTimestamp - this.baseTimestamp;
@@ -63,4 +63,5 @@ export class MovementController {
     }
   }
 }
+
 const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a;

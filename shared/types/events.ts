@@ -1,19 +1,22 @@
-import { ServerMovement, ClientShootData, ServerSnapshot, ServerPlayer } from '.';
+import { ServerMovement, ClientShootData, ServerSnapshot, ServerPlayer, ServerEnemy } from '.';
 
 export enum SocketEvent {
   DISCONNECT = 'disconnect',
   PLAYER_CONNECT = 'players:connect',
-  PLAYER_DISCONNECT = 'players:disconnect',
   PLAYERS = 'players',
   PLAYER_MOVE = 'players:move',
   OBJECTS_CHANGE = 'objects:change',
   PLAYER_SHOOT = 'players:shoot',
-  WORLD_OBJECTS = 'world:objects',
+  ADD_ENEMIES = 'enemies:add',
 }
 
 export type PlayerMoveEvent = {
   clientId: string;
   movement: ServerMovement;
+};
+
+export type AddEnemiesEvent = {
+  data: ServerEnemy[];
 };
 
 export type PlayerConnectEvent = {
