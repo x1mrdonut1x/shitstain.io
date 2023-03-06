@@ -1,7 +1,7 @@
 import { Enemy } from '../../../engine/components/Enemy';
 import { Player } from '../../../engine/components/Player';
 import { GameEngine } from '../../../engine/GameEngine';
-import { ServerEnemy, ServerMovement, ServerPlayer } from '../../../shared/types';
+import { ClientShootData, ServerEnemy, ServerMovement, ServerPlayer } from '../../../shared/types';
 import { SocketEvent } from '../../../shared/types/events';
 import { io } from '../main';
 
@@ -67,6 +67,11 @@ export class GameState {
     const foundPlayer = this.engine.getPlayerById(id);
 
     foundPlayer?.setVelocityFromMovement(data);
+  }
+
+  public playerShoots(id: string, data: ClientShootData) {
+    const foundPlayer = this.engine.getPlayerById(id);
+    foundPlayer?.setShootingFromInput(data);
   }
 
   public update(dt: number) {
