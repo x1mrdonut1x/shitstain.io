@@ -48,11 +48,13 @@ export class Player extends Rectangle {
         this.x,
         this.y,
         velocity,
+        now,
+        this.id,
         `${this.id}_${this.bullets.size + 1}_${Math.random() * 100}`
       );
 
       this.bullets.add(bullet);
-      this.engine.addEntity(bullet);
+      this.engine.addBullet(bullet);
 
       this.lastShot = now;
     }
