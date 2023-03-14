@@ -66,9 +66,10 @@ export class GameState {
         bullet.id
       );
       const player = this.engine.getPlayerById(bullet.playerId);
-      player?.bullets.add(newBullet);
-
-      this.engine.addBullet(newBullet);
+      if (!player?.isLocalPlayer) {
+        player?.bullets.add(newBullet);
+        this.engine.addBullet(newBullet);
+      }
     });
   }
 

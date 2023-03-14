@@ -15,8 +15,6 @@ export class ShootingController {
       this.pointerController.setOnChange((isShooting, position) => {
         this.mousePos = position;
 
-        console.log('shooting', isShooting);
-
         if (isShooting || (this.isShooting && !isShooting)) this.emitShoot(isShooting);
         this.isShooting = isShooting;
       });
@@ -32,6 +30,8 @@ export class ShootingController {
       },
       mousePos: this.mousePos,
     });
+    this.player.isShooting = isShooting;
+    this.player.pointer = this.mousePos;
   }
 
   public update() {
